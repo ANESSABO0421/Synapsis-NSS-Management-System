@@ -15,3 +15,7 @@ const sendOTPEmail = async (email, otp) => {
     text: `Your OTP is ${otp}. Valid for 5 minutes.`,
   });
 };
+
+
+// signup using email and password
+
