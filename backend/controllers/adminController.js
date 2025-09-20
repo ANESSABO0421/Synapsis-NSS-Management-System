@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { sendOTPEmail } from "../utils/sendEmail.js";
 import Admin from "../models/Admin.js";
+import { generatePassword } from "../utils/passwordGenerator.js";
 
 // regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -117,7 +118,7 @@ export const login = async (req, res) => {
     }
 
     // match password
-    const match = await bcrypt.compare(password, admin.password);
+    const comparePassword = await bcrypt.compare(password, admin.password);
     if (!match)
       return res
         .status(400)
@@ -133,5 +134,59 @@ export const login = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// google callback
+export const googleCallvack = async (req, res) => {
+  try {
+    const admin = req.user;
+    if (!admin) {
+      return res.status(404).json({ message: "google auth failed" });
+    }
+
+    if (admin.status == "pending") {
+      admin.status == "active";
+      await admin.save();
+    }
+
+    const token = generateToken(admin._id);
+    res.json({ message: "Google login success", token, admin });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// super admin
+export const createAdminBySuperadmin = async (req, res) => {
+  try {
+    const { name, email, phoneNumber, department, role } = req.body;
+
+    const exists = await Admin.findOne({ email });
+    if (exists)
+      return res.status(400).json({ message: "Email already exists" });
+
+    const rawPassword = generatePassword();
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+    const admin = await Admin.create({
+      name,
+      email,
+      phoneNumber,
+      department,
+      role,
+      password: hashedPassword,
+      status: "active",
+    });
+
+    await sendOTPEmail(
+      email,
+      "Your NSS Admin Account",
+      `Your account has been created. Temporary password: ${rawPassword}`
+    );
+
+    res.status(201).json({ message: "Admin created by superadmin", admin });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
