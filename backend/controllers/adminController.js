@@ -147,7 +147,7 @@ export const googleCallback = async (req, res) => {
     }
 
     if (admin.status === "pending") {
-      admin.status === "active";
+      admin.status = "active";
       await admin.save();
     }
 

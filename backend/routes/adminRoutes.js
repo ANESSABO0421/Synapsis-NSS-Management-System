@@ -16,17 +16,18 @@ router.post("/signup", signUp);
 router.post("/verify-otp", verifyOTP);
 router.post("/login", login);
 
-// Google OAuth
+// Step 1: Google login
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
+
+// Step 2: Google callback
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   googleCallback
-);
-
+); 
 // Superadmin only
 router.post("/create-admin", protect, createAdminBySuperadmin);
 

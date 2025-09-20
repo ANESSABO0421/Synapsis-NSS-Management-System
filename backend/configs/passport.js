@@ -7,24 +7,23 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/admin/google/callback",
+      callbackURL: "http://localhost:3000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails[0].value;
+        const name = profile.displayName;
 
         let admin = await Admin.findOne({ email });
-
         if (!admin) {
-          // New admin from Google → mark active right away
           admin = await Admin.create({
-            name: profile.displayName || "Unnamed",
+            name,
             email,
-            googleId: profile.id,
-            status: "active",   
+            status: "active",
+            password: null, // Google OAuth user
+            role: "admin",
           });
         }
-
         return done(null, admin);
       } catch (err) {
         return done(err, null);
@@ -33,17 +32,15 @@ passport.use(
   )
 );
 
-passport.serializeUser((admin, done) => {
-  done(null, admin.id);
+passport.serializeUser((user, done) => {
+  done(null, user.id); // store admin._id
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const admin = await Admin.findById(id);
-    done(null, admin);
+    const user = await Admin.findById(id);
+    done(null, user);
   } catch (err) {
     done(err, null);
   }
 });
-
-export default passport;

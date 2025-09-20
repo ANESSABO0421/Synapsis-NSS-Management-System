@@ -4,11 +4,15 @@ import cors from "cors";
 import passport from "passport";
 import session from "express-session";
 
+
 import { ConnectDb } from "./configs/db.js";
 import router from "./routes/adminRoutes.js"; // your auth router
 
 dotenv.config();
 const port = process.env.PORT || 5000;
+
+import "./configs/passport.js"
+
 
 const app = express();
 app.use(express.json());
