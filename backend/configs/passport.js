@@ -11,13 +11,17 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        let admin = await Admin.findOne({ email: profile.emails[0].value });
+        const email = profile.emails[0].value;
+
+        let admin = await Admin.findOne({ email });
 
         if (!admin) {
+          // New admin from Google → mark active right away
           admin = await Admin.create({
-            email: profile.emails[0].value,
+            name: profile.displayName || "Unnamed",
+            email,
             googleId: profile.id,
-            status: "pending",
+            status: "active",   
           });
         }
 
@@ -29,7 +33,10 @@ passport.use(
   )
 );
 
-passport.serializeUser((admin, done) => done(null, admin.id));
+passport.serializeUser((admin, done) => {
+  done(null, admin.id);
+});
+
 passport.deserializeUser(async (id, done) => {
   try {
     const admin = await Admin.findById(id);
@@ -38,3 +45,5 @@ passport.deserializeUser(async (id, done) => {
     done(err, null);
   }
 });
+
+export default passport;
