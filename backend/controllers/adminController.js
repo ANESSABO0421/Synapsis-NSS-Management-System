@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import { sendOTPEmail } from "../utils/sendEmail.js";
+import { sendEmail } from "../utils/sendEmail.js";
 import Admin from "../models/Admin.js";
 import { generatePassword } from "../utils/passwordGenerator.js";
 
@@ -55,11 +55,12 @@ export const signUp = async (req, res) => {
       department,
       password: hashedPassword,
       otp,
+      phoneNumber,
       otpExpiry,
       status: "pending",
     });
     // otp genrate
-    await sendOTPEmail(email, otp);
+    await sendEmail(email, otp);
     res.status(201).json({
       success: true,
       message: "OTP sent to email",
@@ -119,7 +120,7 @@ export const login = async (req, res) => {
 
     // match password
     const comparePassword = await bcrypt.compare(password, admin.password);
-    if (!match)
+    if (!comparePassword)
       return res
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
@@ -138,15 +139,15 @@ export const login = async (req, res) => {
 };
 
 // google callback
-export const googleCallvack = async (req, res) => {
+export const googleCallback = async (req, res) => {
   try {
     const admin = req.user;
     if (!admin) {
       return res.status(404).json({ message: "google auth failed" });
     }
 
-    if (admin.status == "pending") {
-      admin.status == "active";
+    if (admin.status === "pending") {
+      admin.status === "active";
       await admin.save();
     }
 
@@ -179,7 +180,7 @@ export const createAdminBySuperadmin = async (req, res) => {
       status: "active",
     });
 
-    await sendOTPEmail(
+    await sendEmail(
       email,
       "Your NSS Admin Account",
       `Your account has been created. Temporary password: ${rawPassword}`

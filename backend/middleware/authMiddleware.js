@@ -4,7 +4,10 @@ import Admin from "../models/Admin.js";
 export const protect = async (req, res, next) => {
   let token;
   //token starts with bearer
-  if (req.headers.authorization && req.authorization.startsWith("Bearer")) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
       token = req.headers.authorization.split(" ")[1];
       //check both the jwt code and token then verify
