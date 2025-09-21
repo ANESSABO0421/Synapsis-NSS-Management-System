@@ -24,3 +24,16 @@ export const protect = async (req, res, next) => {
     return res.status(401).json({ message: "Not authorised and no token" });
   }
 };
+
+// for superadmin
+
+export const superAdminOnly = (req, res, next) => {
+  if (!req.admin) {
+    return res.status(401).json({ message: "Not authorised,no user" });
+  }
+
+  if (req.admin.role != "superadmin") {
+    return res.status(403).json({ message: "Access denied,Superadmin only" });
+  }
+  next();
+};

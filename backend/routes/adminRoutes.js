@@ -7,7 +7,7 @@ import {
   googleCallback,
   createAdminBySuperadmin,
 } from "../controllers/adminController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, superAdminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -27,8 +27,8 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   googleCallback
-); 
+);
 // Superadmin only
-router.post("/create-admin", protect, createAdminBySuperadmin);
+router.post("/create-admin", protect, superAdminOnly, createAdminBySuperadmin);
 
 export default router;
