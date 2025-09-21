@@ -6,6 +6,8 @@ import {
   login,
   googleCallback,
   createAdminBySuperadmin,
+  updateAdmin,
+  deleteAdmin,
 } from "../controllers/adminController.js";
 import { protect, superAdminOnly } from "../middleware/authMiddleware.js";
 
@@ -15,6 +17,8 @@ const router = express.Router();
 router.post("/signup", signUp);
 router.post("/verify-otp", verifyOTP);
 router.post("/login", login);
+router.post("/updateadmin", protect, updateAdmin);
+router.post("/deleteadmin", protect, superAdminOnly, deleteAdmin);
 
 // Step 1: Google login
 router.get(

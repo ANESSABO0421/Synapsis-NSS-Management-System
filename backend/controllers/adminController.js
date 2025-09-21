@@ -71,6 +71,58 @@ export const signUp = async (req, res) => {
   }
 };
 
+// update admin and super admin
+export const updateAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // prevent from changing status and role
+    if (req.admin.role !== "superadmin") {
+      delete updates.role;
+      delete updates.status;
+    }
+
+    // password updation and hash
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, 10);
+    }
+
+    const admin = await Admin.findByIdAndUpdate(id, updates, {
+      // will give the updated one as well else it showly updated succesfull and boolean true
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!admin) {
+      return res
+        .status(404)
+        .json({ success: true, message: "Admin not found" });
+    }
+
+    res.json({ success: true, message: "Admin updated sucessfully", admin });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// delete admin
+export const deleteAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const admin = await Admin.findByIdAndDelete(id);
+    if (!Admin) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin not found" });
+    }
+    res.json({ success: true, message: "Admin updated successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // otp verify
 export const verifyOTP = async (req, res) => {
   try {
