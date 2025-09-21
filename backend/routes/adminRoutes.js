@@ -17,8 +17,8 @@ const router = express.Router();
 router.post("/signup", signUp);
 router.post("/verify-otp", verifyOTP);
 router.post("/login", login);
-router.post("/updateadmin", protect, updateAdmin);
-router.post("/deleteadmin", protect, superAdminOnly, deleteAdmin);
+router.put("/updateadmin/:id", protect, updateAdmin);
+router.delete("/deleteadmin/:id", protect, superAdminOnly, deleteAdmin);
 
 // Step 1: Google login
 router.get(
