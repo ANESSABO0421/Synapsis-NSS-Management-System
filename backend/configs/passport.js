@@ -16,13 +16,8 @@ passport.use(
 
         let admin = await Admin.findOne({ email });
         if (!admin) {
-          admin = await Admin.create({
-            name,
-            email,
-            status: "active",
-            password: null, // Google OAuth user
-            role: "admin",
-          });
+          // User not found — don't create automatically
+          return done(null, false, { message: "User not registered" });
         }
         return done(null, admin);
       } catch (err) {

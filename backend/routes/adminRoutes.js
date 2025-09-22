@@ -29,7 +29,7 @@ router.get(
 // Step 2: Google callback
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", { failureRedirect: "http://localhost:5173/?error=User%20not%20registered" }),
   // googleCallback
   // if success then
   (req, res) => {

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { API } from "../utils/api";
+import { useLocation } from "react-router-dom";
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -7,6 +8,8 @@ const Login = () => {
     password: "",
   });
   const [message, setMessage] = useState("");
+  //gets the current url
+  const location = useLocation();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -28,9 +31,21 @@ const Login = () => {
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/api/auth/google";
   };
+
+  //if user not found using gmail show error
+  useEffect(() => {
+    // url search params used to get the exact value i mean %20=space like that
+    const params = new URLSearchParams(location.search);
+    const error = params.get("error");
+    if (error) {
+      setMessage(error);
+    }
+  }, [location]);
+
   return (
     <div>
       <div className="flex flex-col justify-center items-center h-screen bg-gray-100">
+        {message && <p className="mt-3 text-sm">{message}</p>}
         <form
           className="bg-white p-6 rounded-xl shadow-md w-96"
           onSubmit={handleSubmit}
@@ -57,8 +72,6 @@ const Login = () => {
           <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
             Login
           </button>
-
-          {message && <p className="mt-3 text-sm">{message}</p>}
         </form>
         <div className="flex items-center my-4">
           <hr className="flex-grow border-gray-300" />
