@@ -30,7 +30,11 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
-  googleCallback
+  // googleCallback
+  // if success then
+  (req, res) => {
+    res.redirect("http://localhost:5173/dashboard");
+  }
 );
 // Superadmin only
 router.post("/create-admin", protect, superAdminOnly, createAdminBySuperadmin);
