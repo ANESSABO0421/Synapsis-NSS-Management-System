@@ -1,0 +1,119 @@
+import Event from "../models/Event.js";
+import Student from "../models/Student.js";
+
+// create events
+export const createEvents = async (req, res) => {
+  try {
+    const { title, description, date, location, hours } = req.body;
+    const event = await Event.create({
+      title,
+      description,
+      date,
+      location,
+      hours,
+      creatdBy: req.admin._id,
+    });
+    res.status(201).json({ success: true, event });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// get events
+export const getEvents = async (req, res) => {
+  try {
+    const events = await Event.find().populate("participants", "name email");
+    res.json({ success: true, events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// get events by id
+export const getEventById = async (req, res) => {
+  try {
+    const events = await Event.findById(req.params.id, req.body, { new: true });
+    if (!events) {
+      return res
+        .status(404)
+        .json({ success: false, message: "event not found" });
+    }
+    res.json({ success: true, events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// delete Event
+export const deleteEvent = async (req, res) => {
+  try {
+    const deleteEvent = await Event.findByIdAndDelete(req.params.id);
+    if (!deleteEvent) {
+      return res.status(404).json({
+        success: false,
+        message: "event not found",
+      });
+    }
+    res.json({ success: true, message: "event deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// assigning student to an event by admin or super admin
+export const assignStudentToEvent = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    const events = await Event.findById(req.params.id);
+    if (!events) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "student not found" });
+    }
+
+    // adding students to participants
+    if (!events.participants.includes(studentId)) {
+      events.participants.push(studentId);
+      await events.save();
+    }
+
+    // Also add event to student's assignedEvents if not already added
+    if (!student.assignedEvents.includes(event._id)) {
+      student.assignedEvents.push(event._id);
+      await student.save();
+    }
+
+    res.json({
+      success: true,
+      message: "Student assigned to event successfully",
+      events,
+      student,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// get event participants
+export const getEventParticipants = async (req, res) => {
+  try {
+    const events = await Event.findById(req.params.id).populate(
+      "participants",
+      "name email department"
+    );
+    if (!events) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Even not found" });
+    }
+    res.json({ success: true, participants: events.participants });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

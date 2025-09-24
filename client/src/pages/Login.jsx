@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { API } from "../utils/api";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
+import { FaGoogle } from 'react-icons/fa';
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -8,33 +9,30 @@ const Login = () => {
     password: "",
   });
   const [message, setMessage] = useState("");
-  //gets the current url
   const location = useLocation();
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  //handle the submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await API.post("/login", form);
       localStorage.setItem("token", res.data.token);
-      setMessage("Login successful");
+      setMessage("✅ Login successful");
       window.location.href = "/dashboard";
     } catch (error) {
       setMessage(error.response?.data?.message || "Login failed");
     }
   };
 
-  //login using google button
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/api/auth/google";
   };
 
-  //if user not found using gmail show error
+  //error fetching and showing
   useEffect(() => {
-    // url search params used to get the exact value i mean %20=space like that
     const params = new URLSearchParams(location.search);
     const error = params.get("error");
     if (error) {
@@ -43,48 +41,87 @@ const Login = () => {
   }, [location]);
 
   return (
-    <div>
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-100">
-        {message && <p className="mt-3 text-sm">{message}</p>}
-        <form
-          className="bg-white p-6 rounded-xl shadow-md w-96"
-          onSubmit={handleSubmit}
-        >
-          <h2 className="text-xl font-bold mb-4">Login</h2>
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 px-4">
+      <div className="bg-white shadow-2xl rounded-2xl w-full max-w-md p-8 relative">
+        {/* Title */}
+        <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">
+          Welcome Back
+        </h2>
+        <p className="text-center text-gray-500 text-sm mb-6">
+          Login to your account to continue
+        </p>
 
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full mb-3 p-2 border rounded"
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full mb-3 p-2 border rounded"
-          />
+        {/* Message */}
+        {message && (
+          <p
+            className={`text-center mb-4 text-sm ${
+              message.includes("successful") ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
 
-          <button className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              value={form.password}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold hover:bg-blue-700 transition duration-200"
+          >
             Login
           </button>
         </form>
-        <div className="flex items-center my-4">
+
+        {/* Divider */}
+        <div className="flex items-center my-6">
           <hr className="flex-grow border-gray-300" />
           <span className="px-2 text-sm text-gray-500">OR</span>
           <hr className="flex-grow border-gray-300" />
         </div>
 
+        {/* Google Button */}
         <button
           onClick={handleGoogleLogin}
-          className="w-[380px] bg-red-500 text-white p-2 rounded hover:bg-red-600"
+          className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 rounded-xl font-medium hover:bg-red-600 transition duration-200"
         >
+          <FaGoogle/>
           Continue with Google
         </button>
+
+        {/* Extra Links */}
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Don’t have an account? <Link to={"/signup"} className="text-blue-500">Sign Up</Link>
+        </p>
       </div>
     </div>
   );
