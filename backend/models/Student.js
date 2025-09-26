@@ -13,7 +13,7 @@ const StudentSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["pending", "active", "inacative"],
+      enum: ["student", "volunteer"],
       default: "student",
     },
     status: {

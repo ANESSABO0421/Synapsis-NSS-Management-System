@@ -6,7 +6,8 @@ import session from "express-session";
 import { ConnectDb } from "./configs/db.js";
 import router from "./routes/adminRoutes.js";
 import eventRouter from "./routes/eventRoutes.js";
-
+import authRouter from "./routes/authRoutes.js";
+import studentRouter from "./routes/StudentRoutes.js";
 dotenv.config();
 const port = process.env.PORT || 5000;
 
@@ -26,6 +27,8 @@ app.use(passport.session());
 // Mount routers
 app.use("/api/auth", router);
 app.use("/api/events", eventRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/students", studentRouter);
 
 ConnectDb()
   .then(() => {
