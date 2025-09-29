@@ -3,6 +3,7 @@ import Hero from "./Hero";
 import About from "./About";
 import Features from "./Features";
 import Navbar from "../components/Navbar";
+import EventDisplay from "./EventDisplay";
 
 const Home = () => {
   return (
@@ -11,6 +12,7 @@ const Home = () => {
       <Hero />
       <About />
       <Features />
+      <EventDisplay/>
     </div>
   );
 };

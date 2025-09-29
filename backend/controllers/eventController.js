@@ -99,8 +99,8 @@ export const assignStudentToEvent = async (req, res) => {
     }
 
     // Also add event to student's assignedEvents if not already added
-    if (!student.assignedEvents.includes(event._id)) {
-      student.assignedEvents.push(event._id);
+    if (!student.assignedEvents.includes(events._id)) {
+      student.assignedEvents.push(events._id);
       await student.save();
     }
 
@@ -110,6 +110,37 @@ export const assignStudentToEvent = async (req, res) => {
       events,
       student,
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// update event section
+export const updateEvent = async (req, res) => {
+  try {
+    const { title, description, date, location, hours } = req.body;
+    const events = await Event.findById(req.params.id);
+    if (!events) {
+      return res
+        .status(404)
+        .json({ success: false, message: "events is not found" });
+    }
+    if (title) {
+      events.title = title || title;
+    }
+    if (description) {
+      events.description = description || description;
+    }
+    if (date) {
+      events.date = date || location;
+    }
+    if (hours) {
+      events.hours = hours || hours;
+    }
+
+    await events.save();
+
+    res.json({ success: true, message: "event updated", events });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -125,7 +156,7 @@ export const getEventParticipants = async (req, res) => {
     if (!events) {
       return res
         .status(404)
-        .json({ success: false, message: "Even not found" });
+        .json({ success: false, message: "Event not found" });
     }
     res.json({ success: true, participants: events.participants });
   } catch (error) {
