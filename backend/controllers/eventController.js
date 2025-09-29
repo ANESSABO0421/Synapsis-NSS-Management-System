@@ -11,7 +11,7 @@ export const createEvents = async (req, res) => {
       date,
       location,
       hours,
-      creatdBy: req.admin._id,
+      createdBy: req.admin._id,
     });
     res.status(201).json({ success: true, event });
   } catch (error) {

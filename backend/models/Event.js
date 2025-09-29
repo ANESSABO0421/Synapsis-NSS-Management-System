@@ -8,6 +8,7 @@ const eventSchema = new mongoose.Schema(
     location: { type: String, required: true },
     hours: { type: Number, default: 0 },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
   },
   { timestamps: true }
 );

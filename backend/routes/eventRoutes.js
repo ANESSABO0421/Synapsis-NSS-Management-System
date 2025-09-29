@@ -7,10 +7,11 @@ import {
   getEventParticipants,
   getEvents,
 } from "../controllers/eventController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const eventRouter = express.Router();
 
-eventRouter.post("/addevent", createEvents);
+eventRouter.post("/addevent", protect, createEvents);
 
 eventRouter.get("/getevents", getEvents);
 
