@@ -3,6 +3,7 @@ import {
   assignStudentToEvent,
   createEvents,
   deleteEvent,
+  getAllevents,
   getEventById,
   getEventParticipants,
   getEvents,
@@ -14,6 +15,8 @@ const eventRouter = express.Router();
 eventRouter.post("/addevent", protect, createEvents);
 
 eventRouter.get("/getevents", getEvents);
+
+eventRouter.get("/getallevent", getAllevents);
 
 eventRouter.get("/geteventsbyid/:id", getEventById);
 

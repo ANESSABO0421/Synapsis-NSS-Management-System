@@ -29,6 +29,21 @@ export const getEvents = async (req, res) => {
   }
 };
 
+// get all events on the table
+export const getAllevents = async (req, res) => {
+  try {
+    const events = await Event.find();
+    if (events.length == 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no events are found" });
+    }
+    res.status(200).json({ success: true, events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // get events by id
 export const getEventById = async (req, res) => {
   try {
