@@ -15,7 +15,7 @@ const EventDisplay = () => {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-6 flex flex-col items-center justify-center gap-8">
       <div className="max-w-7xl mx-auto text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800">
           Upcoming<span className="text-green-600"> Events</span>
@@ -56,6 +56,7 @@ const EventDisplay = () => {
           </div>
         ))}
       </div>
+        <button className=" bg-green-600 text-white p-6 rounded-2xl hover:bg-green-800 ease-out duration-200 cursor-pointer">Get all events</button>
     </div>
   );
 };
