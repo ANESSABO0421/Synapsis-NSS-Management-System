@@ -9,11 +9,11 @@ import Home from "./pages/Home";
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/verifyotp" element={<VerifyOTP />} />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/home" element={<Home />} />
+      <Route path="/" element={<Home />} />
     </Routes>
   );
 };

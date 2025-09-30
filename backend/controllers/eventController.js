@@ -1,5 +1,6 @@
 import Event from "../models/Event.js";
 import Student from "../models/Student.js";
+import cloudinary from "../utils/cloudinary.js";
 
 // create events
 export const createEvents = async (req, res) => {
@@ -159,6 +160,82 @@ export const getEventParticipants = async (req, res) => {
         .json({ success: false, message: "Event not found" });
     }
     res.json({ success: true, participants: events.participants });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// upload images
+export const uploadEventImages = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "event not found" });
+    }
+    if (!req.files || req.files.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "no image has been uploaded" });
+    }
+
+    const uploadImages = req.files.map((file) => ({
+      url: file.path,
+      public_id: file.filename,
+      caption: file.caption,
+      uploadedAt: new Date(),
+    }));
+
+    event.images.push(...uploadImages);
+    await event.save();
+
+    res.status(201).json({
+      success: true,
+      message: `${req.files.length} images has been uploaded`,
+      images: event.images,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getEventImages = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id).select("images");
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "no event found" });
+    }
+    res.json({ success: true, images: event.images });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// delete image
+export const deleteEventImage = async (req, res) => {
+  try {
+    const { id, imageId } = req.params;
+    const events = await Event.findById(id);
+    if (!events) {
+      return res
+        .status(404)
+        .json({ success: false, message: "event is not found" });
+    }
+    const image = event.images.id(imageId);
+    if (!image) {
+      return res.status(404).message("image is not found");
+    }
+
+    if (image.public_id) {
+      await cloudinary.uploader.destroy(image.public_id);
+    }
+
+    image.remove();
+    await events.save();
+    res.status(201).json({ success: true, events });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

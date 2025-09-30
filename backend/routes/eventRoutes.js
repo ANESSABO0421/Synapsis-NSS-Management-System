@@ -3,13 +3,17 @@ import {
   assignStudentToEvent,
   createEvents,
   deleteEvent,
+  deleteEventImage,
   getAllevents,
   getEventById,
+  getEventImages,
   getEventParticipants,
   getEvents,
   updateEvent,
+  uploadEventImages,
 } from "../controllers/eventController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import upload from "../middleware/uploadMiddleware.js";
 
 const eventRouter = express.Router();
 
@@ -28,5 +32,15 @@ eventRouter.post("/assigntoevent/:id", assignStudentToEvent);
 eventRouter.get("/participantsofevents/:id", getEventParticipants);
 
 eventRouter.put("/updateevent/:id", updateEvent);
+
+eventRouter.post(
+  "/:id/uploadimages",
+  upload.array("images", 10),
+  uploadEventImages
+);
+
+eventRouter.get("/:id/images", getEventImages);
+
+eventRouter.delete("/:id/images/:imageId", deleteEventImage);
 
 export default eventRouter;

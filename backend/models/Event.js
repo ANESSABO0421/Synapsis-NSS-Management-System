@@ -9,6 +9,14 @@ const eventSchema = new mongoose.Schema(
     hours: { type: Number, default: 0 },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
+    images: [
+      {
+        url: { type: String },
+        public_id: { type: String },
+        caption: { type: String, default: "" },
+        uploadAt: { type: Date, default: Date.now() },
+      },
+    ],
   },
   { timestamps: true }
 );
