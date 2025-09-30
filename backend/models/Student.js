@@ -21,6 +21,7 @@ const StudentSchema = new mongoose.Schema(
       enum: ["pending", "active", "inactive"],
       default: "pending",
     },
+    graceMarks: { type: Number, default: 0 },
     password: { type: String, required: true },
     otp: { type: Number },
     otpExpiry: { type: Date },

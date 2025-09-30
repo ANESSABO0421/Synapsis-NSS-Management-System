@@ -40,13 +40,13 @@ const EventDisplay = () => {
 
             <div className="space-y-2 text-sm text-gray-700">
               <p>
-                Location:<span className="font-medium">{event.location}</span>
+                Location:<span className="font-medium">{" "}{event.location}</span>
               </p>
               <p>
-                Date:<span className="font-medium">{event.date}</span>
+                Date:<span className="font-medium">{" "}{event.date.split("T")[0]} </span>
               </p>
               <p>
-                Hours:<span className="font-medium">{event.hours}</span>
+                Hours:<span className="font-medium">{" "}{event.hours}</span>
               </p>
             </div>
 
@@ -56,7 +56,7 @@ const EventDisplay = () => {
           </div>
         ))}
       </div>
-        <button className=" bg-green-600 text-white p-6 rounded-2xl hover:bg-green-800 ease-out duration-200 cursor-pointer">Get all events</button>
+        <button className=" bg-green-600 text-white p-4 rounded-2xl hover:bg-green-800 ease-out duration-200 cursor-pointer">Get all events</button>
     </div>
   );
 };

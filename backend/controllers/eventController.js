@@ -99,7 +99,7 @@ export const assignStudentToEvent = async (req, res) => {
       await events.save();
     }
 
-    // Also add event to student's assignedEvents if not already added
+    // Also add event to student's  assignedEvents key it will update both modal of student and event if not already added
     if (!student.assignedEvents.includes(events._id)) {
       student.assignedEvents.push(events._id);
       await student.save();
@@ -133,7 +133,7 @@ export const updateEvent = async (req, res) => {
       events.description = description || description;
     }
     if (date) {
-      events.date = date || location;
+      events.date = date || date;
     }
     if (hours) {
       events.hours = hours || hours;
@@ -183,8 +183,8 @@ export const uploadEventImages = async (req, res) => {
     const uploadImages = req.files.map((file) => ({
       url: file.path,
       public_id: file.filename,
-      caption: file.caption,
-      uploadedAt: new Date(),
+      caption: req.body.caption || "",
+      uploadAt: new Date(),
     }));
 
     event.images.push(...uploadImages);
@@ -224,9 +224,11 @@ export const deleteEventImage = async (req, res) => {
         .status(404)
         .json({ success: false, message: "event is not found" });
     }
-    const image = event.images.id(imageId);
+    const image = events.images.id(imageId);
     if (!image) {
-      return res.status(404).message("image is not found");
+      return res
+        .status(404)
+        .json({ success: false, message: "image is not found" });
     }
 
     if (image.public_id) {
@@ -235,7 +237,7 @@ export const deleteEventImage = async (req, res) => {
 
     image.remove();
     await events.save();
-    res.status(201).json({ success: true, events });
+    res.status(200).json({ success: true, events });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -261,7 +263,7 @@ export const getAllEventImages = async (req, res) => {
     res.status(200).json({ success: true, images: getAllImages });
   } catch (error) {
     res.status(500).json({
-      success: true,
+      success: false,
       message: error.message,
     });
   }
