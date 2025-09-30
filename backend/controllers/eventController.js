@@ -240,3 +240,29 @@ export const deleteEventImage = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// get all event images (show case on the main website)
+export const getAllEventImages = async (req, res) => {
+  try {
+    const events = await Event.find().select("title images");
+    if (!events || events.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "event not found" });
+    }
+    // get all images to string in an single array of object using flatMap
+    const getAllImages = events.flatMap((event) =>
+      event.images.map((img) => ({
+        ...img.toObject(),
+        eventTitle: event.title,
+        eventId: event._id,
+      }))
+    );
+    res.status(200).json({ success: true, images: getAllImages });
+  } catch (error) {
+    res.status(500).json({
+      success: true,
+      message: error.message,
+    });
+  }
+};

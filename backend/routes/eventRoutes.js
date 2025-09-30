@@ -4,6 +4,7 @@ import {
   createEvents,
   deleteEvent,
   deleteEventImage,
+  getAllEventImages,
   getAllevents,
   getEventById,
   getEventImages,
@@ -42,5 +43,7 @@ eventRouter.post(
 eventRouter.get("/:id/images", getEventImages);
 
 eventRouter.delete("/:id/images/:imageId", deleteEventImage);
+
+eventRouter.get("/getalleventimage", getAllEventImages);
 
 export default eventRouter;

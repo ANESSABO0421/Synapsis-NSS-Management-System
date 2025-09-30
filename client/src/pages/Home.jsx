@@ -4,6 +4,7 @@ import About from "./About";
 import Features from "./Features";
 import Navbar from "../components/Navbar";
 import EventDisplay from "./EventDisplay";
+import Gallery from "./Gallery";
 
 const Home = () => {
   return (
@@ -13,6 +14,7 @@ const Home = () => {
       <About />
       <Features />
       <EventDisplay/>
+      <Gallery/>
     </div>
   );
 };
