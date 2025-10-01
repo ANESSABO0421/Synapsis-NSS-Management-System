@@ -1,6 +1,28 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { gsap, Power1 } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
+  useEffect(() => {
+    gsap.fromTo(
+      "#about",
+      { opacity: 0, scale: 0.8 },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 1,
+        ease: Power1.easeOut,
+        scrollTrigger: {
+          trigger: "#about",
+          start: "top 80%",        
+          toggleActions: "play reverse play reverse", 
+        },
+      }
+    );
+  }, []);
+
   return (
     <section
       id="about"
@@ -8,16 +30,18 @@ const About = () => {
     >
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         {/* Left Side: Text */}
-        <div>
+        <div className="about-container">
           <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 mb-6">
             About <span className="text-green-600">Synapsis</span>
           </h2>
           <p className="text-gray-600 leading-relaxed mb-6">
             Synapsis is an all-in-one NSS Management Portal built for{" "}
-            <span className="font-semibold">students, teachers, alumni, and volunteers</span>. 
-            It helps you track volunteer hours, manage events, and connect with 
-            like-minded individuals who are passionate about creating meaningful 
-            social impact.
+            <span className="font-semibold">
+              students, teachers, alumni, and volunteers
+            </span>
+            . It helps you track volunteer hours, manage events, and connect
+            with like-minded individuals who are passionate about creating
+            meaningful social impact.
           </p>
 
           {/* Bullet Points */}
