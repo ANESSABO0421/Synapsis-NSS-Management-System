@@ -3,17 +3,17 @@ import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VerifyOTP from "./pages/VerifyOtp";
-import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const App = () => {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Home />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/verifyotp" element={<VerifyOTP />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/admindashboard" element={<AdminDashboard />} />
     </Routes>
   );
 };

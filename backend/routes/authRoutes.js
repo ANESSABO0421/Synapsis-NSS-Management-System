@@ -16,7 +16,7 @@ router.get(
   (req, res) => {
     // Role-based redirect
     if (req.user.role === "admin") {
-      return res.redirect("http://localhost:5173/dashboard");
+      return res.redirect("http://localhost:5173/admindashboard");
     } else if (req.user.role === "student") {
       return res.redirect("http://localhost:5173/student/dashboard");
     }

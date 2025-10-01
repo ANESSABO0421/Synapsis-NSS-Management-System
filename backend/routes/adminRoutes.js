@@ -20,22 +20,22 @@ router.post("/login", login);
 router.put("/updateadmin/:id", protect, updateAdmin);
 router.delete("/deleteadmin/:id", protect, superAdminOnly, deleteAdmin);
 
-// Step 1: Google login
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+// // Step 1: Google login
+// router.get(
+//   "/google",
+//   passport.authenticate("google", { scope: ["profile", "email"] })
+// );
 
-// Step 2: Google callback
-router.get(
-  "/google/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:5173/?error=User%20not%20registered" }),
-  // googleCallback
-  // if success then
-  (req, res) => {
-    res.redirect("http://localhost:5173/dashboard");
-  }
-);
+// // Step 2: Google callback
+// router.get(
+//   "/google/callback",
+//   passport.authenticate("google", { failureRedirect: "http://localhost:5173/?error=User%20not%20registered" }),
+//   // googleCallback
+//   // if success then
+//   (req, res) => {
+//     res.redirect("http://localhost:5173/dashboard");
+//   }
+// );
 // Superadmin only
 router.post("/create-admin", protect, superAdminOnly, createAdminBySuperadmin);
 
