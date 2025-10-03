@@ -9,13 +9,18 @@ const alumniSchema = new mongoose.Schema(
     graduationYear: { type: String, required: true },
     department: { type: String, required: true },
 
-    otp: { type: String, required: true },
-    otpExpiry: { type: Date, required: true },
+    otp: { type: String},
+    otpExpiry: { type: Date},
 
     status: {
       type: String,
       enum: ["pending", "active", "inactive"],
       default: "pending",
+    },
+
+    profileImage: {
+      url: { type: String },
+      public_id: { type: String },
     },
 
     testimonials: [

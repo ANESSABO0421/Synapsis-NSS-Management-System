@@ -10,16 +10,17 @@ import {
   verifyOtp,
 } from "../controllers/alumniController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import upload from "../middleware/uploadMiddleware.js";
 
 const alumniRouter = express.Router();
 
-alumniRouter.post("/alumnisignup", Signup);
-alumniRouter.post("/verifyotp", verifyOtp);
+alumniRouter.post("/alumnisignup", upload.single("profileImage"), Signup);
+alumniRouter.post("/verifyotp/:id", verifyOtp);
 alumniRouter.post("/login", Login);
 
 // admin approval
 alumniRouter.put("/alumniapproval/:id", protect, approveAlumni);
-alumniRouter.put("/updatealumni/:id", protect, updateAlumni);
+alumniRouter.put("/updatealumni/:id", protect,upload.single("profileImage"),updateAlumni);
 alumniRouter.delete("/delete/:id", protect, deleteAlumni);
 
 // alumni achievement and testimonial adding
