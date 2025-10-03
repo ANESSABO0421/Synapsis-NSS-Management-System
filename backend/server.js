@@ -8,6 +8,8 @@ import router from "./routes/adminRoutes.js";
 import eventRouter from "./routes/eventRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import studentRouter from "./routes/StudentRoutes.js";
+import alumniRouter from "./routes/alumniRoutes.js";
+
 dotenv.config();
 const port = process.env.PORT || 5000;
 
@@ -29,6 +31,7 @@ app.use("/api/auth", router);
 app.use("/api/events", eventRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/students", studentRouter);
+app.use("/api/alumni", alumniRouter);
 
 ConnectDb()
   .then(() => {

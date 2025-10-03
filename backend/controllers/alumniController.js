@@ -171,7 +171,7 @@ export const deleteAlumni = async (req, res) => {
     if (!alumni) {
       return res
         .status(404)
-        .jsn({ success: false, message: "Alumni not found" });
+        .json({ success: false, message: "Alumni not found" });
     }
     res.json({ success: true, message: "Alumni deleted successfully!!!" });
   } catch (error) {
