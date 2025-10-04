@@ -225,6 +225,64 @@ export const addTestimonial = async (req, res) => {
   }
 };
 
+export const updateTestimonialVisibility = async (req, res) => {
+  try {
+    const { id, testimonialId } = req.params; // ✅ route param fix
+    const { visibility } = req.body; // "approved" | "rejected"
+
+    const alumni = await Alumni.findById(id);
+    if (!alumni) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni not found" });
+    }
+
+    const testimonial = alumni.testimonials.id(testimonialId);
+    if (!testimonial) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Testimonial not found" });
+    }
+
+    testimonial.visibility = visibility;
+    await alumni.save();
+
+    res.json({
+      success: true,
+      message: `Testimonial visibility updated to ${visibility}`,
+      testimonial,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// get top 3 testimonials
+export const getTopTestimonial = async (req, res) => {
+  try {
+    const alumni = await Alumni.find({ "testimonials.visibility": "approved" })
+      .select("name department graduationYear profileImage testimonials")
+      .lean();
+    const approvedTestimonials = alumni
+      .flatMap((a) =>
+        a.testimonials
+          .filter((t) => t.visibility === "approved")
+          .map((t) => ({
+            alumniId: a._id,
+            name: a.name,
+            department: a.department,
+            graduationYear: a.graduationYear,
+            profileImage: a.profileImage?.url,
+            message: t.message,
+          }))
+      )
+      .slice(0, 3);
+    res.json({ success: true, testimonials: approvedTestimonials });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // add achievements
 export const addAchievement = async (req, res) => {
   try {

@@ -53,10 +53,6 @@ const Navbar = () => {
           <BiMenu />
         </div>
       </nav>
-      {/* mobile menu */}
-      <div className="flex flex-col bg-red-400">
-        <li>dskfhsd</li>
-      </div>
     </div>
   );
 };
