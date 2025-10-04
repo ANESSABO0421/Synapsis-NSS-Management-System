@@ -5,6 +5,7 @@ import Features from "./Features";
 import Navbar from "../components/Navbar";
 import EventDisplay from "./EventDisplay";
 import Gallery from "./Gallery";
+import Testimonials from "./Testimonials";
 
 const Home = () => {
   return (
@@ -15,6 +16,7 @@ const Home = () => {
       <Features />
       <EventDisplay/>
       <Gallery/>
+      <Testimonials/>
     </div>
   );
 };

@@ -38,6 +38,7 @@ alumniRouter.post("/:id/addachievement", protect, addAchievement);
 alumniRouter.put(
   "/:id/:testimonialId",
   protect,
+  superAdminOnly,
   updateTestimonialVisibility
 );
 
