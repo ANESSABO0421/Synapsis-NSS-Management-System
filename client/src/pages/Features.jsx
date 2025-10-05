@@ -1,5 +1,10 @@
 import React from "react";
-import { FaUsers, FaCalendarCheck, FaChartLine, FaHandshake } from "react-icons/fa";
+import {
+  FaUsers,
+  FaCalendarCheck,
+  FaChartLine,
+  FaHandshake,
+} from "react-icons/fa";
 
 const featuresData = [
   {
@@ -43,8 +48,9 @@ const Features = () => {
           Key Features of <span className="text-green-600">Synapsis</span>
         </h2>
         <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-          Synapsis helps NSS volunteers, teachers, and alumni connect seamlessly,
-          making it easy to track contributions, organize events, and celebrate impact.
+          Synapsis helps NSS volunteers, teachers, and alumni connect
+          seamlessly, making it easy to track contributions, organize events,
+          and celebrate impact.
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 md:gap-10">
@@ -63,9 +69,13 @@ const Features = () => {
             }}
           >
             {/* Abstract Gradient Glow */}
-            <span className={`absolute inset-0 z-0 rounded-3xl blur-2xl opacity-0 group-hover:opacity-50 pointer-events-none bg-gradient-to-br ${f.color}`}></span>
+            <span
+              className={`absolute inset-0 z-0 rounded-3xl blur-2xl opacity-0 group-hover:opacity-50 pointer-events-none bg-gradient-to-br ${f.color}`}
+            ></span>
             {/* Icon */}
-            <div className={`z-10 relative mb-5 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/70 border-4 border-white shadow-md group-hover:bg-white/90 transition-all text-3xl md:text-4xl text-green-700`}>
+            <div
+              className={`z-10 relative mb-5 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/70 border-4 border-white shadow-md group-hover:bg-white/90 transition-all text-3xl md:text-4xl text-green-700`}
+            >
               {f.icon}
             </div>
             {/* Title */}

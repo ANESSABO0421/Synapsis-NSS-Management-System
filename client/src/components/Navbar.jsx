@@ -68,10 +68,12 @@ const Navbar = () => {
 
       {/* Mobile Dropdown */}
       <div
-        className={`absolute top-[70px] left-0 w-full bg-gradient-to-br
+        className={`fixed  top-[70px] left-0 w-full bg-gradient-to-br
         from-green-500 via-green-300 to-teal-300/80 backdrop-blur-lg border-t border-green-400/30
         text-white flex flex-col items-center gap-8 py-6 transition-all
-        duration-500 ease-in-out ${open ? "opacity-100 visible" : "opacity-0 invisible"}`}
+        duration-500 ease-in-out ${
+          open ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
       >
         {["Home", "About", "Features", "Events", "Contact"].map((item) => (
           <Link
@@ -102,8 +104,10 @@ const Navbar = () => {
       </div>
 
       {/* Soft Glow/Highlight */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[260px] h-[40px]
-        bg-green-400/40 blur-2xl rounded-full pointer-events-none"></div>
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[260px] h-[40px]
+        bg-green-400/40 blur-2xl rounded-full pointer-events-none"
+      ></div>
     </div>
   );
 };

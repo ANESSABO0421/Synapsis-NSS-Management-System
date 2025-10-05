@@ -146,6 +146,16 @@ export const protect = async (req, res, next) => {
       else if (user instanceof Alumni) req.alumni = user;
       else if (user instanceof Student) req.student = user;
 
+      // chat app
+      // attach unified user object for universal use
+      req.user = req.admin || req.alumni || req.student;
+      if (req.user) {
+        req.user.role =
+          req.admin?.role ||
+          (req.alumni ? "alumni" : null) ||
+          (req.student ? "student" : null);
+      }
+
       next();
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token failed" });
