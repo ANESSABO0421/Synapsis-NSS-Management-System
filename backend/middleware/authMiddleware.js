@@ -127,7 +127,6 @@ export const protect = async (req, res, next) => {
       // Verify the token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // 🔹 Note:
       // Your token currently only contains `id`
       // So we’ll find the user by ID across all models
       let user =
@@ -165,7 +164,7 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// ✅ Super Admin only access
+// Super Admin only access
 export const superAdminOnly = (req, res, next) => {
   if (!req.admin) {
     return res.status(401).json({ message: "Not authorized, no user" });
@@ -178,7 +177,7 @@ export const superAdminOnly = (req, res, next) => {
   next();
 };
 
-// ✅ Admin (and Superadmin) access only
+//  Admin (and Superadmin) access only
 export const adminOnly = (req, res, next) => {
   if (!req.admin) {
     return res.status(401).json({ message: "Not authorized, admin not found" });

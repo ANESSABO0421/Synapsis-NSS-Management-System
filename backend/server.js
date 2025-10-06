@@ -14,6 +14,7 @@ dotenv.config();
 const port = process.env.PORT || 5000;
 
 import "./configs/passport.js";
+import teacherRoute from "./routes/teacherRoutes.js";
 
 const app = express();
 app.use(express.json());
@@ -32,6 +33,7 @@ app.use("/api/events", eventRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/students", studentRouter);
 app.use("/api/alumni", alumniRouter);
+app.use("/api/teacher",teacherRoute)
 
 ConnectDb()
   .then(() => {
