@@ -111,6 +111,7 @@ import jwt from "jsonwebtoken";
 import Admin from "../models/Admin.js";
 import Alumni from "../models/Alumni.js";
 import Student from "../models/Student.js";
+import Teacher from "../models/Teacher.js";
 
 //  Protect middleware for all user types
 export const protect = async (req, res, next) => {
@@ -144,15 +145,17 @@ export const protect = async (req, res, next) => {
       if (user instanceof Admin) req.admin = user;
       else if (user instanceof Alumni) req.alumni = user;
       else if (user instanceof Student) req.student = user;
+      else if (user instanceof Teacher) req.teacher = user;
 
       // chat app
       // attach unified user object for universal use
-      req.user = req.admin || req.alumni || req.student;
+      req.user = req.admin || req.alumni || req.student || req.teacher;
       if (req.user) {
         req.user.role =
           req.admin?.role ||
           (req.alumni ? "alumni" : null) ||
-          (req.student ? "student" : null);
+          (req.student ? "student" : null) ||
+          (req.teacher ? "teacher" : null);
       }
 
       next();
@@ -189,3 +192,21 @@ export const adminOnly = (req, res, next) => {
 
   next();
 };
+
+// teacher only
+export const teacherOnly = (req, res, next) => {
+  if (!req.teacher) {
+    return res.status(403).json({ message: "Access denied, Teachers only" });
+  }
+  next();
+};
+
+// Coordinator only
+// export const coordinatorOnly = (req, res, next) => {
+//   if (!req.coordinator) {
+//     return res
+//       .status(403)
+//       .json({ message: "Access denied, Coordinators only" });
+//   }
+//   next();
+// };

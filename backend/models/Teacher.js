@@ -27,7 +27,7 @@ const TeacherSchema = new mongoose.Schema(
       default: "pending",
     },
 
-    assignedEvents: { type: mongoose.Schema.Types.ObjectId, ref: "Events" },
+    assignedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Events" }],
   },
   { timestamps: true }
 );

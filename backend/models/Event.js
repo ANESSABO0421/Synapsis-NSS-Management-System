@@ -9,7 +9,7 @@ const eventSchema = new mongoose.Schema(
     hours: { type: Number, default: 0, min: [0, "Hours cannot be negative"] },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
-    assignedTeacher: { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
+    assignedTeacher: [{ type: mongoose.Schema.Types.ObjectId, ref: "Teacher" }],
     assignedCoordinators: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Coordinator",
