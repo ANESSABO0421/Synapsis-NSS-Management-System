@@ -12,15 +12,18 @@ router.get(
 // Step 2: Google callback
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:5173/login?error=notregistered" }),
+  passport.authenticate("google", {
+    failureRedirect: "http://localhost:5173/login?error=notregistered",
+  }),
   (req, res) => {
-    // Role-based redirect
+    // console.log(req.user)
     if (req.user.role === "admin") {
       return res.redirect("http://localhost:5173/admindashboard");
     } else if (req.user.role === "student") {
-      return res.redirect("http://localhost:5173/student/dashboard");
+      return res.redirect("http://localhost:5173/studentdashboard");
+    } else {
+      return res.redirect("http://localhost:5173/");
     }
-    res.redirect("http://localhost:5173/");
   }
 );
 

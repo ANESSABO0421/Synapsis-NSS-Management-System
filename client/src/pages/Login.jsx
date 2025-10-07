@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { API } from "../utils/api";
 import { useLocation, Link } from "react-router-dom";
-import { FaGoogle } from 'react-icons/fa';
+import { FaGoogle } from "react-icons/fa";
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -21,7 +21,12 @@ const Login = () => {
       const res = await API.post("/auth/login", form);
       localStorage.setItem("token", res.data.token);
       setMessage("✅ Login successful");
-      window.location.href = "/dashboard";
+
+      if (user.role === "admin") {
+        window.location.href = "/admindashboard";
+      } else if (user.role === "student") {
+        window.location.href = "/studentdashboard";
+      }
     } catch (error) {
       setMessage(error.response?.data?.message || "Login failed");
     }
@@ -114,13 +119,16 @@ const Login = () => {
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 rounded-xl font-medium hover:bg-red-600 transition duration-200"
         >
-          <FaGoogle/>
+          <FaGoogle />
           Continue with Google
         </button>
 
         {/* Extra Links */}
         <p className="text-center text-sm text-gray-500 mt-6">
-          Don’t have an account? <Link to={"/signup"} className="text-blue-500">Sign Up</Link>
+          Don’t have an account?{" "}
+          <Link to={"/signup"} className="text-blue-500">
+            Sign Up
+          </Link>
         </p>
       </div>
     </div>
