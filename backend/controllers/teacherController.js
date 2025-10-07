@@ -260,11 +260,11 @@ export const genrateAttendncePdfs = async (req, res) => {
     doc.text(`Location: ${event.location}`);
     doc.text(`Hours: ${event.hours}`);
     doc.moveDown();
-    doc.text("No.  Name              Dept           Status   GraceMarks");
+    doc.text("No.  Name                         Dept          Status      GraceMarks");
     (event.attendance || []).forEach((a, i) => {
       const s = a.student || {};
       doc.text(
-        `${i + 1}. ${s.name || "-"}   ${s.department || "-"}   ${a.status}   ${
+        `${i + 1}.     ${s.name || "-"}            ${s.department || "-"}              ${a.status}      ${
           s.graceMarks || 0
         }`
       );

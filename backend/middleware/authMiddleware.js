@@ -133,7 +133,8 @@ export const protect = async (req, res, next) => {
       let user =
         (await Admin.findById(decoded.id).select("-password")) ||
         (await Alumni.findById(decoded.id).select("-password")) ||
-        (await Student.findById(decoded.id).select("-password"));
+        (await Student.findById(decoded.id).select("-password")) ||
+        (await Teacher.findById(decoded.id).select("-password"));
 
       if (!user) {
         return res

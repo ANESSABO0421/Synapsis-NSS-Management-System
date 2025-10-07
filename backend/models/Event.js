@@ -16,7 +16,7 @@ const eventSchema = new mongoose.Schema(
     },
     attendance: [
       {
-        student: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
+        student: { type: mongoose.Schema.Types.ObjectId, ref: "student" },
         status: {
           type: String,
           enum: ["Present", "Absent"],

@@ -1,10 +1,13 @@
 import React from "react";
+import { useEffect } from "react";
 import {
   FaUsers,
   FaCalendarCheck,
   FaChartLine,
   FaHandshake,
 } from "react-icons/fa";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/all";
 
 const featuresData = [
   {
@@ -38,6 +41,14 @@ const featuresData = [
 ];
 
 const Features = () => {
+  useEffect(() => {
+    gsap.fromTo(
+      "#features",
+      { y: -200, opacity: 0, scale: 0.8 },
+      { y: 0, opacity: 1, scale: 1, duration:1}
+    );
+  }, []);
+
   return (
     <section
       id="features"

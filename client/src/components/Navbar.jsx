@@ -1,113 +1,179 @@
 import React, { useState } from "react";
 import { BiMenu, BiX } from "react-icons/bi";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
 
+  // Animation variants for desktop nav links
+  const linkVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, delay: i * 0.1, ease: "easeOut" },
+    }),
+  };
+
+  // Animation variants for mobile menu
+  const mobileMenuVariants = {
+    hidden: { opacity: 0, y: -20, height: 0 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      height: "auto",
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      height: 0,
+      transition: { duration: 0.3, ease: "easeIn" },
+    },
+  };
+
   return (
     <div className="relative z-50">
       <nav
-        className="w-full fixed top-0 left-0 flex justify-between items-center
-        px-6 md:px-16 py-4
-        bg-gradient-to-r from-green-500 via-green-400 to-teal-300
-        backdrop-blur-lg shadow-lg border-b border-green-400/30"
+        className="w-full fixed top-0 left-0 flex justify-between items-center px-4 sm:px-8 lg:px-16 py-4 bg-gradient-to-r from-green-600 via-teal-500 to-blue-600 backdrop-blur-xl shadow-lg border-b border-green-500/20"
       >
         {/* Logo */}
-        <div className="flex items-center gap-2 text-white font-extrabold text-xl md:text-3xl tracking-wide">
+        <motion.div
+          className="flex items-center gap-3 text-white font-extrabold text-xl sm:text-2xl lg:text-3xl tracking-tight"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           <img
             src="/Synapsis-Logo-bgRemover.png"
-            alt="Logo"
-            className="h-[34px] animate-pulse"
+            alt="Synapsis Logo"
+            className="h-10 sm:h-12 object-contain"
+            onError={(e) => {
+              e.target.src =
+                "https://via.placeholder.com/40?text=Logo";
+            }}
           />
-          <span className="bg-gradient-to-r from-green-300 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-300 via-cyan-300 to-blue-300">
             SYNAPSIS
           </span>
-        </div>
+        </motion.div>
 
-        {/* Navigation Links */}
-        <ul className="hidden md:flex gap-8 text-white font-semibold text-lg">
-          {["Home", "About", "Features", "Events", "Contact"].map((item) => (
-            <li
+        {/* Navigation Links (Desktop) */}
+        <ul className="hidden md:flex gap-6 lg:gap-10 text-white font-medium text-base lg:text-lg">
+          {["Home", "About", "Features", "Events", "Contact"].map((item, index) => (
+            <motion.li
               key={item}
-              className="relative group cursor-pointer hover:text-yellow-300 transition"
+              className="relative group cursor-pointer"
+              custom={index}
+              initial="hidden"
+              animate="visible"
+              variants={linkVariants}
             >
-              {item}
-              {/* Animated Underline on Hover */}
-              <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-green-400 to-teal-400 group-hover:w-full transition-all duration-300"></span>
-            </li>
+              <Link
+                to={`/${item.toLowerCase()}`}
+                className="hover:text-yellow-200 transition-colors duration-300"
+              >
+                {item}
+              </Link>
+              <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-gradient-to-r from-green-300 to-teal-300 group-hover:w-full transition-all duration-300"></span>
+            </motion.li>
           ))}
         </ul>
 
-        {/* Login/Signup Buttons */}
-        <div className="hidden md:flex gap-4">
-          <Link
-            to="/login"
-            className="px-4 py-2 border border-white text-white rounded-full
-              hover:bg-white hover:text-black transition font-medium shadow-sm"
+        {/* Login/Signup Buttons (Desktop) */}
+        <div className="hidden md:flex gap-3 lg:gap-4">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
           >
-            Login
-          </Link>
-          <Link
-            to="/signup"
-            className="px-4 py-2 bg-gradient-to-r from-green-400 to-teal-400
-              font-semibold rounded-full text-white transition shadow-md"
+            <Link
+              to="/login"
+              className="px-4 py-2 border border-white/80 text-white rounded-full hover:bg-white hover:text-gray-900 font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+            >
+              Login
+            </Link>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
           >
-            Signup
-          </Link>
+            <Link
+              to="/signup"
+              className="px-4 py-2 bg-gradient-to-r from-green-400 to-teal-400 text-white font-semibold rounded-full hover:from-green-500 hover:to-teal-500 transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              Signup
+            </Link>
+          </motion.div>
         </div>
 
         {/* Mobile Icon */}
-        <div
+        <motion.div
           className="md:hidden text-white text-3xl cursor-pointer"
           onClick={() => setOpen(!open)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
           {open ? <BiX /> : <BiMenu />}
-        </div>
+        </motion.div>
       </nav>
 
       {/* Mobile Dropdown */}
-      <div
-        className={`fixed  top-[70px] left-0 w-full bg-gradient-to-br
-        from-green-500 via-green-300 to-teal-300/80 backdrop-blur-lg border-t border-green-400/30
-        text-white flex flex-col items-center gap-8 py-6 transition-all
-        duration-500 ease-in-out ${
-          open ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
-      >
-        {["Home", "About", "Features", "Events", "Contact"].map((item) => (
-          <Link
-            key={item}
-            to={`/${item.toLowerCase()}`}
-            className="text-xl tracking-wide font-medium hover:text-yellow-300 transition-all"
-            onClick={() => setOpen(false)}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed top-[68px] left-0 w-full bg-gradient-to-br from-green-600/90 via-teal-500/90 to-blue-600/90 backdrop-blur-xl border-t border-green-500/30 text-white flex flex-col items-center gap-6 py-8"
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={mobileMenuVariants}
           >
-            {item}
-          </Link>
-        ))}
-        <div className="flex gap-4">
-          <Link
-            to="/login"
-            className="px-5 py-2 border border-white text-white rounded-full
-              hover:bg-white hover:text-black font-semibold transition-all shadow-sm"
-          >
-            Login
-          </Link>
-          <Link
-            to="/signup"
-            className="px-5 py-2 bg-gradient-to-r from-green-400 to-teal-400 rounded-full
-              text-white font-bold transition-all shadow-md"
-          >
-            Signup
-          </Link>
-        </div>
-      </div>
+            {["Home", "About", "Features", "Events", "Contact"].map((item, index) => (
+              <motion.div
+                key={item}
+                custom={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+              >
+                <Link
+                  to={`/${item.toLowerCase()}`}
+                  className="text-lg sm:text-xl font-medium hover:text-yellow-200 transition-all duration-300"
+                  onClick={() => setOpen(false)}
+                >
+                  {item}
+                </Link>
+              </motion.div>
+            ))}
+            <motion.div
+              className="flex flex-col gap-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+            >
+              <Link
+                to="/login"
+                className="px-6 py-2 border border-white/80 text-white rounded-full hover:bg-white hover:text-gray-900 font-medium transition-all duration-300 shadow-sm"
+                onClick={() => setOpen(false)}
+              >
+                Login
+              </Link>
+              <Link
+                to="/signup"
+                className="px-6 py-2 bg-gradient-to-r from-green-400 to-teal-400 text-white font-semibold rounded-full hover:from-green-500 hover:to-teal-500 transition-all duration-300 shadow-md"
+                onClick={() => setOpen(false)}
+              >
+                Signup
+              </Link>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Soft Glow/Highlight */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[260px] h-[40px]
-        bg-green-400/40 blur-2xl rounded-full pointer-events-none"
-      ></div>
+      {/* Soft Glow Effect */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 sm:w-80 h-12 bg-green-400/30 blur-3xl rounded-full pointer-events-none" />
     </div>
   );
 };
