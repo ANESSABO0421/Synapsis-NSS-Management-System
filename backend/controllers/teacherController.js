@@ -131,7 +131,7 @@ export const teacherLogin = async (req, res) => {
     }
     const token = generateToken(teacher._id);
 
-    res.json({ success: true, message: "Login succssfully", token, teacher });
+    res.json({ success: true, message: "Login succssfully", token});
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -9,12 +9,12 @@ import eventRouter from "./routes/eventRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import studentRouter from "./routes/StudentRoutes.js";
 import alumniRouter from "./routes/alumniRoutes.js";
+import "./configs/passport.js";
+import teacherRoute from "./routes/teacherRoutes.js";
+import coordinatorRoute from "./routes/coordinatorRoute.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
-
-import "./configs/passport.js";
-import teacherRoute from "./routes/teacherRoutes.js";
 
 const app = express();
 app.use(express.json());
@@ -33,7 +33,8 @@ app.use("/api/events", eventRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/students", studentRouter);
 app.use("/api/alumni", alumniRouter);
-app.use("/api/teacher",teacherRoute)
+app.use("/api/teacher", teacherRoute);
+app.use("/api/coordinator", coordinatorRoute);
 
 ConnectDb()
   .then(() => {

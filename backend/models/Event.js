@@ -34,11 +34,11 @@ const eventSchema = new mongoose.Schema(
         uploadAt: { type: Date, default: Date.now },
       },
     ],
-    // status: {
-    //   type: String,
-    //   enum: ["Upcoming", "Ongoing", "Completed", "Cancelled"],
-    //   default: "Upcoming",
-    // },
+    status: {
+      type: String,
+      enum: ["Upcoming", "Ongoing", "Completed", "Cancelled"],
+      default: "Upcoming",
+    },
   },
   { timestamps: true }
 );

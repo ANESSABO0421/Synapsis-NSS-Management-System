@@ -112,6 +112,7 @@ import Admin from "../models/Admin.js";
 import Alumni from "../models/Alumni.js";
 import Student from "../models/Student.js";
 import Teacher from "../models/Teacher.js";
+import Coordinator from "../models/Coordinator.js";
 
 //  Protect middleware for all user types
 export const protect = async (req, res, next) => {
@@ -134,7 +135,8 @@ export const protect = async (req, res, next) => {
         (await Admin.findById(decoded.id).select("-password")) ||
         (await Alumni.findById(decoded.id).select("-password")) ||
         (await Student.findById(decoded.id).select("-password")) ||
-        (await Teacher.findById(decoded.id).select("-password"));
+        (await Teacher.findById(decoded.id).select("-password")) ||
+        (await Coordinator.findById(decoded.id).select("-password"));
 
       if (!user) {
         return res
@@ -147,6 +149,7 @@ export const protect = async (req, res, next) => {
       else if (user instanceof Alumni) req.alumni = user;
       else if (user instanceof Student) req.student = user;
       else if (user instanceof Teacher) req.teacher = user;
+      else if (user instanceof Coordinator) req.coordinator = user;
 
       // chat app
       // attach unified user object for universal use
@@ -156,7 +159,8 @@ export const protect = async (req, res, next) => {
           req.admin?.role ||
           (req.alumni ? "alumni" : null) ||
           (req.student ? "student" : null) ||
-          (req.teacher ? "teacher" : null);
+          (req.teacher ? "teacher" : null) ||
+          (req.coordinator ? "coordinator" : null);
       }
 
       next();
@@ -203,11 +207,11 @@ export const teacherOnly = (req, res, next) => {
 };
 
 // Coordinator only
-// export const coordinatorOnly = (req, res, next) => {
-//   if (!req.coordinator) {
-//     return res
-//       .status(403)
-//       .json({ message: "Access denied, Coordinators only" });
-//   }
-//   next();
-// };
+export const coordinatorOnly = (req, res, next) => {
+  if (!req.coordinator) {
+    return res
+      .status(403)
+      .json({ message: "Access denied, Coordinators only" });
+  }
+  next();
+};
