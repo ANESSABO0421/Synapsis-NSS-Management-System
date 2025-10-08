@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Coordinator from "../models/Coordinator.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import Event from "../models/Event.js";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -65,6 +66,7 @@ export const coordinatorSignup = async (req, res) => {
   }
 };
 
+// verify otp
 export const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -85,6 +87,98 @@ export const verifyOtp = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Otp verified successfully.wait for admin approval",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// approve coordinator
+export const approveCoordinator = async (req, res) => {
+  try {
+    const { coordinatorId } = req.body;
+    const coordinator = await Coordinator.findById(coordinatorId);
+    if (!coordinator) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Coordinator Not found" });
+    }
+    coordinator.status = "active";
+    await coordinator.save();
+    res.json({ success: true, message: "Coordinator has been approved" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// login
+export const Login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const coordinator = await Coordinator.findOne({ email });
+    if (!coordinator) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Coordinatr is not found" });
+    }
+    const match = await bcrypt.compare(password, coordinator.password);
+    if (!match) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid Credential" });
+    }
+    const token = generateToken(coordinator._id);
+    res.json({
+      success: true,
+      message: "Login successfully",
+      token,
+      coordinator,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// create event
+export const createEvent = async (req, res) => {
+  try {
+    const { title, description, location, date, hours } = req.body;
+    if (!title || !description || !location || !date || !hours) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing Fields" });
+    }
+    let imageData = null;
+    if (req.file) {
+      const uploaded = await cloudinary.uploader.upload(req.file.path, {
+        folder: "event_images",
+      });
+      imageData = {
+        url: uploaded.secure_url,
+        public_id: uploaded.public_id,
+        caption: req.body.caption || "",
+      };
+    }
+    const newEvent = await Event.create({
+      title,
+      description,
+      location,
+      date,
+      hours: hours || 0,
+      assignedCoordinators: req.user._id,
+      createdBy: req.user._id,
+      images: imageData ? [imageData] : [],
+      status: "Upcoming",
+    });
+
+    // update as well on the coordinator events manging array
+    await Coordinator.findByIdAndUpdate(req.user._id, {
+      $push: { managedEvents: newEvent._id },
+    });
+    res.json({
+      success: true,
+      message: "new Event created successfully",
+      event: newEvent,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -153,7 +153,7 @@ export const protect = async (req, res, next) => {
 
       // chat app
       // attach unified user object for universal use
-      req.user = req.admin || req.alumni || req.student || req.teacher;
+      req.user = req.admin || req.alumni || req.student || req.teacher||req.coordinator;
       if (req.user) {
         req.user.role =
           req.admin?.role ||
