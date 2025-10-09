@@ -207,3 +207,46 @@ export const getStudentBySkill = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// student to volunteer
+export const studentToVolunteer = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    }
+    student.role = "volunteer";
+    await student.save();
+    res.json({
+      success: true,
+      message: "changed student to volunteer",
+      student,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const volunteerTostudent = async (req, res) => {
+  try {
+    const { studentId } = req.body;
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    }
+    student.role = "student";
+    await student.save();
+    res.json({
+      success: true,
+      message: "changed volunteer to student",
+      student,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

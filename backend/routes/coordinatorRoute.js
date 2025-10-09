@@ -5,7 +5,9 @@ import {
   createEvent,
   getStudentBySkill,
   Login,
+  studentToVolunteer,
   verifyOtp,
+  volunteerTostudent,
 } from "../controllers/coordinatorController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import { coordinatorOnly, protect } from "../middleware/authMiddleware.js";
@@ -32,6 +34,19 @@ coordinatorRoute.post(
   protect,
   coordinatorOnly,
   getStudentBySkill
+);
+
+coordinatorRoute.post(
+  "/studenttovolunteer",
+  protect,
+  coordinatorOnly,
+  studentToVolunteer
+);
+coordinatorRoute.post(
+  "/volunteertostudent",
+  protect,
+  coordinatorOnly,
+  volunteerTostudent
 );
 
 export default coordinatorRoute;
