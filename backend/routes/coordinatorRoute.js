@@ -3,6 +3,7 @@ import {
   approveCoordinator,
   coordinatorSignup,
   createEvent,
+  getStudentBySkill,
   Login,
   verifyOtp,
 } from "../controllers/coordinatorController.js";
@@ -19,6 +20,18 @@ coordinatorRoute.post(
 coordinatorRoute.post("/verifyotp", verifyOtp);
 coordinatorRoute.post("/approvecoordinator", approveCoordinator);
 coordinatorRoute.post("/logincoordinator", Login);
-coordinatorRoute.post("/createevents",upload.single("images"),protect,coordinatorOnly, createEvent);
+coordinatorRoute.post(
+  "/createevents",
+  upload.single("images"),
+  protect,
+  coordinatorOnly,
+  createEvent
+);
+coordinatorRoute.post(
+  "/getstudentbyskill/:skills",
+  protect,
+  coordinatorOnly,
+  getStudentBySkill
+);
 
 export default coordinatorRoute;

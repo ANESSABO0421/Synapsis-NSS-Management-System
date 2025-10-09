@@ -4,6 +4,7 @@ import Coordinator from "../models/Coordinator.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import Event from "../models/Event.js";
+import Student from "../models/Student.js";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -180,6 +181,28 @@ export const createEvent = async (req, res) => {
       message: "new Event created successfully",
       event: newEvent,
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// get student by their skill
+export const getStudentBySkill = async (req, res) => {
+  try {
+    const { skills } = req.params;
+    if (!skills) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Skills required" });
+    }
+
+    const students = await Student.find({
+      // $regex is a mongodb query for matching the skill
+      talents: { $regex: `^${skills}$`, $options: "i" }, // exact-ish match; adjust as needed
+      role: "student",
+      status: "active",
+    }).select("name email department skills status");
+    res.json({ success: true, count: students.length, students });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
