@@ -250,3 +250,103 @@ export const volunteerTostudent = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// assign voulnteer to event
+export const assignVoulnteerToEvent = async (req, res) => {
+  try {
+    const { eventId, volunteerIds } = req.body;
+    if (!eventId || !Array.isArray(volunteerIds) || volunteerIds.length === 0)
+      return res
+        .status(400)
+        .json({ success: false, message: "eventId and volunteerIds required" });
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+
+    // ensure the provided id is voulunteer
+    const volunteer = await Student.find({
+      _id: { $in: volunteerIds },
+      role: "volunteer",
+      status: "active",
+    });
+    if (!volunteer.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No volunteer found" });
+    }
+
+    // add participants without duplicates
+    const volunteerObjectIds = volunteer.map((v) => v._id);
+    await Event.findByIdAndUpdate(
+      eventId,
+      { $addToSet: { participants: { $each: volunteerObjectIds } } },
+      { new: true }
+    );
+
+    // also add assigned event to each student's assignedEvents
+    await Student.updateMany(
+      { _id: { $in: volunteerObjectIds } },
+      { $addToSet: { assignedEvents: event._id } }
+    );
+
+    const updatedEvent = await Event.findById(eventId).populate(
+      "participants",
+      "name email department role"
+    );
+
+    res.json({
+      success: true,
+      message: "Volunteers assigned",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// recommendation mark
+export const recommendedGraceMark = async (req, res) => {
+  try {
+    const { studentId, marks, reason } = req.body;
+    if (!studentId || typeof marks === undefined) {
+      return res
+        .status(400)
+        .json({ success: false, message: "studentId and marks required" });
+    }
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    }
+    student.pendingGraceRecommendation = {
+      marks: Number(marks),
+      reason: reason || "",
+      recommendedBy: req.user._id,
+      status: "pending",
+    };
+    await student.save();
+
+    await Coordinator.findByIdAndUpdate(req.user._id, {
+      $push: {
+        graceRecommendations: {
+          student: studentId,
+          marks: Number(marks),
+          reason: reason || "",
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Grace mark recommendation submitted",
+      student,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

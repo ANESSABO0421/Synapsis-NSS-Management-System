@@ -1,6 +1,7 @@
 import express from "express";
 import {
   approveCoordinator,
+  assignVoulnteerToEvent,
   coordinatorSignup,
   createEvent,
   getStudentBySkill,
@@ -47,6 +48,13 @@ coordinatorRoute.post(
   protect,
   coordinatorOnly,
   volunteerTostudent
+);
+
+coordinatorRoute.post(
+  "/assignvolunteertoevents",
+  protect,
+  coordinatorOnly,
+  assignVoulnteerToEvent
 );
 
 export default coordinatorRoute;

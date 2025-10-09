@@ -25,6 +25,20 @@ const StudentSchema = new mongoose.Schema(
     password: { type: String, required: true },
     otp: { type: Number },
     otpExpiry: { type: Date },
+    // gracemark Recommendation
+    pendingGraceRecommendation: {
+      marks: { type: Number, default: 0 },
+      reason: { type: String, default: "" },
+      recommendedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Coordinator",
+      },
+      status: {
+        type: String,
+        enum: ["pending", "approved", "rejected"],
+        default: "pending",
+      },
+    },
     assignedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
   },
   { timestamps: true }
