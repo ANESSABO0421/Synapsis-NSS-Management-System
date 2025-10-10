@@ -4,10 +4,12 @@ import {
   assignVoulnteerToEvent,
   coordinatorSignup,
   createEvent,
+  generateEventReport,
   getStudentBySkill,
   Login,
   recommendedGraceMark,
   studentToVolunteer,
+  updateEventStatus,
   verifyOtp,
   volunteerTostudent,
 } from "../controllers/coordinatorController.js";
@@ -63,6 +65,21 @@ coordinatorRoute.post(
   protect,
   coordinatorOnly,
   recommendedGraceMark
+);
+
+//pdf generation
+coordinatorRoute.get(
+  "/pdfgeneration/:eventId",
+  protect,
+  coordinatorOnly,
+  generateEventReport
+);
+
+coordinatorRoute.post(
+  "/updateeventstatus",
+  protect,
+  coordinatorOnly,
+  updateEventStatus
 );
 
 export default coordinatorRoute;

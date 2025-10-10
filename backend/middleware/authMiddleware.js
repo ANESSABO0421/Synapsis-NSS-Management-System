@@ -153,12 +153,17 @@ export const protect = async (req, res, next) => {
 
       // chat app
       // attach unified user object for universal use
-      req.user = req.admin || req.alumni || req.student || req.teacher||req.coordinator;
+      req.user =
+        req.admin ||
+        req.alumni ||
+        req.student ||
+        req.teacher ||
+        req.coordinator;
       if (req.user) {
         req.user.role =
           req.admin?.role ||
           (req.alumni ? "alumni" : null) ||
-          (req.student ? "student" : null) ||
+          (req.student ? req.student.role : null) ||
           (req.teacher ? "teacher" : null) ||
           (req.coordinator ? "coordinator" : null);
       }
@@ -202,6 +207,13 @@ export const adminOnly = (req, res, next) => {
 export const teacherOnly = (req, res, next) => {
   if (!req.teacher) {
     return res.status(403).json({ message: "Access denied, Teachers only" });
+  }
+  next();
+};
+// Volunteer only
+export const volunteerOnly = (req, res, next) => {
+  if (!req.student || req.student.role !== "volunteer") {
+    return res.status(403).json({ message: "Access denied, Volunteers only" });
   }
   next();
 };

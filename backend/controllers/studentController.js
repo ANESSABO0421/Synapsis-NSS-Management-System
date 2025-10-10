@@ -4,6 +4,9 @@ import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
 import Event from "../models/Event.js";
+import fs from "fs";
+import path from "path";
+import PDFDocument from "pdfkit";
 
 // OTP generation (6 digits)
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
@@ -20,7 +23,8 @@ const generateToken = (student) => {
 // Student Signup
 export const studentSignUp = async (req, res) => {
   try {
-    const { name, email, phoneNumber, department, talents, password } = req.body;
+    const { name, email, phoneNumber, department, talents, password } =
+      req.body;
 
     const emailExist = await Student.findOne({ email });
     if (emailExist) {
@@ -140,7 +144,8 @@ export const studentLogin = async (req, res) => {
 // Admin Create Student
 export const adminCreateStudent = async (req, res) => {
   try {
-    const { name, email, phoneNumber, department, talents, password } = req.body;
+    const { name, email, phoneNumber, department, talents, password } =
+      req.body;
 
     const existing = await Student.findOne({ email });
     if (existing) {
@@ -317,6 +322,197 @@ export const removeStudentFromEvent = async (req, res) => {
     res.json({
       success: true,
       message: "Student removed from event successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// certificate genration
+export const generateOwnCertificate = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const studentId = req.user._id;
+
+    const event = await Event.findById(eventId).populate(
+      "participants",
+      "_id name department"
+    );
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+
+    if (event.status !== "Completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Certificate available only after event completion",
+      });
+    }
+
+    const isParticipant = event.participants.some(
+      (p) => p._id.toString() === studentId.toString()
+    );
+    if (!isParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "You did not participate in this event",
+      });
+    }
+
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    }
+
+    // Folder setup
+    const folder = path.join("uploads", "certificates");
+    if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+
+    const fileName = `certificate_${event._id}_${student._id}.pdf`;
+    const filePath = path.join(folder, fileName);
+
+    const doc = new PDFDocument({ layout: "landscape", size: "A4" });
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    /* ============ Certificate Design ============ */
+
+    // Colors & styling
+    const mainColor = "#003366";
+    const accentColor = "#D4AF37"; // gold
+    const textColor = "#1a1a1a";
+
+    // Background
+    doc.rect(0, 0, doc.page.width, doc.page.height).fill("#FAFAFA");
+    doc.fillColor(textColor);
+
+    // Border
+    doc
+      .lineWidth(12)
+      .strokeColor(mainColor)
+      .rect(25, 25, doc.page.width - 50, doc.page.height - 50)
+      .stroke();
+
+    // Inner thin border
+    doc
+      .lineWidth(2)
+      .strokeColor(accentColor)
+      .rect(45, 45, doc.page.width - 90, doc.page.height - 90)
+      .stroke();
+
+    // Watermark logo (light)
+    const logoPath = "public/nss-logo.png"; // path to your NSS logo
+    if (fs.existsSync(logoPath)) {
+      doc.opacity(0.08);
+      doc.image(logoPath, doc.page.width / 2 - 150, doc.page.height / 2 - 150, {
+        width: 300,
+      });
+      doc.opacity(1);
+    }
+
+    // Header
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(28)
+      .fillColor(mainColor)
+      .text("National Service Scheme (NSS)", { align: "center" });
+
+    doc
+      .font("Helvetica")
+      .fontSize(14)
+      .fillColor("#333")
+      .text(
+        "Under the Ministry of Youth Affairs and Sports, Government of India",
+        {
+          align: "center",
+        }
+      );
+
+    // Title
+    doc.moveDown(2);
+    doc
+      .font("Times-BoldItalic")
+      .fontSize(34)
+      .fillColor(accentColor)
+      .text("Certificate of Appreciation", { align: "center" });
+
+    // Decorative line
+    const lineY = doc.y + 10;
+    doc
+      .moveTo(180, lineY)
+      .lineTo(doc.page.width - 180, lineY)
+      .lineWidth(2)
+      .stroke(accentColor);
+
+    // Recipient name
+    doc.moveDown(2);
+    doc
+      .font("Times-BoldItalic")
+      .fontSize(32)
+      .fillColor("#000")
+      .text(student.name, { align: "center" });
+
+    // Text body
+    doc.moveDown(1.5);
+    doc
+      .font("Times-Roman")
+      .fontSize(18)
+      .fillColor("#333333")
+      .text(
+        `of the ${
+          student.department
+        } Department is hereby awarded this certificate in recognition of their valuable participation in the event "${
+          event.title
+        }", conducted on ${new Date(event.date).toLocaleDateString()}.`,
+        {
+          align: "center",
+          lineGap: 10,
+          indent: 40,
+        }
+      );
+
+    // Signature lines
+    const sigY = doc.page.height - 130;
+
+    doc
+      .font("Helvetica")
+      .fontSize(14)
+      .text("_________________________", 150, sigY)
+      .text("_________________________", doc.page.width - 350, sigY);
+
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(12)
+      .text("Program Officer", 150, sigY + 15)
+      .text("Principal / NSS Coordinator", doc.page.width - 350, sigY + 15);
+
+    // Footer
+    doc
+      .font("Helvetica-Oblique")
+      .fontSize(10)
+      .fillColor("#666")
+      .text(
+        "Generated by SYNAPSIS NSS Management Portal",
+        0,
+        doc.page.height - 50,
+        {
+          align: "center",
+        }
+      );
+
+    /* ============================================ */
+
+    doc.end();
+
+    stream.on("finish", () => {
+      res.download(filePath, fileName, (err) => {
+        if (err) console.error("File download error:", err);
+        fs.unlink(filePath, () => {});
+      });
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

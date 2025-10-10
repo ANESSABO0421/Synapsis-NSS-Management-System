@@ -5,6 +5,9 @@ import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import Event from "../models/Event.js";
 import Student from "../models/Student.js";
+import PDFDocument from "pdfkit";
+import fs from "fs";
+import path from "path";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -351,6 +354,178 @@ export const recommendedGraceMark = async (req, res) => {
   }
 };
 
+// pdf genrateion for the coordinator
+export const generateEventReport = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await Event.findById(eventId)
+      .populate("assignedTeacher", "name")
+      .populate("assignedCoordinators", "name")
+      .populate("participants", "name department");
+
+    if (!event) {
+      return res.status(404).json({ success: false, message: "Event not found" });
+    }
+
+    // Normalize data (make sure they are arrays)
+    const assignedCoordinators = Array.isArray(event.assignedCoordinators)
+      ? event.assignedCoordinators
+      : event.assignedCoordinators
+      ? [event.assignedCoordinators]
+      : [];
+
+    const assignedTeachers = Array.isArray(event.assignedTeacher)
+      ? event.assignedTeacher
+      : event.assignedTeacher
+      ? [event.assignedTeacher]
+      : [];
+
+    const participants = Array.isArray(event.participants)
+      ? event.participants
+      : event.participants
+      ? [event.participants]
+      : [];
+
+    // Ensure folder exists
+    const uploadsDir = path.join("uploads");
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+    const fileName = `event_report_${event._id}.pdf`;
+    const filePath = path.join(uploadsDir, fileName);
+
+    const doc = new PDFDocument({ margin: 40 });
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Header
+    doc
+      .fontSize(20)
+      .text("Event Report", { align: "center", underline: true });
+    doc.moveDown(1.5);
+
+    // Section: Basic Event Info
+    doc.fontSize(12).text("Event Details", { underline: true });
+    doc.moveDown(0.5);
+
+    const tableLeftX = 60;
+    const valueLeftX = 200;
+    const rowHeight = 20;
+
+    const drawRow = (label, value, yOffset) => {
+      doc.font("Helvetica-Bold").text(`${label}:`, tableLeftX, yOffset);
+      doc.font("Helvetica").text(value || "N/A", valueLeftX, yOffset);
+    };
+
+    let currentY = doc.y;
+    drawRow("Title", event.title, currentY);
+    drawRow("Date", new Date(event.date).toLocaleDateString(), currentY + rowHeight);
+    drawRow("Location", event.location, currentY + 2 * rowHeight);
+    drawRow("Hours", event.hours.toString(), currentY + 3 * rowHeight);
+    drawRow("Status", event.status || "Upcoming", currentY + 4 * rowHeight);
+
+    currentY += 5 * rowHeight + 10;
+    doc.moveDown();
+
+    // Coordinators and Teachers
+    doc.fontSize(12).text("Team Details", { underline: true });
+    currentY = doc.y + 5;
+
+    const coordinators = assignedCoordinators.map((c) => c.name).join(", ") || "N/A";
+    const teachers = assignedTeachers.map((t) => t.name).join(", ") || "N/A";
+
+    drawRow("Coordinators", coordinators, currentY);
+    drawRow("Teachers", teachers, currentY + rowHeight);
+
+    doc.moveDown(2);
+
+    // Participants Table
+    doc.fontSize(12).text("Volunteers", { underline: true });
+    doc.moveDown(0.5);
+
+    const startY = doc.y + 5;
+    const col1 = 60; // #
+    const col2 = 100; // Name
+    const col3 = 300; // Department
+
+    // Table header
+    doc
+      .font("Helvetica-Bold")
+      .text("No.", col1, startY)
+      .text("Name", col2, startY)
+      .text("Department", col3, startY);
+
+    doc.moveTo(60, startY + 15).lineTo(500, startY + 15).stroke();
+
+    // Table rows
+    doc.font("Helvetica");
+    let y = startY + 25;
+    if (participants.length > 0) {
+      participants.forEach((p, i) => {
+        doc
+          .text(i + 1, col1, y)
+          .text(p.name || "N/A", col2, y)
+          .text(p.department || "N/A", col3, y);
+        y += 20;
+      });
+    } else {
+      doc.text("No participants recorded.", col2, y);
+      y += 20;
+    }
+
+    // Total count
+    doc.moveDown(1.5);
+    doc.font("Helvetica-Bold").text(
+      `Total Volunteers: ${participants.length}`,
+      { align: "right" }
+    );
+
+    // Finalize and download
+    doc.end();
+
+    stream.on("finish", () => {
+      res.download(filePath, fileName, (err) => {
+        if (err) console.error("File download error:", err);
+        fs.unlink(filePath, () => {}); // Delete file after sending
+      });
+    });
+  } catch (err) {
+    console.error("PDF Generation Error:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message || "Internal Server Error during PDF generation",
+    });
+  }
+};
 
 
-// 
+// update event status (simple version)
+export const updateEventStatus = async (req, res) => {
+  try {
+    const { eventId, status } = req.body;
+
+    if (!eventId || !status) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Event ID and status are required" });
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+
+    event.status = status;
+    await event.save();
+
+    res.json({
+      success: true,
+      message: `Event status updated to ${status}`,
+      event,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

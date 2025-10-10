@@ -4,6 +4,7 @@ import {
   adminCreateStudent,
   approveStudent,
   deleteStudent,
+  generateOwnCertificate,
   getStudentEvents,
   removeStudentFromEvent,
   studentLogin,
@@ -11,6 +12,7 @@ import {
   studentUpdate,
   verifyOtp,
 } from "../controllers/studentController.js";
+import { protect, volunteerOnly } from "../middleware/authMiddleware.js";
 
 const studentRouter = express.Router();
 
@@ -43,6 +45,13 @@ studentRouter.get("/student-events/:id", getStudentEvents);
 studentRouter.delete(
   "/remove-student-event/:studentId/:eventId",
   removeStudentFromEvent
+);
+
+studentRouter.get(
+  "/eventcerificate/:eventId",
+  protect,
+  volunteerOnly,
+  generateOwnCertificate
 );
 
 export default studentRouter;
