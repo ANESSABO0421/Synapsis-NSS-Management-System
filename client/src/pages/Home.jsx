@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import EventDisplay from "./EventDisplay";
 import Gallery from "./Gallery";
 import Testimonials from "./Testimonials";
+import Footer from "../components/Footer";
 
 const Home = () => {
   return (
@@ -17,6 +18,7 @@ const Home = () => {
       <EventDisplay/>
       <Gallery/>
       <Testimonials/>
+      <Footer/>
     </div>
   );
 };

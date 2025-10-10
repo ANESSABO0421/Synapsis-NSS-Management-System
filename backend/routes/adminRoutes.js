@@ -8,8 +8,13 @@ import {
   createAdminBySuperadmin,
   updateAdmin,
   deleteAdmin,
+  getDashboardStat,
 } from "../controllers/adminController.js";
-import { protect, superAdminOnly } from "../middleware/authMiddleware.js";
+import {
+  adminOnly,
+  protect,
+  superAdminOnly,
+} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -19,6 +24,9 @@ router.post("/verify-otp", verifyOTP);
 router.post("/login", login);
 router.put("/updateadmin/:id", protect, updateAdmin);
 router.delete("/deleteadmin/:id", protect, superAdminOnly, deleteAdmin);
+
+// dashboard data
+router.get("/dashboardata", protect, adminOnly, getDashboardStat);
 
 // // Step 1: Google login
 // router.get(

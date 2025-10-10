@@ -4,8 +4,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import VerifyOTP from "./pages/VerifyOtp";
 import Home from "./pages/Home";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import AdminLayout from "./pages/admin/AdminLayout";
 
 const App = () => {
   return (
@@ -14,7 +15,9 @@ const App = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/verifyotp" element={<VerifyOTP />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/admindashboard" element={<AdminDashboard />} />
+      <Route path="/adminpanel" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+      </Route>
       <Route path="/studentdashboard" element={<StudentDashboard />} />
     </Routes>
   );

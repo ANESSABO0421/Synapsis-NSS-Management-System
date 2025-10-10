@@ -18,7 +18,7 @@ router.get(
   (req, res) => {
     // console.log(req.user)
     if (req.user.role === "admin") {
-      return res.redirect("http://localhost:5173/admindashboard");
+      return res.redirect("http://localhost:5173/adminpanel");
     } else if (req.user.role === "student") {
       return res.redirect("http://localhost:5173/studentdashboard");
     } else {

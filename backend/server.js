@@ -28,7 +28,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Mount routers
-app.use("/api/auth", router);
+app.use("/api/admin", router);
 app.use("/api/events", eventRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/students", studentRouter);

@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import { sendEmail } from "../utils/sendEmail.js";
 import Admin from "../models/Admin.js";
 import { generatePassword } from "../utils/passwordGenerator.js";
+import Student from "../models/Student.js";
 
 // regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -241,5 +242,19 @@ export const createAdminBySuperadmin = async (req, res) => {
     res.status(201).json({ message: "Admin created by superadmin", admin });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+// Dashboard
+export const getDashboardStat = async (req, res) => {
+  try {
+    const totalStudent = await Student.countDocuments();
+    res.json({
+      success: true,
+      message: "Successfully fetched the dashboard data",
+      totalStudent,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
