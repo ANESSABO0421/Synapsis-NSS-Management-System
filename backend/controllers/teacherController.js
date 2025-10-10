@@ -131,7 +131,7 @@ export const teacherLogin = async (req, res) => {
     }
     const token = generateToken(teacher._id);
 
-    res.json({ success: true, message: "Login succssfully", token});
+    res.json({ success: true, message: "Login succssfully", token });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -260,13 +260,15 @@ export const genrateAttendncePdfs = async (req, res) => {
     doc.text(`Location: ${event.location}`);
     doc.text(`Hours: ${event.hours}`);
     doc.moveDown();
-    doc.text("No.  Name                         Dept          Status      GraceMarks");
+    doc.text(
+      "No.  Name                         Dept          Status      GraceMarks"
+    );
     (event.attendance || []).forEach((a, i) => {
       const s = a.student || {};
       doc.text(
-        `${i + 1}.     ${s.name || "-"}            ${s.department || "-"}              ${a.status}      ${
-          s.graceMarks || 0
-        }`
+        `${i + 1}.     ${s.name || "-"}            ${
+          s.department || "-"
+        }              ${a.status}      ${s.graceMarks || 0}`
       );
     });
     doc.end();
@@ -293,6 +295,37 @@ export const assignGraceMark = async (req, res) => {
     await student.save();
 
     res.json({ success: true, message: "Grace marks assigned", student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// gracemark recommended by coordinator approve
+export const approveRecommendedGraceMark = async (req, res) => {
+  try {
+    const { studentId, approve } = req.body;
+    const student = await Student.findById(studentId).select("-password");
+    if (!student || !student.pendingGraceRecommendation) {
+      return res.status(404).json({
+        success: false,
+        message: "No pending grace mark recommendation found",
+      });
+    }
+    if (approve) {
+      student.graceMarks += student.pendingGraceRecommendation.marks;
+      student.pendingGraceRecommendation.status = "approved";
+    } else {
+      student.pendingGraceRecommendation.status = "rejected";
+    }
+
+    await student.save();
+    res.json({
+      success: true,
+      message: approve
+        ? "Grace marks approved and added"
+        : "Grace marks recommendation rejected",
+      student,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

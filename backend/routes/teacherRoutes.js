@@ -8,6 +8,7 @@ import {
   markAttendance,
   assignGraceMark,
   genrateAttendncePdfs,
+  approveRecommendedGraceMark,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
@@ -37,5 +38,13 @@ teacherRoute.get(
 
 // Grace marks
 teacherRoute.post("/grace-marks", protect, teacherOnly, assignGraceMark);
+
+// recommended gracemark approve
+teacherRoute.put(
+  "/approverecommendedgracemark",
+  protect,
+  teacherOnly,
+  approveRecommendedGraceMark
+);
 
 export default teacherRoute;

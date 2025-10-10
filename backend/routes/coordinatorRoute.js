@@ -6,6 +6,7 @@ import {
   createEvent,
   getStudentBySkill,
   Login,
+  recommendedGraceMark,
   studentToVolunteer,
   verifyOtp,
   volunteerTostudent,
@@ -55,6 +56,13 @@ coordinatorRoute.post(
   protect,
   coordinatorOnly,
   assignVoulnteerToEvent
+);
+
+coordinatorRoute.post(
+  "/recommendgracemark",
+  protect,
+  coordinatorOnly,
+  recommendedGraceMark
 );
 
 export default coordinatorRoute;
