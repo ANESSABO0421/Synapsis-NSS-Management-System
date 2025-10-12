@@ -6,6 +6,9 @@ import Admin from "../models/Admin.js";
 import { generatePassword } from "../utils/passwordGenerator.js";
 import Student from "../models/Student.js";
 import Event from "../models/Event.js";
+import Teacher from "../models/Teacher.js";
+import Coordinator from "../models/Coordinator.js";
+import Alumni from "../models/Alumni.js";
 
 // regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -259,6 +262,28 @@ export const getDashboardStat = async (req, res) => {
       { $sort: { count: -1 } },
     ]);
 
+    // Teachers
+    const totalTeachers = await Teacher.countDocuments();
+    const activeTeacher = await Teacher.countDocuments({ status: "active" });
+    const pendingTeachers = await Teacher.countDocuments({ status: "pending" });
+
+    // coordinators
+    const totalCoordinator = await Coordinator.countDocuments();
+    const activeCoordinators = await Coordinator.countDocuments({
+      status: "active",
+    });
+    const pendingCoordinators = await Coordinator.countDocuments({
+      status: "pending",
+    });
+
+    // Alumni
+    const totalAlumni = await Alumni.countDocuments();
+    const activeAlumni = await Alumni.countDocuments({ status: "active" });
+    const pendingAlumnis = await Alumni.countDocuments({ status: "pending" });
+
+    // admins
+    const totalAdmin = await Admin.countDocuments();
+
     // events
     const totalEvents = await Event.countDocuments();
     const totalCompletedEvent = await Event.countDocuments({
@@ -280,6 +305,24 @@ export const getDashboardStat = async (req, res) => {
           total: totalEvents,
           completed: totalCompletedEvent,
           upcoming: upcomingEvents,
+        },
+        teacher: {
+          total: totalTeachers,
+          active: activeTeacher,
+          pending: pendingTeachers,
+        },
+        coordinator: {
+          total: totalCoordinator,
+          active: activeCoordinators,
+          pending: pendingCoordinators,
+        },
+        alumni: {
+          total: totalAlumni,
+          active: activeAlumni,
+          pending: pendingAlumnis,
+        },
+        admin: {
+          total: totalAdmin,
         },
       },
     });
