@@ -5,6 +5,7 @@ import { sendEmail } from "../utils/sendEmail.js";
 import Admin from "../models/Admin.js";
 import { generatePassword } from "../utils/passwordGenerator.js";
 import Student from "../models/Student.js";
+import Event from "../models/Event.js";
 
 // regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -248,11 +249,39 @@ export const createAdminBySuperadmin = async (req, res) => {
 // Dashboard
 export const getDashboardStat = async (req, res) => {
   try {
-    const totalStudent = await Student.countDocuments();
+    // students
+    const totalStudents = await Student.countDocuments({ role: "student" });
+    const activeStudent = await Student.countDocuments({ status: "active" });
+    const pendingStudent = await Student.countDocuments({ status: "Pending" });
+    const totalVolunteer = await Student.countDocuments({ role: "volunteer" });
+    const departmentStats = await Student.aggregate([
+      { $group: { _id: "$department", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]);
+
+    // events
+    const totalEvents = await Event.countDocuments();
+    const totalCompletedEvent = await Event.countDocuments({
+      status: "Completed",
+    });
+    const upcomingEvents = await Event.countDocuments({ status: "Upcoming" });
+
     res.json({
       success: true,
-      message: "Successfully fetched the dashboard data",
-      totalStudent,
+      Data: {
+        student: {
+          total: totalStudents,
+          active: activeStudent,
+          pending: pendingStudent,
+          volunteer: totalVolunteer,
+          bydepartment: departmentStats,
+        },
+        event: {
+          total: totalEvents,
+          completed: totalCompletedEvent,
+          upcoming: upcomingEvents,
+        },
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

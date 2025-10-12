@@ -1,9 +1,33 @@
-import React from 'react'
+import React from "react";
+import Sidebar from "../../components/Sidebar";
+import { Outlet } from "react-router-dom";
 
 const AdminLayout = () => {
+  const Logout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
   return (
-    <div>AdminLayout</div>
-  )
-}
+    <div className="flex">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <header className="bg-white shadow p-4 flex justify-between items-center">
+          <h2 className="font-semibold text-gray-700">Admin Dashboard</h2>
+          <button
+            className="text-sm bg-blue-600 rounded-2xl cursor-pointer text-white font-medium"
+            onClick={() => Logout()}
+          >
+            Logout
+          </button>
+        </header>
 
-export default AdminLayout
+        {/* content */}
+        <main className="flex-1 p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default AdminLayout;

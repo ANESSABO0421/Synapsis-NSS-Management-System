@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { API } from "../utils/api";
 import { useLocation, Link } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
+import axios from "axios";
 
 const Login = () => {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+  const [user, setUser] = useState();
   const [message, setMessage] = useState("");
   const location = useLocation();
 
@@ -18,15 +20,20 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await API.post("/auth/login", form);
-      localStorage.setItem("token", res.data.token);
-      setMessage("✅ Login successful");
-
-      if (user.role === "admin") {
-        window.location.href = "/admindashboard";
-      } else if (user.role === "student") {
+      const res = await axios.post(
+        "http://localhost:3000/api/admin/login",
+        form
+      );
+      console.log(res.data.admin.role);
+      if (
+        res.data.admin.role === "admin" ||
+        res.data.admin.role === "superadmin"
+      ) {
+        window.location.href = "/adminpanel";
+      } else if (res.role === "student" || res.role === "volunteer") {
         window.location.href = "/studentdashboard";
       }
+      localStorage.setItem("token", res.data.token);
     } catch (error) {
       setMessage(error.response?.data?.message || "Login failed");
     }

@@ -1,5 +1,6 @@
 import express from "express";
 import passport from "passport";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -16,9 +17,15 @@ router.get(
     failureRedirect: "http://localhost:5173/login?error=notregistered",
   }),
   (req, res) => {
+    const token = jwt.sign(
+      { id: req.user.id, role: req.user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     // console.log(req.user)
     if (req.user.role === "admin") {
-      return res.redirect("http://localhost:5173/adminpanel");
+      return res.redirect(`http://localhost:5173/adminpanel?token=${token}`);
     } else if (req.user.role === "student") {
       return res.redirect("http://localhost:5173/studentdashboard");
     } else {

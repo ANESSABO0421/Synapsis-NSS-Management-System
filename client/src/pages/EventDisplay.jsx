@@ -15,6 +15,7 @@ const EventDisplay = () => {
 
   return (
     <div className="p-6 flex flex-col items-center justify-center gap-12 bg-gradient-to-tr from-green-50 to-white">
+      {/* Header */}
       <div className="max-w-7xl mx-auto text-center mb-16">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow-md">
           Upcoming <span className="text-green-600">Events</span>
@@ -24,27 +25,31 @@ const EventDisplay = () => {
         </p>
       </div>
 
-      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+      {/* Grid */}
+      <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto items-stretch">
         {events.map((event, i) => (
           <div
             key={i}
             className="relative bg-white/80 backdrop-blur-md border border-green-300 rounded-3xl p-6 shadow-xl shadow-green-200/50
-                       hover:shadow-[0_12px_25px_rgba(16,185,129,0.5)] transition-shadow duration-300 cursor-pointer"
+                       hover:shadow-[0_12px_25px_rgba(16,185,129,0.5)] transition-shadow duration-300 cursor-pointer 
+                       flex flex-col justify-between"
           >
-            <h2 className="text-xl font-bold text-green-600 mb-3 tracking-wide drop-shadow">
-              {event.title}
-            </h2>
-            <p className="text-gray-700 mb-6 min-h-[60px]">{event.description}</p>
-            <div className="space-y-1 text-sm text-gray-600 font-semibold">
-              <p>
-                Location: <span className="font-normal">{event.location}</span>
-              </p>
-              <p>
-                Date: <span className="font-normal">{event.date.split("T")[0]}</span>
-              </p>
-              <p>
-                Hours: <span className="font-normal">{event.hours}</span>
-              </p>
+            <div>
+              <h2 className="text-xl font-bold text-green-600 mb-3 tracking-wide drop-shadow">
+                {event.title}
+              </h2>
+              <p className="text-gray-700 mb-6 min-h-[60px]">{event.description}</p>
+              <div className="space-y-1 text-sm text-gray-600 font-semibold">
+                <p>
+                  Location: <span className="font-normal">{event.location}</span>
+                </p>
+                <p>
+                  Date: <span className="font-normal">{event.date.split("T")[0]}</span>
+                </p>
+                <p>
+                  Hours: <span className="font-normal">{event.hours}</span>
+                </p>
+              </div>
             </div>
             <button className="mt-6 w-full rounded-lg bg-gradient-to-r from-green-500 to-teal-400 text-white py-3 font-semibold
                                shadow-lg hover:from-green-600 hover:to-teal-500 transition duration-300">
