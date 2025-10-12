@@ -3,6 +3,7 @@ import { API } from "../utils/api";
 import { useLocation, Link } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -24,12 +25,14 @@ const Login = () => {
         "http://localhost:3000/api/admin/login",
         form
       );
-      console.log(res.data.admin.role);
       if (
         res.data.admin.role === "admin" ||
         res.data.admin.role === "superadmin"
       ) {
-        window.location.href = "/adminpanel";
+        toast.success("you have successfully Logged in");
+        setTimeout(() => {
+          window.location.href = "/adminpanel";
+        }, 3000);
       } else if (res.role === "student" || res.role === "volunteer") {
         window.location.href = "/studentdashboard";
       }

@@ -13,8 +13,8 @@ const Sidebar = () => {
   ];
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="w-64 bg-white shadow-md p-5">
-        <h1 className="text-xl font-bold text-blue-700 mb-8">Admin Panel</h1>
+      <aside className="w-64 bg-white shadow-md p-5 flex-shrink-0 h-full">
+        <h1 className="text-xl font-bold text-green-700 mb-8">Admin Panel</h1>
         <nav>
           {navLinks.map((link) => (
             <NavLink
@@ -24,7 +24,7 @@ const Sidebar = () => {
               className={({ isActive }) => `
             flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
               isActive
-                ? "bg-blue-600 text-white"
+                ? "bg-green-600 text-white"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
             >
