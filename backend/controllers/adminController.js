@@ -255,7 +255,7 @@ export const getDashboardStat = async (req, res) => {
     // students
     const totalStudents = await Student.countDocuments({ role: "student" });
     const activeStudent = await Student.countDocuments({ status: "active" });
-    const pendingStudent = await Student.countDocuments({ status: "Pending" });
+    const pendingStudent = await Student.countDocuments({ status: "pending" });
     const totalVolunteer = await Student.countDocuments({ role: "volunteer" });
     const departmentStats = await Student.aggregate([
       { $group: { _id: "$department", count: { $sum: 1 } } },

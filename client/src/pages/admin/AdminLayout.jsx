@@ -1,11 +1,15 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
 import { Outlet } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AdminLayout = () => {
   const Logout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    toast.success("You have been logged out");
+    setTimeout(() => {
+      window.location.href = "/login";
+    },3000);
   };
   return (
     <div className="flex h-screen overflow-hidden">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { API } from "../utils/api";
+import { API } from "../../utils/api";
 import { useLocation, Link } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import axios from "axios";

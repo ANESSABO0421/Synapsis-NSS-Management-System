@@ -72,9 +72,9 @@ export const studentSignUp = async (req, res) => {
 // Verify OTP
 export const verifyOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { studentId, otp } = req.body;
 
-    const student = await Student.findOne({ email });
+    const student = await Student.findById(studentId);
     if (!student) {
       return res
         .status(404)
@@ -91,7 +91,7 @@ export const verifyOtp = async (req, res) => {
     student.otpExpiry = null;
     await student.save();
 
-    res.json({ success: true, message: "OTP has been verified" });
+    res.json({ success: true, message: "OTP has been verified,now wait for admin approval" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -379,8 +379,7 @@ export const generateOwnCertificate = async (req, res) => {
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    /* ============ Certificate Design ============ */
-
+    // certifiacte
     // Colors & styling
     const mainColor = "#003366";
     const accentColor = "#D4AF37"; // gold
@@ -518,3 +517,5 @@ export const generateOwnCertificate = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// Admin process

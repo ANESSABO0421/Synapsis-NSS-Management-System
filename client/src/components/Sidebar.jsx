@@ -1,6 +1,7 @@
 import React from "react";
 import { BiLayout, BiTask } from "react-icons/bi";
 import { NavLink } from "react-router-dom";
+import { PiStudent } from "react-icons/pi";
 
 const Sidebar = () => {
   const navLinks = [
@@ -10,6 +11,7 @@ const Sidebar = () => {
       path: "/adminpanel/admincreateevent",
       icon: <BiTask size={18} />,
     },
+    {name:"Pending Students",path:"/adminpanel/pendingstudent",icon:<PiStudent size={18}/>}
   ];
   return (
     <div className="flex min-h-screen bg-gray-50">

@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import Login from "./pages/Login/Login";
+import Signup from "./pages/Signup/Signup";
 import VerifyOTP from "./pages/VerifyOtp";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -10,6 +10,10 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import { AdminCreateEvent } from "./pages/admin/AdminCreateEvent";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GetAllPendingStudent from "./pages/admin/GetAllPendingStudent";
+import TeacherSignup from "./pages/Signup/TeacherSignup";
+import CoordinatorSignup from "./pages/Signup/CoordinatorSignup";
+import AlumniSignup from "./pages/Signup/AlumniSignup";
 
 const App = () => {
   return (
@@ -17,12 +21,21 @@ const App = () => {
       <ToastContainer position="top-center" autoClose={3000} />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
         <Route path="/verifyotp" element={<VerifyOTP />} />
+
+        {/* login */}
         <Route path="/login" element={<Login />} />
+
+        {/* signup */}
+        <Route path="/signup/student" element={<Signup />} />
+        <Route path="/signup/teacher" element={<TeacherSignup />} />
+        <Route path="/signup/coordinator" element={<CoordinatorSignup />} />
+        <Route path="/signup/alumni" element={<AlumniSignup />} />
+
         <Route path="/adminpanel" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="admincreateevent" element={<AdminCreateEvent />} />
+          <Route path="pendingstudent" element={<GetAllPendingStudent />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>
