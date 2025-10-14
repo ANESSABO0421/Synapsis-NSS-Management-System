@@ -45,7 +45,7 @@ export default function StudentSignup() {
 
       toast.success("Signup successful! Please verify OTP.");
       // here the studetId is passed which is inside state but when we move to another page do pass it like params because less secure so use useLocation
-      navigate("/verifyotp", { state: { studentId: res.data.studentId } });
+      navigate("/verifyotp", { state: { studentId: res.data.userId,role:res.data.role } });
     } catch (err) {
       const errorMsg = err.response?.data?.message || "Signup failed";
       setMessage(errorMsg);

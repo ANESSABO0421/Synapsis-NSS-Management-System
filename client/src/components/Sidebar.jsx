@@ -6,11 +6,7 @@ import { PiStudent } from "react-icons/pi";
 const Sidebar = () => {
   const navLinks = [
     { name: "Dashboard", path: "/adminpanel", icon: <BiLayout size={18} /> },
-    {
-      name: "Create Event",
-      path: "/adminpanel/admincreateevent",
-      icon: <BiTask size={18} />,
-    },
+    
     {name:"Pending Students",path:"/adminpanel/pendingstudent",icon:<PiStudent size={18}/>}
   ];
   return (

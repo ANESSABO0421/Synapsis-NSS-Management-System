@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  approveTeacher,
   assignTeacherToEvent,
   teacherLogin,
   teacherSignUp,
@@ -9,6 +8,8 @@ import {
   assignGraceMark,
   genrateAttendncePdfs,
   approveRecommendedGraceMark,
+  rejectPendingTeacher,
+  getAllPendingTeacher,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
@@ -16,15 +17,22 @@ import {
   protect,
   teacherOnly,
 } from "../middleware/authMiddleware.js";
+import { approvePendingStudent } from "../controllers/studentController.js";
 
 const teacherRoute = express.Router();
 
-teacherRoute.post("/signup", upload.single("profileImage"), teacherSignUp);
+teacherRoute.post(
+  "/signup",
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "verificationDocument", maxCount: 1 },
+  ]),
+  teacherSignUp
+);
 teacherRoute.post("/verify-otp", verifyOtp);
 teacherRoute.post("/login", teacherLogin);
 
 // Admin actions
-teacherRoute.put("/approve/:id", protect, adminOnly, approveTeacher);
 teacherRoute.post("/assign-event", protect, adminOnly, assignTeacherToEvent);
 
 // Attendance
@@ -45,6 +53,22 @@ teacherRoute.put(
   protect,
   teacherOnly,
   approveRecommendedGraceMark
+);
+
+// admin operation
+teacherRoute.get("/pendingTeacher", protect, adminOnly, getAllPendingTeacher);
+
+teacherRoute.put(
+  "/approvependingteacher/:id",
+  protect,
+  adminOnly,
+  approvePendingStudent
+);
+teacherRoute.delete(
+  "/rejectpendingteacher",
+  protect,
+  adminOnly,
+  rejectPendingTeacher
 );
 
 export default teacherRoute;

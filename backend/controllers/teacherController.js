@@ -25,17 +25,18 @@ const passwordRegex =
 export const teacherSignUp = async (req, res) => {
   try {
     const { name, email, phoneNumber, department, password } = req.body;
+
     if (!emailRegex.test(email)) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid Email format" });
+        .json({ success: false, message: "Invalid email format" });
     }
 
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         success: false,
         message:
-          "Password must be 8+ chars, include uppercase, lowercase, number, special characters",
+          "Password must be 8+ chars, include uppercase, lowercase, number, and special character",
       });
     }
 
@@ -48,16 +49,35 @@ export const teacherSignUp = async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
     const otp = generateOtp();
-    //if image selected
+
     let profileImage = { url: "", public_id: "" };
-    if (req.file) {
-      const uploaded = await cloudinary.uploader.upload(req.file.path, {
-        folder: "teacher_profiles",
-      });
+    let verificationDocument = { url: "", public_id: "" };
+
+    if (req.files?.profileImage?.[0]) {
+      const uploaded = await cloudinary.uploader.upload(
+        req.files.profileImage[0].path,
+        { folder: "teacher_profiles" }
+      );
       profileImage = {
         url: uploaded.secure_url,
         public_id: uploaded.public_id,
       };
+    }
+
+    if (req.files?.verificationDocument?.[0]) {
+      const uploaded = await cloudinary.uploader.upload(
+        req.files.verificationDocument[0].path,
+        { folder: "teacher_verify_documents" }
+      );
+      verificationDocument = {
+        url: uploaded.secure_url,
+        public_id: uploaded.public_id,
+      };
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Verification document is required.",
+      });
     }
 
     const teacher = await Teacher.create({
@@ -69,24 +89,33 @@ export const teacherSignUp = async (req, res) => {
       otp,
       otpExpiry: Date.now() + 5 * 60 * 1000,
       profileImage,
+      verificationDocument,
+      status: "pending", // waiting for admin approval
+      verifiedByAdmin: false,
     });
 
-    // to,subject,text
+    // otp
     await sendEmail(email, "Verify your Teacher account", `Your OTP is ${otp}`);
-    res.status(201).json({
+
+    return res.status(201).json({
       success: true,
-      message: "Signup successful. Verify OTP sent to your email.",
-      teacherId: teacher._id,
+      message:
+        "Signup successful! Verify OTP sent to your email. Wait for admin approval after verification.",
+      userId: teacher._id,
+      role: "teacher",
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error in teacher signup:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Signup failed: " + error.message });
   }
 };
 
 export const verifyOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;
-    const teacher = await Teacher.findOne({ email });
+    const { teacherId, otp } = req.body;
+    const teacher = await Teacher.findById(teacherId);
     if (!teacher) {
       return res
         .status(404)
@@ -139,22 +168,22 @@ export const teacherLogin = async (req, res) => {
 
 // admin operation
 
-// approve teacher
-export const approveTeacher = async (req, res) => {
-  try {
-    const teacher = await Teacher.findById(req.params.id);
-    if (!teacher) {
-      return res
-        .status(404)
-        .json({ success: false, message: "teacher not found" });
-    }
-    teacher.status = "active";
-    await teacher.save();
-    res.json({ success: true, message: "Teacher approved successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+// // approve teacher
+// export const approveTeacher = async (req, res) => {
+//   try {
+//     const teacher = await Teacher.findById(req.params.id);
+//     if (!teacher) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "teacher not found" });
+//     }
+//     teacher.status = "active";
+//     await teacher.save();
+//     res.json({ success: true, message: "Teacher approved successfully" });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 
 // assign teacher to event
 export const assignTeacherToEvent = async (req, res) => {
@@ -325,6 +354,78 @@ export const approveRecommendedGraceMark = async (req, res) => {
         ? "Grace marks approved and added"
         : "Grace marks recommendation rejected",
       student,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/////////////////////////Admin dahboard(approval get and reject)///////////////////////////////////////////////
+
+// get pending teachers
+export const getAllPendingTeacher = async (req, res) => {
+  try {
+    const pendingTeachers = await Teacher.find({ status: "pending" }).select(
+      "-password -otp -otpExpiry"
+    );
+    if (!pendingTeachers) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found" });
+    }
+
+    res.json({
+      success: true,
+      message,
+      count: pendingTeachers.length,
+      teachers: pendingTeachers,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// approve teacher(admin)
+
+export const approveTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const teacher = await Teacher.findById(id);
+    if (!teacher) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found" });
+    }
+    teacher.status = "active";
+    teacher.verifiedByAdmin = true;
+    await teacher.save();
+    res.json({
+      success: true,
+      message: "Teacher has been approved successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// reject teacher(admin)
+
+export const rejectPendingTeacher = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const teacher = await Teacher.findById(id);
+    if (!teacher) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found" });
+    }
+    if (teacher.profileImage?.public_id) {
+      await cloudinary.uploader.destroy(teacher.profileImage.public_id);
+    }
+    await teacher.deleteOne();
+    res.json({
+      success: true,
+      message: "Teacher has been rejected successfully",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -21,6 +21,11 @@ const TeacherSchema = new mongoose.Schema(
       default: "teacher",
     },
 
+    verificationDocument: {
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" },
+    },
+
     status: {
       type: String,
       enum: ["pending", "active", "rejected"],
@@ -28,6 +33,8 @@ const TeacherSchema = new mongoose.Schema(
     },
 
     assignedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Events" }],
+
+    verifiedByAdmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

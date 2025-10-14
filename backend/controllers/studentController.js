@@ -63,7 +63,8 @@ export const studentSignUp = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Signup successful. Please verify OTP.",
-      studentId: student._id,
+      userId: student._id,
+      role: "student",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

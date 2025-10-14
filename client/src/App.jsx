@@ -7,7 +7,6 @@ import Home from "./pages/Home";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import AdminLayout from "./pages/admin/AdminLayout";
-import { AdminCreateEvent } from "./pages/admin/AdminCreateEvent";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GetAllPendingStudent from "./pages/admin/GetAllPendingStudent";
@@ -34,7 +33,6 @@ const App = () => {
 
         <Route path="/adminpanel" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
-          <Route path="admincreateevent" element={<AdminCreateEvent />} />
           <Route path="pendingstudent" element={<GetAllPendingStudent />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
