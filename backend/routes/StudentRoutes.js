@@ -2,17 +2,24 @@ import express from "express";
 import upload from "../middleware/uploadMiddleware.js";
 import {
   adminCreateStudent,
+  approvePendingStudent,
   approveStudent,
   deleteStudent,
   generateOwnCertificate,
+  getPendingStudent,
   getStudentEvents,
+  rejectStudent,
   removeStudentFromEvent,
   studentLogin,
   studentSignUp,
   studentUpdate,
   verifyOtp,
 } from "../controllers/studentController.js";
-import { protect, volunteerOnly } from "../middleware/authMiddleware.js";
+import {
+  adminOnly,
+  protect,
+  volunteerOnly,
+} from "../middleware/authMiddleware.js";
 
 const studentRouter = express.Router();
 
@@ -24,7 +31,6 @@ studentRouter.post(
 studentRouter.post("/student-verify-otp", verifyOtp);
 studentRouter.post("/studentlogin", studentLogin);
 
-// admin
 studentRouter.post(
   "/admin-student-create",
   upload.single("profileImage"),
@@ -53,5 +59,20 @@ studentRouter.get(
   volunteerOnly,
   generateOwnCertificate
 );
+
+//dashboard(admin)
+studentRouter.get(
+  "/getallpendingstudent",
+  protect,
+  adminOnly,
+  getPendingStudent
+);
+studentRouter.put(
+  "/approvependingstudent/:id",
+  protect,
+  adminOnly,
+  approvePendingStudent
+);
+studentRouter.delete("/rejectstuedent/:id", protect, adminOnly, rejectStudent);
 
 export default studentRouter;

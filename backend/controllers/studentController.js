@@ -7,6 +7,7 @@ import Event from "../models/Event.js";
 import fs from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
+import { count } from "console";
 
 // OTP generation (6 digits)
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
@@ -91,7 +92,10 @@ export const verifyOtp = async (req, res) => {
     student.otpExpiry = null;
     await student.save();
 
-    res.json({ success: true, message: "OTP has been verified,now wait for admin approval" });
+    res.json({
+      success: true,
+      message: "OTP has been verified,now wait for admin approval",
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -518,4 +522,72 @@ export const generateOwnCertificate = async (req, res) => {
   }
 };
 
-// Admin process
+// admin dashboard works
+
+// pending
+export const getPendingStudent = async (req, res) => {
+  try {
+    const pendingStudents = await Student.find({ status: "pending" }).select(
+      "-password -otp -otpExpiry"
+    );
+
+    res.json({
+      success: true,
+      count: pendingStudents.length,
+      students: pendingStudents,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// approve Student
+export const approvePendingStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student = await Student.findById(id);
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student Not Found" });
+    }
+
+    if (student.status === "active") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Student Already" });
+    }
+
+    student.status = "active";
+    await student.save();
+    res.json({
+      success: true,
+      message: `${student.name} has been approved successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// reject student
+export const rejectStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student = await Student.findById(id);
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    }
+    if (student.profileImage?.public_id) {
+      await cloudinary.uploader.destroy(student.profileImage.public_id);
+    }
+    await student.deleteOne();
+    res.json({
+      success: true,
+      message: "Student has been deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
