@@ -73,6 +73,6 @@ studentRouter.put(
   adminOnly,
   approvePendingStudent
 );
-studentRouter.delete("/rejectstuedent/:id", protect, adminOnly, rejectStudent);
+studentRouter.put("/rejectstuedent/:id", protect, adminOnly, rejectStudent);
 
 export default studentRouter;

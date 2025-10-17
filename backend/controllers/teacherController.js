@@ -376,7 +376,6 @@ export const getAllPendingTeacher = async (req, res) => {
 
     res.json({
       success: true,
-      message,
       count: pendingTeachers.length,
       teachers: pendingTeachers,
     });
@@ -386,7 +385,6 @@ export const getAllPendingTeacher = async (req, res) => {
 };
 
 // approve teacher(admin)
-
 export const approveTeacher = async (req, res) => {
   try {
     const { id } = req.params;
@@ -409,7 +407,6 @@ export const approveTeacher = async (req, res) => {
 };
 
 // reject teacher(admin)
-
 export const rejectPendingTeacher = async (req, res) => {
   try {
     const { id } = req.params;
@@ -419,15 +416,21 @@ export const rejectPendingTeacher = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Teacher not found" });
     }
+    teacher.status = "rejected";
     if (teacher.profileImage?.public_id) {
       await cloudinary.uploader.destroy(teacher.profileImage.public_id);
     }
-    await teacher.deleteOne();
+    teacher.verifiedByAdmin = false;
+    await teacher.save();
     res.json({
       success: true,
-      message: "Teacher has been rejected successfully",
+      message: "Teacher has been Rejected successfully",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+//  if (teacher.profileImage?.public_id) {
+//       await cloudinary.uploader.destroy(teacher.profileImage.public_id);
+//     }

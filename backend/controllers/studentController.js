@@ -578,15 +578,23 @@ export const rejectStudent = async (req, res) => {
     if (!student) {
       return res
         .status(404)
-        .json({ success: false, message: "Student not found" });
+        .json({ success: false, message: "Student Not Found" });
     }
+
+    if (student.status === "active") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Student Already active" });
+    }
+    student.status = "rejected";
     if (student.profileImage?.public_id) {
       await cloudinary.uploader.destroy(student.profileImage.public_id);
     }
-    await student.deleteOne();
+
+    await student.save();
     res.json({
       success: true,
-      message: "Student has been deleted successfully",
+      message: `${student.name} has been rejected successfully`,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

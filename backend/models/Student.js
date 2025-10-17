@@ -18,7 +18,7 @@ const StudentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "active", "inactive"],
+      enum: ["pending", "active", "rejected"],
       default: "pending",
     },
     graceMarks: { type: Number, default: 0 },

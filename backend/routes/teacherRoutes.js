@@ -10,6 +10,7 @@ import {
   approveRecommendedGraceMark,
   rejectPendingTeacher,
   getAllPendingTeacher,
+  approveTeacher,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
@@ -56,16 +57,16 @@ teacherRoute.put(
 );
 
 // admin operation
-teacherRoute.get("/pendingTeacher", protect, adminOnly, getAllPendingTeacher);
+teacherRoute.get("/pendingteacher", protect, adminOnly, getAllPendingTeacher);
 
 teacherRoute.put(
   "/approvependingteacher/:id",
   protect,
   adminOnly,
-  approvePendingStudent
+  approveTeacher
 );
-teacherRoute.delete(
-  "/rejectpendingteacher",
+teacherRoute.put(
+  "/rejectpendingteacher/:id",
   protect,
   adminOnly,
   rejectPendingTeacher
