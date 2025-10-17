@@ -2,13 +2,25 @@ import React from "react";
 import { BiLayout, BiTask } from "react-icons/bi";
 import { NavLink } from "react-router-dom";
 import { PiChalkboardTeacher, PiStudent } from "react-icons/pi";
-
+import { RiUser2Fill } from "react-icons/ri";
 const Sidebar = () => {
   const navLinks = [
     { name: "Dashboard", path: "/adminpanel", icon: <BiLayout size={18} /> },
-    
-    {name:"Pending Students",path:"/adminpanel/pendingstudent",icon:<PiStudent size={18}/>},
-    {name:"Pending Teacher",path:"/adminpanel/pendingteacher",icon:<PiChalkboardTeacher size={18}/>}
+    {
+      name: "Pending Students",
+      path: "/adminpanel/pendingstudent",
+      icon: <PiStudent size={18} />,
+    },
+    {
+      name: "Pending Teacher",
+      path: "/adminpanel/pendingteacher",
+      icon: <PiChalkboardTeacher size={18} />,
+    },
+    {
+      name: "Pending Coordinators",
+      path: "/adminpanel/pendingcoordinator",
+      icon: <RiUser2Fill size={18} />,
+    },
   ];
   return (
     <div className="flex min-h-screen bg-gray-50">

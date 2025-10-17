@@ -1,3 +1,4 @@
+import Coordinator from "../models/Coordinator.js";
 import Student from "../models/Student.js";
 import Teacher from "../models/Teacher.js";
 
@@ -19,6 +20,8 @@ export const verifyOtp = async (req, res) => {
       user = await Student.findById(id);
     } else if (role === "teacher") {
       user = await Teacher.findById(id);
+    } else if (role === "coordinator") {
+      user = await Coordinator.findById(id);
     } else {
       return res.status(400).json({ success: false, message: "Invalid role" });
     }
@@ -49,6 +52,8 @@ export const verifyOtp = async (req, res) => {
     } else if (role === "student") {
       // student becomes verified immediately
       user.status = "pending";
+    } else if (role === "coordinator") {
+      user.status === "pending";
     }
 
     await user.save();

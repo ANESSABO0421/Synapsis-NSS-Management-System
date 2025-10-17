@@ -20,7 +20,10 @@ const coordinatorRoute = express.Router();
 
 coordinatorRoute.post(
   "/coordinatorsignup",
-  upload.single("profileImage"),
+  upload.fields([
+    { name: "profileImage", maxCount: 1 },
+    { name: "verificationDocument", maxCount: 1 },
+  ]),
   coordinatorSignup
 );
 coordinatorRoute.post("/verifyotp", verifyOtp);

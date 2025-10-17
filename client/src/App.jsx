@@ -14,6 +14,7 @@ import TeacherSignup from "./pages/Signup/TeacherSignup";
 import CoordinatorSignup from "./pages/Signup/CoordinatorSignup";
 import AlumniSignup from "./pages/Signup/AlumniSignup";
 import GetAllPendingTeacher from "./pages/admin/GetAllPendingTeacher";
+import GetAllPendingCoordinator from "./pages/admin/GetAllPendingCoordinator";
 
 const App = () => {
   return (
@@ -32,10 +33,12 @@ const App = () => {
         <Route path="/signup/coordinator" element={<CoordinatorSignup />} />
         <Route path="/signup/alumni" element={<AlumniSignup />} />
 
+        {/* admin dashboard */}
         <Route path="/adminpanel" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="pendingstudent" element={<GetAllPendingStudent />} />
           <Route path="pendingteacher" element={<GetAllPendingTeacher />} />
+          <Route path="pendingcoordinator" element={<GetAllPendingCoordinator />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>

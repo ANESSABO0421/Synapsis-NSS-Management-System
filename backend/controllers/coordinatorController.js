@@ -39,6 +39,8 @@ export const coordinatorSignup = async (req, res) => {
     const otp = generateOtp();
     const otpExpiry = Date.now() + 5 * 60 * 1000;
     let profileImage = { url: "", public_id: "" };
+    let verificationDocument = { url: "", public_id: "" };
+
     if (req.file) {
       const uploaded = await cloudinary.uploader.upload(req.file.path, {
         folder: "coordinator_profiles",
@@ -48,6 +50,23 @@ export const coordinatorSignup = async (req, res) => {
         public_id: uploaded.public_id,
       };
     }
+
+    // verification document
+    if (req.files?.verificationDocument?.[0]) {
+      const uploaded = await cloudinary.uploader.upload(
+        req.files.verificationDocument[0].path,
+        { folder: "coordinator_verify_documents" }
+      );
+      verificationDocument = {
+        url: uploaded.secure_url,
+        public_id: uploaded.public_id,
+      };
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Verification document is required.",
+      });
+    }
     const coordinator = await Coordinator.create({
       name,
       email,
@@ -55,6 +74,7 @@ export const coordinatorSignup = async (req, res) => {
       department,
       password: hashed,
       otp,
+      verificationDocument,
       otpExpiry,
       profileImage,
     });
@@ -63,7 +83,8 @@ export const coordinatorSignup = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Successfully created Coordinator verify Otp now",
-      coordinator: coordinator._id,
+      userId: coordinator._id,
+      role: "coordinator",
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -365,7 +386,9 @@ export const generateEventReport = async (req, res) => {
       .populate("participants", "name department");
 
     if (!event) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     // Normalize data (make sure they are arrays)
@@ -399,9 +422,7 @@ export const generateEventReport = async (req, res) => {
     doc.pipe(stream);
 
     // Header
-    doc
-      .fontSize(20)
-      .text("Event Report", { align: "center", underline: true });
+    doc.fontSize(20).text("Event Report", { align: "center", underline: true });
     doc.moveDown(1.5);
 
     // Section: Basic Event Info
@@ -419,7 +440,11 @@ export const generateEventReport = async (req, res) => {
 
     let currentY = doc.y;
     drawRow("Title", event.title, currentY);
-    drawRow("Date", new Date(event.date).toLocaleDateString(), currentY + rowHeight);
+    drawRow(
+      "Date",
+      new Date(event.date).toLocaleDateString(),
+      currentY + rowHeight
+    );
     drawRow("Location", event.location, currentY + 2 * rowHeight);
     drawRow("Hours", event.hours.toString(), currentY + 3 * rowHeight);
     drawRow("Status", event.status || "Upcoming", currentY + 4 * rowHeight);
@@ -431,7 +456,8 @@ export const generateEventReport = async (req, res) => {
     doc.fontSize(12).text("Team Details", { underline: true });
     currentY = doc.y + 5;
 
-    const coordinators = assignedCoordinators.map((c) => c.name).join(", ") || "N/A";
+    const coordinators =
+      assignedCoordinators.map((c) => c.name).join(", ") || "N/A";
     const teachers = assignedTeachers.map((t) => t.name).join(", ") || "N/A";
 
     drawRow("Coordinators", coordinators, currentY);
@@ -455,7 +481,10 @@ export const generateEventReport = async (req, res) => {
       .text("Name", col2, startY)
       .text("Department", col3, startY);
 
-    doc.moveTo(60, startY + 15).lineTo(500, startY + 15).stroke();
+    doc
+      .moveTo(60, startY + 15)
+      .lineTo(500, startY + 15)
+      .stroke();
 
     // Table rows
     doc.font("Helvetica");
@@ -475,10 +504,9 @@ export const generateEventReport = async (req, res) => {
 
     // Total count
     doc.moveDown(1.5);
-    doc.font("Helvetica-Bold").text(
-      `Total Volunteers: ${participants.length}`,
-      { align: "right" }
-    );
+    doc
+      .font("Helvetica-Bold")
+      .text(`Total Volunteers: ${participants.length}`, { align: "right" });
 
     // Finalize and download
     doc.end();
@@ -497,7 +525,6 @@ export const generateEventReport = async (req, res) => {
     });
   }
 };
-
 
 // update event status (simple version)
 export const updateEventStatus = async (req, res) => {

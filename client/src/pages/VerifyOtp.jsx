@@ -61,7 +61,6 @@
 
 // export default VerifyOtp;
 
-
 import axios from "axios";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -70,9 +69,10 @@ import { toast } from "react-toastify";
 const VerifyOtp = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  console.log(location);
 
-  const { teacherId, studentId, role } = location.state || {};
-  const id = teacherId || studentId; 
+  const { teacherId, studentId, coordinatorId, role } = location.state || {};
+  const id = teacherId || studentId || coordinatorId;
 
   const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");

@@ -34,6 +34,10 @@ const coordinatorSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    verificationDocument: {
+      url: { type: String, default: "" },
+      public_id: { type: String, default: "" },
+    },
     // grace mark recommendations they made
     graceRecommendations: [
       {
