@@ -438,19 +438,19 @@ export const getDashboardStat = async (req, res) => {
           pending: pendingStudent,
           volunteer: totalVolunteer,
           bydepartment: departmentStats,
-          growth: filledStudentGrowth, // 👈 new field
+          growth: filledStudentGrowth, 
         },
         teacher: {
           total: totalTeachers,
           active: activeTeacher,
           pending: pendingTeachers,
-          growth: filledTeacherGrowth, // 👈 new field
+          growth: filledTeacherGrowth, 
         },
         coordinator: {
           total: totalCoordinator,
           active: activeCoordinators,
           pending: pendingCoordinators,
-          growth: filledCoordinatorGrowth, // 👈 new field
+          growth: filledCoordinatorGrowth, 
         },
         alumni: {
           total: totalAlumni,

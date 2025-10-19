@@ -16,6 +16,7 @@ import AlumniSignup from "./pages/Signup/AlumniSignup";
 import GetAllPendingTeacher from "./pages/admin/GetAllPendingTeacher";
 import GetAllPendingCoordinator from "./pages/admin/GetAllPendingCoordinator";
 import AllStudent from "./pages/admin/AllStudent";
+import AllTeacher from "./pages/admin/AllTeacher";
 
 const App = () => {
   return (
@@ -41,6 +42,7 @@ const App = () => {
           <Route path="pendingteacher" element={<GetAllPendingTeacher />} />
           <Route path="pendingcoordinator" element={<GetAllPendingCoordinator />} />
           <Route path="allstudent" element={<AllStudent />} />
+          <Route path="allteachers" element={<AllTeacher />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>

@@ -431,6 +431,34 @@ export const rejectPendingTeacher = async (req, res) => {
   }
 };
 
-//  if (teacher.profileImage?.public_id) {
-//       await cloudinary.uploader.destroy(teacher.profileImage.public_id);
-//     }
+export const getAllTeacher = async (req, res) => {
+  try {
+    const teachers = await Teacher.find()
+      .select("-password -otp -otpExpiry") // don’t return sensitive data
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: teachers.length,
+      teachers,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+export const rejectInDashboardTeacher = async (req, res) => {
+  try {
+    const teacher = await Teacher.findByIdAndUpdate(
+      req.params.id,
+      { status: "rejected" },
+      { new: true }
+    );
+    if (!teacher) return res.status(404).json({ success: false, message: "Student not found" });
+    res.json({ success: true, message: "teacher rejected successfully", teacher });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

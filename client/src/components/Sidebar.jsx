@@ -1,7 +1,7 @@
 import React from "react";
 import { BiLayout, BiTask } from "react-icons/bi";
 import { NavLink } from "react-router-dom";
-import { PiChalkboardTeacher, PiStudent, PiStudentDuotone } from "react-icons/pi";
+import { PiChalkboardTeacher, PiChalkboardTeacherBold, PiChalkboardTeacherDuotone, PiStudent, PiStudentDuotone } from "react-icons/pi";
 import { RiUser2Fill } from "react-icons/ri";
 const Sidebar = () => {
   const navLinks = [
@@ -25,6 +25,11 @@ const Sidebar = () => {
       name: "All Student",
       path: "/adminpanel/allstudent",
       icon: <PiStudentDuotone size={18} />,
+    },
+    {
+      name: "All Teachers",
+      path: "/adminpanel/allteachers",
+      icon: <PiChalkboardTeacherBold size={18} />,
     },
   ];
   return (

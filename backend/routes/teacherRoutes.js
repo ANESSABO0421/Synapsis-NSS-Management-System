@@ -11,6 +11,8 @@ import {
   rejectPendingTeacher,
   getAllPendingTeacher,
   approveTeacher,
+  getAllTeacher,
+  rejectInDashboardTeacher,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
@@ -65,11 +67,15 @@ teacherRoute.put(
   adminOnly,
   approveTeacher
 );
+
 teacherRoute.put(
   "/rejectpendingteacher/:id",
   protect,
   adminOnly,
   rejectPendingTeacher
 );
+
+teacherRoute.get("/getallteacher", protect, adminOnly, getAllTeacher);
+teacherRoute.put("/rejectteacherindashboard/:id", protect, adminOnly,rejectInDashboardTeacher);
 
 export default teacherRoute;

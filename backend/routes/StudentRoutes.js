@@ -9,6 +9,7 @@ import {
   getAllStudents,
   getPendingStudent,
   getStudentEvents,
+  rejectInDashboardStudent,
   rejectStudent,
   removeStudentFromEvent,
   studentLogin,
@@ -77,5 +78,7 @@ studentRouter.put(
 studentRouter.put("/rejectstuedent/:id", protect, adminOnly, rejectStudent);
 
 studentRouter.get("/getallstudent", protect, adminOnly, getAllStudents);
+
+studentRouter.put("/rejectinallstudent/:id", protect, adminOnly, rejectInDashboardStudent);
 
 export default studentRouter;
