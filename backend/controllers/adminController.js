@@ -250,9 +250,109 @@ export const createAdminBySuperadmin = async (req, res) => {
 };
 
 // Dashboard
+// export const getDashboardStat = async (req, res) => {
+//   try {
+//     // students
+//     const totalStudents = await Student.countDocuments({ role: "student" });
+//     const activeStudent = await Student.countDocuments({ status: "active" });
+//     const pendingStudent = await Student.countDocuments({ status: "pending" });
+//     const totalVolunteer = await Student.countDocuments({ role: "volunteer" });
+//     const departmentStats = await Student.aggregate([
+//       { $group: { _id: "$department", count: { $sum: 1 } } },
+//       { $sort: { count: -1 } },
+//     ]);
+
+//     // Teachers
+//     const totalTeachers = await Teacher.countDocuments();
+//     const activeTeacher = await Teacher.countDocuments({ status: "active" });
+//     const pendingTeachers = await Teacher.countDocuments({ status: "pending" });
+
+//     // coordinators
+//     const totalCoordinator = await Coordinator.countDocuments();
+//     const activeCoordinators = await Coordinator.countDocuments({
+//       status: "active",
+//     });
+//     const pendingCoordinators = await Coordinator.countDocuments({
+//       status: "pending",
+//     });
+
+//     // Alumni
+//     const totalAlumni = await Alumni.countDocuments();
+//     const activeAlumni = await Alumni.countDocuments({ status: "active" });
+//     const pendingAlumnis = await Alumni.countDocuments({ status: "pending" });
+
+//     // admins
+//     const totalAdmin = await Admin.countDocuments();
+
+//     // events
+//     const totalEvents = await Event.countDocuments();
+//     const totalCompletedEvent = await Event.countDocuments({
+//       status: "Completed",
+//     });
+//     const upcomingEvents = await Event.countDocuments({ status: "Upcoming" });
+
+//     res.json({
+//       success: true,
+//       Data: {
+//         student: {
+//           total: totalStudents,
+//           active: activeStudent,
+//           pending: pendingStudent,
+//           volunteer: totalVolunteer,
+//           bydepartment: departmentStats,
+//         },
+//         event: {
+//           total: totalEvents,
+//           completed: totalCompletedEvent,
+//           upcoming: upcomingEvents,
+//         },
+//         teacher: {
+//           total: totalTeachers,
+//           active: activeTeacher,
+//           pending: pendingTeachers,
+//         },
+//         coordinator: {
+//           total: totalCoordinator,
+//           active: activeCoordinators,
+//           pending: pendingCoordinators,
+//         },
+//         alumni: {
+//           total: totalAlumni,
+//           active: activeAlumni,
+//           pending: pendingAlumnis,
+//         },
+//         admin: {
+//           total: totalAdmin,
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+
 export const getDashboardStat = async (req, res) => {
   try {
-    // students
+    // ======= Date Setup =======
+    const today = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(today.getDate() - 6);
+
+    // utility to fill missing days with 0
+    const fillMissingDays = (data) => {
+      const filled = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(sevenDaysAgo);
+        date.setDate(sevenDaysAgo.getDate() + i);
+        const formatted = date.toISOString().split("T")[0];
+        const found = data.find((d) => d._id === formatted);
+        filled.push({ date: formatted, count: found ? found.count : 0 });
+      }
+      return filled;
+    };
+
+    // ======= Students =======
     const totalStudents = await Student.countDocuments({ role: "student" });
     const activeStudent = await Student.countDocuments({ status: "active" });
     const pendingStudent = await Student.countDocuments({ status: "pending" });
@@ -262,12 +362,37 @@ export const getDashboardStat = async (req, res) => {
       { $sort: { count: -1 } },
     ]);
 
-    // Teachers
+    // last 7-day student signup trend
+    const studentGrowth = await Student.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    const filledStudentGrowth = fillMissingDays(studentGrowth);
+
+    // ======= Teachers =======
     const totalTeachers = await Teacher.countDocuments();
     const activeTeacher = await Teacher.countDocuments({ status: "active" });
     const pendingTeachers = await Teacher.countDocuments({ status: "pending" });
 
-    // coordinators
+    const teacherGrowth = await Teacher.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    const filledTeacherGrowth = fillMissingDays(teacherGrowth);
+
+    // ======= Coordinators =======
     const totalCoordinator = await Coordinator.countDocuments();
     const activeCoordinators = await Coordinator.countDocuments({
       status: "active",
@@ -276,21 +401,34 @@ export const getDashboardStat = async (req, res) => {
       status: "pending",
     });
 
-    // Alumni
+    const coordinatorGrowth = await Coordinator.aggregate([
+      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    const filledCoordinatorGrowth = fillMissingDays(coordinatorGrowth);
+
+    // ======= Alumni =======
     const totalAlumni = await Alumni.countDocuments();
     const activeAlumni = await Alumni.countDocuments({ status: "active" });
     const pendingAlumnis = await Alumni.countDocuments({ status: "pending" });
 
-    // admins
+    // ======= Admin =======
     const totalAdmin = await Admin.countDocuments();
 
-    // events
+    // ======= Events =======
     const totalEvents = await Event.countDocuments();
     const totalCompletedEvent = await Event.countDocuments({
       status: "Completed",
     });
     const upcomingEvents = await Event.countDocuments({ status: "Upcoming" });
 
+    // ======= Response =======
     res.json({
       success: true,
       Data: {
@@ -300,21 +438,19 @@ export const getDashboardStat = async (req, res) => {
           pending: pendingStudent,
           volunteer: totalVolunteer,
           bydepartment: departmentStats,
-        },
-        event: {
-          total: totalEvents,
-          completed: totalCompletedEvent,
-          upcoming: upcomingEvents,
+          growth: filledStudentGrowth, // 👈 new field
         },
         teacher: {
           total: totalTeachers,
           active: activeTeacher,
           pending: pendingTeachers,
+          growth: filledTeacherGrowth, // 👈 new field
         },
         coordinator: {
           total: totalCoordinator,
           active: activeCoordinators,
           pending: pendingCoordinators,
+          growth: filledCoordinatorGrowth, // 👈 new field
         },
         alumni: {
           total: totalAlumni,
@@ -323,6 +459,11 @@ export const getDashboardStat = async (req, res) => {
         },
         admin: {
           total: totalAdmin,
+        },
+        event: {
+          total: totalEvents,
+          completed: totalCompletedEvent,
+          upcoming: upcomingEvents,
         },
       },
     });

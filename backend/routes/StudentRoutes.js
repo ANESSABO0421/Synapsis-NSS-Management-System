@@ -6,6 +6,7 @@ import {
   approveStudent,
   deleteStudent,
   generateOwnCertificate,
+  getAllStudents,
   getPendingStudent,
   getStudentEvents,
   rejectStudent,
@@ -74,5 +75,7 @@ studentRouter.put(
   approvePendingStudent
 );
 studentRouter.put("/rejectstuedent/:id", protect, adminOnly, rejectStudent);
+
+studentRouter.get("/getallstudent", protect, adminOnly, getAllStudents);
 
 export default studentRouter;

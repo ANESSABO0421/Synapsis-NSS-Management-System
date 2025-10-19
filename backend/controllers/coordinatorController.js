@@ -119,22 +119,22 @@ export const verifyOtp = async (req, res) => {
 };
 
 // approve coordinator
-export const approveCoordinator = async (req, res) => {
-  try {
-    const { coordinatorId } = req.body;
-    const coordinator = await Coordinator.findById(coordinatorId);
-    if (!coordinator) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Coordinator Not found" });
-    }
-    coordinator.status = "active";
-    await coordinator.save();
-    res.json({ success: true, message: "Coordinator has been approved" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
+// export const approveCoordinator = async (req, res) => {
+//   try {
+//     const { coordinatorId } = req.body;
+//     const coordinator = await Coordinator.findById(coordinatorId);
+//     if (!coordinator) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Coordinator Not found" });
+//     }
+//     coordinator.status = "active";
+//     await coordinator.save();
+//     res.json({ success: true, message: "Coordinator has been approved" });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 
 // login
 export const Login = async (req, res) => {
@@ -556,3 +556,80 @@ export const updateEventStatus = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+////////////ADMIN DASHBOARD WORK/////////////
+export const getAllPendingCoordinator = async (req, res) => {
+  try {
+    const pendingCoordinator = await Coordinator.find({
+      status: "pending",
+    }).select("-password -otp -otpExpiry");
+    res.json({
+      success: true,
+      count: pendingCoordinator.length,
+      coordinator: pendingCoordinator,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// approve coordinator
+export const approveCoordinator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const coordinator = await Coordinator.findById(id);
+    if (!coordinator) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Coordinator Not Found" });
+    }
+
+    if (coordinator.status === "active") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Student Already" });
+    }
+
+    coordinator.status = "active";
+    await coordinator.save();
+    res.json({
+      success: true,
+      message: `${coordinator.name} has been approved successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// reject
+export const rejectCoordinator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const coordinator = await Coordinator.findById(id);
+    if (!coordinator) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student Not Found" });
+    }
+
+    if (coordinator.status === "active") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Student Already active" });
+    }
+    coordinator.status = "rejected";
+    if (coordinator.profileImage?.public_id) {
+      await cloudinary.uploader.destroy(coordinator.profileImage.public_id);
+    }
+
+    await coordinator.save();
+    res.json({
+      success: true,
+      message: `${coordinator.name} has been rejected successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+

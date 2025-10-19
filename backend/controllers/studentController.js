@@ -600,3 +600,22 @@ export const rejectStudent = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+// Get all students with their status
+export const getAllStudents = async (req, res) => {
+  try {
+    const students = await Student.find()
+      .select("-password -otp -otpExpiry") // don’t return sensitive data
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: students.length,
+      students,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

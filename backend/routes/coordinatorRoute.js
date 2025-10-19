@@ -5,16 +5,22 @@ import {
   coordinatorSignup,
   createEvent,
   generateEventReport,
+  getAllPendingCoordinator,
   getStudentBySkill,
   Login,
   recommendedGraceMark,
+  rejectCoordinator,
   studentToVolunteer,
   updateEventStatus,
   verifyOtp,
   volunteerTostudent,
 } from "../controllers/coordinatorController.js";
 import upload from "../middleware/uploadMiddleware.js";
-import { coordinatorOnly, protect } from "../middleware/authMiddleware.js";
+import {
+  coordinatorOnly,
+  protect,
+  adminOnly,
+} from "../middleware/authMiddleware.js";
 
 const coordinatorRoute = express.Router();
 
@@ -83,6 +89,28 @@ coordinatorRoute.post(
   protect,
   coordinatorOnly,
   updateEventStatus
+);
+
+////////Admin Dashboard/////////////////////////////
+coordinatorRoute.get(
+  "/getallpendingcoordinator",
+  protect,
+  adminOnly,
+  getAllPendingCoordinator
+);
+
+coordinatorRoute.put(
+  "/approvecoordinator/:id",
+  protect,
+  adminOnly,
+  approveCoordinator
+);
+
+coordinatorRoute.put(
+  "/rejectcoordinator/:id",
+  protect,
+  adminOnly,
+  rejectCoordinator
 );
 
 export default coordinatorRoute;
