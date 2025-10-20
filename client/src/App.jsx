@@ -18,6 +18,7 @@ import GetAllPendingCoordinator from "./pages/admin/GetAllPendingCoordinator";
 import AllStudent from "./pages/admin/AllStudent";
 import AllTeacher from "./pages/admin/AllTeacher";
 import CoordinatorLayout from "./pages/coordinator/CoordinatorLayout";
+import AllCoordinators from "./pages/admin/AllCoordinators";
 
 const App = () => {
   return (
@@ -47,6 +48,7 @@ const App = () => {
           />
           <Route path="allstudent" element={<AllStudent />} />
           <Route path="allteachers" element={<AllTeacher />} />
+          <Route path="allcoordinators" element={<AllCoordinators />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
         <Route path="/coordinatorlayout" element={<CoordinatorLayout />} />

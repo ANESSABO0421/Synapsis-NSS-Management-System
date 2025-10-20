@@ -5,11 +5,13 @@ import {
   coordinatorSignup,
   createEvent,
   generateEventReport,
+  getAllCoordinators,
   getAllPendingCoordinator,
   getStudentBySkill,
   Login,
   recommendedGraceMark,
   rejectCoordinator,
+  rejectInDashboardCoordinator,
   studentToVolunteer,
   updateEventStatus,
   verifyOtp,
@@ -111,6 +113,20 @@ coordinatorRoute.put(
   protect,
   adminOnly,
   rejectCoordinator
+);
+
+coordinatorRoute.get(
+  "/getallcoordinator",
+  protect,
+  adminOnly,
+  getAllCoordinators
+);
+
+coordinatorRoute.put(
+  "/rejectcoordinatorindahboard/:id",
+  protect,
+  adminOnly,
+  rejectInDashboardCoordinator
 );
 
 export default coordinatorRoute;

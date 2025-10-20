@@ -632,4 +632,39 @@ export const rejectCoordinator = async (req, res) => {
   }
 };
 
+export const getAllCoordinators = async (req, res) => {
+  try {
+    const coordinator = await Coordinator.find()
+      .select("-password -otp -otpExpiry") // don’t return sensitive data
+      .sort({ createdAt: -1 });
 
+    res.json({
+      success: true,
+      count: coordinator.length,
+      coordinator,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const rejectInDashboardCoordinator = async (req, res) => {
+  try {
+    const coordinator = await Coordinator.findByIdAndUpdate(
+      req.params.id,
+      { status: "rejected" },
+      { new: true }
+    );
+    if (!coordinator)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    res.json({
+      success: true,
+      message: "Student rejected successfully",
+      coordinator,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
