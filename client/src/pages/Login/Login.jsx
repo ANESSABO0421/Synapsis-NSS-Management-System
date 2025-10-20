@@ -18,27 +18,81 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const res = await axios.post(
+  //       "http://localhost:3000/api/admin/login",
+  //       form
+  //     );
+  //     if (
+  //       res.data.admin.role === "admin" ||
+  //       res.data.admin.role === "superadmin"
+  //     ) {
+  //       toast.success("you have successfully Logged in");
+  //       setTimeout(() => {
+  //         window.location.href = "/adminpanel";
+  //       }, 3000);
+  //     } else if (res.role === "student" || res.role === "volunteer") {
+  //       window.location.href = "/studentdashboard";
+  //     } else if (res.role === "coordinator") {
+  //       window.location.href = "/coordinatorlayout";
+  //     }
+  //     localStorage.setItem("token", res.data.token);
+  //   } catch (error) {
+  //     setMessage(error.response?.data?.message || "Login failed");
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post(
-        "http://localhost:3000/api/admin/login",
-        form
-      );
-      if (
-        res.data.admin.role === "admin" ||
-        res.data.admin.role === "superadmin"
-      ) {
-        toast.success("you have successfully Logged in");
+
+    const possibleLogins = [
+      { role: "admin", url: "http://localhost:3000/api/admin/login" },
+      {
+        role: "coordinator",
+        url: "http://localhost:3000/api/coordinator/logincoordinator",
+      },
+      { role: "student", url: "http://localhost:3000/api/students/studentlogin" },
+      { role: "teacher", url: "http://localhost:3000/api/teacher/login" },
+    ];
+
+    let success = false;
+
+    for (let i = 0; i < possibleLogins.length; i++) {
+      const { role, url } = possibleLogins[i];
+      try {
+        const res = await axios.post(url, form);
+
+        // Success found
+        const token = res.data.token;
+        const user =
+          res.data.admin ||
+          res.data.coordinator ||
+          res.data.student ||
+          res.data.volunteer;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
+        localStorage.setItem("email", user.email);
+
+        toast.success(`${role} login successful`);
+        success = true;
+
+        // redirect based on role
         setTimeout(() => {
-          window.location.href = "/adminpanel";
-        }, 3000);
-      } else if (res.role === "student" || res.role === "volunteer") {
-        window.location.href = "/studentdashboard";
+          if (role === "admin") window.location.href = "/adminpanel";
+          else if (role === "coordinator")
+            window.location.href = "/coordinatorlayout";
+          else window.location.href = "/studentdashboard";
+        }, 1500);
+
+        break; // stop after first success
+      } catch (error) {
+        // just try next role
+        if (i === possibleLogins.length - 1 && !success) {
+          setMessage("Invalid credentials or account not found");
+        }
       }
-      localStorage.setItem("token", res.data.token);
-    } catch (error) {
-      setMessage(error.response?.data?.message || "Login failed");
     }
   };
 
