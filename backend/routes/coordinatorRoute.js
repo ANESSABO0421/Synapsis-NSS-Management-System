@@ -7,6 +7,7 @@ import {
   generateEventReport,
   getAllCoordinators,
   getAllPendingCoordinator,
+  getCoordinatorDashboard,
   getStudentBySkill,
   Login,
   recommendedGraceMark,
@@ -127,6 +128,14 @@ coordinatorRoute.put(
   protect,
   adminOnly,
   rejectInDashboardCoordinator
+);
+
+//coordinator Dahboard
+coordinatorRoute.get(
+  "/coordinatordashboard",
+  protect,
+  coordinatorOnly,
+  getCoordinatorDashboard
 );
 
 export default coordinatorRoute;

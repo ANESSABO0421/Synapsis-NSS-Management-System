@@ -19,6 +19,7 @@ import AllStudent from "./pages/admin/AllStudent";
 import AllTeacher from "./pages/admin/AllTeacher";
 import CoordinatorLayout from "./pages/coordinator/CoordinatorLayout";
 import AllCoordinators from "./pages/admin/AllCoordinators";
+import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 
 const App = () => {
   return (
@@ -50,8 +51,13 @@ const App = () => {
           <Route path="allteachers" element={<AllTeacher />} />
           <Route path="allcoordinators" element={<AllCoordinators />} />
         </Route>
+
+        {/* coordinator dashboard */}
+        <Route path="/coordinatorlayout" element={<CoordinatorLayout />}>
+          <Route index element={<CoordinatorDashboard />} />
+        </Route>
+
         <Route path="/studentdashboard" element={<StudentDashboard />} />
-        <Route path="/coordinatorlayout" element={<CoordinatorLayout />} />
       </Routes>
     </>
   );

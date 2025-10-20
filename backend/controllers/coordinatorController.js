@@ -8,6 +8,7 @@ import Student from "../models/Student.js";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
+import Teacher from "../models/Teacher.js";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -666,5 +667,84 @@ export const rejectInDashboardCoordinator = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+
+
+// ===================== COORDINATOR DASHBOARD =====================
+export const getCoordinatorDashboard = async (req, res) => {
+  try {
+    const coordinatorId = req.user.id;
+
+    // 1️ All events in the system
+    const totalAllEvents = await Event.countDocuments();
+    const completedAllEvents = await Event.countDocuments({ status: "Completed" });
+    const upcomingAllEvents = await Event.countDocuments({ status: "Upcoming" });
+
+    // 2️ Events created by this coordinator
+    const totalMyEvents = await Event.countDocuments({ coordinator: coordinatorId });
+    const completedMyEvents = await Event.countDocuments({
+      coordinator: coordinatorId,
+      status: "Completed",
+    });
+    const upcomingMyEvents = await Event.countDocuments({
+      coordinator: coordinatorId,
+      status: "Upcoming",
+    });
+
+    // 3️ Community stats
+    const totalStudents = await Student.countDocuments();
+    const totalVolunteers = await Student.countDocuments({ role: "volunteer" });
+    const totalTeachers = await Teacher.countDocuments({ role: "teacher" });
+
+    // 4️ Grace marks
+    const totalGraceRecommendations = await Event.aggregate([
+      { $match: { coordinator: coordinatorId } },
+      { $group: { _id: null, total: { $sum: { $size: "$recommendedGraceMarks" } } } },
+    ]);
+
+    // 5️ Recent events
+    const recentAllEvents = await Event.find()
+      .sort({ date: -1 })
+      .limit(5)
+      .select("title date status");
+
+    const recentMyEvents = await Event.find({ coordinator: coordinatorId })
+      .sort({ date: -1 })
+      .limit(5)
+      .select("title date status");
+
+    res.json({
+      success: true,
+      data: {
+        allEvents: {
+          totalEvents: totalAllEvents,
+          completedEvents: completedAllEvents,
+          upcomingEvents: upcomingAllEvents,
+          recentEvents: recentAllEvents,
+        },
+        myEvents: {
+          totalEvents: totalMyEvents,
+          completedEvents: completedMyEvents,
+          upcomingEvents: upcomingMyEvents,
+          recentEvents: recentMyEvents,
+        },
+        totalStudents,
+        totalVolunteers,
+        totalTeachers,
+        totalGraceRecommendations: totalGraceRecommendations[0]?.total || 0,
+      },
+    });
+  } catch (error) {
+    console.error("Dashboard Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching coordinator dashboard",
+      error: error.message,
+    });
   }
 };
