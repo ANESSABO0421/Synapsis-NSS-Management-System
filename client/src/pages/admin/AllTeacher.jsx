@@ -122,7 +122,7 @@ const AllTeacher = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
         <div className="bg-white border rounded-2xl shadow p-5 text-center">
           <p className="text-gray-500 text-sm">Total Teachers</p>
-          <h3 className="text-3xl font-bold text-blue-600">{stats.total}</h3>
+          <h3 className="text-3xl font-bold text-green-600">{stats.total}</h3>
         </div>
         <div className="bg-white border rounded-2xl shadow p-5 text-center">
           <p className="text-gray-500 text-sm">Active Teachers</p>
@@ -148,7 +148,7 @@ const AllTeacher = () => {
             <Line
               type="monotone"
               dataKey="count"
-              stroke="#2563eb"
+              stroke="#00A63E"
               strokeWidth={2}
               dot
             />
@@ -161,11 +161,11 @@ const AllTeacher = () => {
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">
             All Teachers{" "}
-            <span className="text-blue-600">({teachers.length})</span>
+            <span className="text-green-600">({teachers.length})</span>
           </h3>
           <button
             onClick={fetchAllTeachers}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+            className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
           >
             Refresh
           </button>

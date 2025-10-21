@@ -2,7 +2,9 @@ import React from "react";
 import { BiLayout, BiTask } from "react-icons/bi";
 import { NavLink } from "react-router-dom";
 import { PiChalkboardTeacher, PiChalkboardTeacherBold, PiChalkboardTeacherDuotone, PiStudent, PiStudentDuotone,PiUserBold } from "react-icons/pi";
+import { FaSchool } from 'react-icons/fa';
 import { RiUser2Fill } from "react-icons/ri";
+import { FaSchoolCircleExclamation } from 'react-icons/fa6';
 const Sidebar = () => {
   const navLinks = [
     { name: "Dashboard", path: "/adminpanel", icon: <BiLayout size={18} /> },
@@ -35,6 +37,16 @@ const Sidebar = () => {
       name: "All Coordinators",
       path: "/adminpanel/allcoordinators",
       icon: <PiUserBold size={18} />,
+    },
+    {
+      name: "Create Institution",
+      path: "/adminpanel/createinstitution",
+      icon: <FaSchool size={18} />,
+    },
+    {
+      name: "Manage Institute",
+      path: "/adminpanel/manageinstitute",
+      icon: <FaSchoolCircleExclamation size={18} />,
     },
   ];
   return (

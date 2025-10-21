@@ -21,6 +21,8 @@ import CoordinatorLayout from "./pages/coordinator/CoordinatorLayout";
 import AllCoordinators from "./pages/admin/AllCoordinators";
 import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import CreateEvent from "./pages/coordinator/CreateEvent";
+import CreateInstitution from "./pages/admin/CreateInstitution";
+import ManageInstitute from "./pages/admin/ManageInstitute";
 
 const App = () => {
   return (
@@ -51,6 +53,8 @@ const App = () => {
           <Route path="allstudent" element={<AllStudent />} />
           <Route path="allteachers" element={<AllTeacher />} />
           <Route path="allcoordinators" element={<AllCoordinators />} />
+          <Route path="createinstitution" element={<CreateInstitution />} />
+          <Route path="manageinstitute" element={<ManageInstitute />} />
         </Route>
 
         {/* coordinator dashboard */}

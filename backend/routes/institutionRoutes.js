@@ -12,7 +12,7 @@ const instituteRouter = express.Router();
 
 // Only Admin can manage institutions
 instituteRouter.post("/create", protect, adminOnly, createInstitution);
-instituteRouter.get("/all", protect, adminOnly, getAllInstitutions);
+instituteRouter.get("/allinstitutebyadmin", protect, adminOnly, getAllInstitutions);
 // signup
 instituteRouter.get("/getallinstitutes", getAllInstitutions);
 instituteRouter.get("/:id", protect, adminOnly, getInstitutionById);
