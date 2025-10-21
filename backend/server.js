@@ -13,6 +13,7 @@ import "./configs/passport.js";
 import teacherRoute from "./routes/teacherRoutes.js";
 import coordinatorRoute from "./routes/coordinatorRoute.js";
 import otpRouter from "./routes/otpRoute.js";
+import instituteRouter from "./routes/institutionRoutes.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -36,6 +37,7 @@ app.use("/api/students", studentRouter);
 app.use("/api/alumni", alumniRouter);
 app.use("/api/teacher", teacherRoute);
 app.use("/api/coordinator", coordinatorRoute);
+app.use("/api/institution", instituteRouter);
 app.use("/api/otp",otpRouter);
 
 ConnectDb()

@@ -22,6 +22,12 @@ const alumniSchema = new mongoose.Schema(
       url: { type: String },
       public_id: { type: String },
     },
+    institution: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Institution",
+  required: true
+},
+
 
     testimonials: [
       {

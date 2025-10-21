@@ -8,6 +8,7 @@ import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
 import Event from "../models/Event.js";
+import Institution from "../models/Institution.js";
 
 const generateToken = (id) =>
   jwt.sign({ id, role: "teacher" }, process.env.JWT_SECRET, {
@@ -24,7 +25,8 @@ const passwordRegex =
 // signup
 export const teacherSignUp = async (req, res) => {
   try {
-    const { name, email, phoneNumber, department, password } = req.body;
+    const { name, email, phoneNumber, department, password, institutionId } =
+      req.body;
 
     if (!emailRegex.test(email)) {
       return res
@@ -89,9 +91,14 @@ export const teacherSignUp = async (req, res) => {
       otp,
       otpExpiry: Date.now() + 5 * 60 * 1000,
       profileImage,
+      institution: institutionId,
       verificationDocument,
       status: "pending", // waiting for admin approval
       verifiedByAdmin: false,
+    });
+
+    await Institution.findByIdAndUpdate(institutionId, {
+      $push: { teacher: teacher._id },
     });
 
     // otp
@@ -447,7 +454,6 @@ export const getAllTeacher = async (req, res) => {
   }
 };
 
-
 export const rejectInDashboardTeacher = async (req, res) => {
   try {
     const teacher = await Teacher.findByIdAndUpdate(
@@ -455,10 +461,16 @@ export const rejectInDashboardTeacher = async (req, res) => {
       { status: "rejected" },
       { new: true }
     );
-    if (!teacher) return res.status(404).json({ success: false, message: "Student not found" });
-    res.json({ success: true, message: "teacher rejected successfully", teacher });
+    if (!teacher)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    res.json({
+      success: true,
+      message: "teacher rejected successfully",
+      teacher,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-

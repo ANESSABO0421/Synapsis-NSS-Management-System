@@ -9,6 +9,7 @@ import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
 import Teacher from "../models/Teacher.js";
+import Institution from "../models/Institution.js";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -22,7 +23,8 @@ const passwordRegex =
 
 export const coordinatorSignup = async (req, res) => {
   try {
-    const { name, email, phoneNumber, department, password } = req.body;
+    const { name, email, phoneNumber, department, password, institutionId } =
+      req.body;
     if (!name || !email || !phoneNumber || !department || !password) {
       return res
         .status(400)
@@ -78,6 +80,10 @@ export const coordinatorSignup = async (req, res) => {
       verificationDocument,
       otpExpiry,
       profileImage,
+      institution: institutionId,
+    });
+    await Institution.findByIdAndUpdate(institutionId, {
+      $push: { coordinators: coordinator._id },
     });
 
     await sendEmail(email, "Verify Coordinator Account", `Your OTP: ${otp}`);
@@ -596,6 +602,7 @@ export const approveCoordinator = async (req, res) => {
     res.json({
       success: true,
       message: `${coordinator.name} has been approved successfully`,
+      coordinator: await coordinator.populate("institution", "name address"),
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -636,6 +643,7 @@ export const rejectCoordinator = async (req, res) => {
 export const getAllCoordinators = async (req, res) => {
   try {
     const coordinator = await Coordinator.find()
+      .populate("institution", "name address contactEmail")
       .select("-password -otp -otpExpiry") // don’t return sensitive data
       .sort({ createdAt: -1 });
 
@@ -670,11 +678,6 @@ export const rejectInDashboardCoordinator = async (req, res) => {
   }
 };
 
-
-
-
-
-
 // ===================== COORDINATOR DASHBOARD =====================
 export const getCoordinatorDashboard = async (req, res) => {
   try {
@@ -682,11 +685,17 @@ export const getCoordinatorDashboard = async (req, res) => {
 
     // 1️ All events in the system
     const totalAllEvents = await Event.countDocuments();
-    const completedAllEvents = await Event.countDocuments({ status: "Completed" });
-    const upcomingAllEvents = await Event.countDocuments({ status: "Upcoming" });
+    const completedAllEvents = await Event.countDocuments({
+      status: "Completed",
+    });
+    const upcomingAllEvents = await Event.countDocuments({
+      status: "Upcoming",
+    });
 
     // 2️ Events created by this coordinator
-    const totalMyEvents = await Event.countDocuments({ coordinator: coordinatorId });
+    const totalMyEvents = await Event.countDocuments({
+      coordinator: coordinatorId,
+    });
     const completedMyEvents = await Event.countDocuments({
       coordinator: coordinatorId,
       status: "Completed",
@@ -704,7 +713,12 @@ export const getCoordinatorDashboard = async (req, res) => {
     // 4️ Grace marks
     const totalGraceRecommendations = await Event.aggregate([
       { $match: { coordinator: coordinatorId } },
-      { $group: { _id: null, total: { $sum: { $size: "$recommendedGraceMarks" } } } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $size: "$recommendedGraceMarks" } },
+        },
+      },
     ]);
 
     // 5️ Recent events

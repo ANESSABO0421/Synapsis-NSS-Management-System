@@ -69,7 +69,7 @@ import { toast } from "react-toastify";
 const VerifyOtp = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  console.log(location);
+  // console.log(location);
 
   const { teacherId, studentId, coordinatorId, role } = location.state || {};
   const id = teacherId || studentId || coordinatorId;

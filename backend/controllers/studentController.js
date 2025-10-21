@@ -8,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
 import { count } from "console";
+import Institution from "../models/Institution.js";
 
 // OTP generation (6 digits)
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
@@ -24,8 +25,15 @@ const generateToken = (student) => {
 // Student Signup
 export const studentSignUp = async (req, res) => {
   try {
-    const { name, email, phoneNumber, department, talents, password } =
-      req.body;
+    const {
+      name,
+      email,
+      phoneNumber,
+      department,
+      talents,
+      password,
+      institution,
+    } = req.body;
 
     const emailExist = await Student.findOne({ email });
     if (emailExist) {
@@ -56,6 +64,11 @@ export const studentSignUp = async (req, res) => {
       otpExpiry: Date.now() + 5 * 60 * 1000, // 5 mins
       status: "pending",
       profileImage,
+      institution
+    });
+
+    await Institution.findByIdAndUpdate(institution, {
+      $push: { students: student._id },
     });
 
     await sendEmail(email, "Verify your NSS account", `Your OTP is ${otp}`);
@@ -601,12 +614,12 @@ export const rejectStudent = async (req, res) => {
   }
 };
 
-
 // Get all students with their status
 export const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find()
       .select("-password -otp -otpExpiry") // don’t return sensitive data
+      .populate("institution", "name address")
       .sort({ createdAt: -1 });
 
     res.json({
@@ -619,8 +632,6 @@ export const getAllStudents = async (req, res) => {
   }
 };
 
-
-
 export const rejectInDashboardStudent = async (req, res) => {
   try {
     const student = await Student.findByIdAndUpdate(
@@ -628,8 +639,15 @@ export const rejectInDashboardStudent = async (req, res) => {
       { status: "rejected" },
       { new: true }
     );
-    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
-    res.json({ success: true, message: "Student rejected successfully", student });
+    if (!student)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+    res.json({
+      success: true,
+      message: "Student rejected successfully",
+      student,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

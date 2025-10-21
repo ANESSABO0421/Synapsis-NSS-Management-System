@@ -34,6 +34,11 @@ const coordinatorSchema = new mongoose.Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    institution: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institution",
+      required: true,
+    },
     verificationDocument: {
       url: { type: String, default: "" },
       public_id: { type: String, default: "" },

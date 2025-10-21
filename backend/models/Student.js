@@ -25,6 +25,12 @@ const StudentSchema = new mongoose.Schema(
     password: { type: String, required: true },
     otp: { type: Number },
     otpExpiry: { type: Date },
+    institution: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institution",
+      required: true,
+    },
+
     // gracemark Recommendation
     pendingGraceRecommendation: {
       marks: { type: Number, default: 0 },

@@ -14,6 +14,11 @@ const TeacherSchema = new mongoose.Schema(
       url: { type: String, default: "" },
       public_id: { type: String, default: "" },
     },
+    institution: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institution",
+      required: true,
+    },
 
     role: {
       type: String,

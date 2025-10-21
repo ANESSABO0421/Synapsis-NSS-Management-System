@@ -14,6 +14,12 @@ const eventSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Coordinator",
     },
+    institution: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institution",
+      required: true,
+    },
+
     attendance: [
       {
         student: { type: mongoose.Schema.Types.ObjectId, ref: "student" },
