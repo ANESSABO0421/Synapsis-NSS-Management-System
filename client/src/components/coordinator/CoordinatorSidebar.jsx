@@ -9,7 +9,7 @@ const CoordinatorSidebar = () => {
 
   const navLinks = [
     { name: "Dashboard", path: "/coordinatorlayout", icon: <BiLayout size={18} /> },
-    { name: "Manage Events", path: "/coordinatorlayout/manageevents", icon: <FaCalendarAlt size={18} /> },
+    { name: "Create Events", path: "/coordinatorlayout/createevent", icon: <FaCalendarAlt size={18} /> },
     { name: "Volunteers", path: "/coordinatorlayout/volunteers", icon: <FaUsers size={18} /> },
     { name: "Generate Certificates", path: "/coordinatorlayout/certificates", icon: <FaCertificate size={18} /> },
     { name: "Profile", path: "/coordinatorlayout/profile", icon: <RiUserStarFill size={18} /> },

@@ -73,7 +73,7 @@ const CoordinatorDashboard = () => {
       {/* ---------- ALL EVENTS SECTION ---------- */}
       <DashboardSection
         title="All NSS Events"
-        color="text-blue-700"
+        color="text-green-700"
         stats={[
           {
             title: "Total Events",
@@ -120,7 +120,7 @@ const CoordinatorDashboard = () => {
 
       {/* ---------- COMMUNITY OVERVIEW SECTION ---------- */}
       <section className="bg-white shadow-md rounded-2xl p-6">
-        <h2 className="text-2xl font-semibold mb-4 text-indigo-700">
+        <h2 className="text-2xl font-semibold mb-4 text-green-700">
           Community Overview
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -178,7 +178,7 @@ const StatCard = ({ title, value, icon }) => (
         {value !== undefined ? value : 0}
       </h3>
     </div>
-    <div className="text-blue-500 text-2xl">{icon}</div>
+    <div className="text-green-500 text-2xl">{icon}</div>
   </div>
 );
 
@@ -217,7 +217,7 @@ const RecentEventsTable = ({ title, events }) => (
                     event.status === "Completed"
                       ? "text-green-600"
                       : event.status === "Upcoming"
-                      ? "text-blue-600"
+                      ? "text-yellow-600"
                       : "text-gray-600"
                   }`}
                 >
