@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, FileText } from "lucide-react";
 
 const GetAllPendingCoordinator = () => {
-  const [coordinators, setCoordinators] = useState();
+  const [coordinators, setCoordinators] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
@@ -31,7 +31,7 @@ const GetAllPendingCoordinator = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Coordinator approved successfully!");
-      fetchCoordinator(); // refresh list
+      fetchCoordinator();
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     }
@@ -45,7 +45,7 @@ const GetAllPendingCoordinator = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Coordinator rejected successfully!");
-      fetchCoordinator(); // refresh list
+      fetchCoordinator();
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     }
@@ -78,6 +78,7 @@ const GetAllPendingCoordinator = () => {
                 <th className="p-3">Name</th>
                 <th className="p-3">Email</th>
                 <th className="p-3">Department</th>
+                <th className="p-3">Verification Document</th>
                 <th className="p-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -97,6 +98,23 @@ const GetAllPendingCoordinator = () => {
                   <td className="p-3 text-gray-600">
                     {coordinator.department || "—"}
                   </td>
+
+                  {/* ✅ Verification Document */}
+                  <td className="p-3 text-center">
+                    {coordinator.verificationDocument?.url ? (
+                      <a
+                        href={coordinator.verificationDocument.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        <FileText className="w-4 h-4" /> View
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">No document</span>
+                    )}
+                  </td>
+
                   <td className="p-3 text-center flex gap-3 justify-center">
                     <button
                       onClick={() => handleApprove(coordinator._id)}

@@ -174,8 +174,8 @@ export const Login = async (req, res) => {
 // create event
 export const createEvent = async (req, res) => {
   try {
-    const { title, description, location, date, hours } = req.body;
-    if (!title || !description || !location || !date || !hours) {
+    const { title, description, location, date, hours,institutionId } = req.body;
+    if (!title || !description || !location || !date || !hours||!institutionId) {
       return res
         .status(400)
         .json({ success: false, message: "Missing Fields" });
@@ -198,10 +198,17 @@ export const createEvent = async (req, res) => {
       date,
       hours: hours || 0,
       assignedCoordinators: req.user._id,
+      institution:institutionId,
       createdBy: req.user._id,
       images: imageData ? [imageData] : [],
       status: "Upcoming",
     });
+
+    await Institution.findByIdAndUpdate(institutionId, {
+      $push: { Events: newEvent._id },
+    });
+
+
 
     // update as well on the coordinator events manging array
     await Coordinator.findByIdAndUpdate(req.user._id, {
@@ -212,6 +219,10 @@ export const createEvent = async (req, res) => {
       message: "new Event created successfully",
       event: newEvent,
     });
+
+
+
+
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
