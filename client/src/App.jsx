@@ -23,6 +23,8 @@ import CoordinatorDashboard from "./pages/coordinator/CoordinatorDashboard";
 import CreateEvent from "./pages/coordinator/CreateEvent";
 import CreateInstitution from "./pages/admin/CreateInstitution";
 import ManageInstitute from "./pages/admin/ManageInstitute";
+import ManageStudents from "./pages/coordinator/ManageStudents";
+import MyEvents from "./pages/coordinator/MyEvents";
 
 const App = () => {
   return (
@@ -61,6 +63,8 @@ const App = () => {
         <Route path="/coordinatorlayout" element={<CoordinatorLayout />}>
           <Route index element={<CoordinatorDashboard />} />
           <Route path="createevent" element={<CreateEvent />} />
+          <Route path="managestudents" element={<ManageStudents />} />
+          <Route path="myevents" element={<MyEvents />} />
         </Route>
 
         <Route path="/studentdashboard" element={<StudentDashboard />} />

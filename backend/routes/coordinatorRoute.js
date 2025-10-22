@@ -7,7 +7,11 @@ import {
   generateEventReport,
   getAllCoordinators,
   getAllPendingCoordinator,
+  getAllStudentsByCoordinator,
   getCoordinatorDashboard,
+  getCoordinatorProfile,
+  getMyEvents,
+  getStudentById,
   getStudentBySkill,
   Login,
   recommendedGraceMark,
@@ -15,6 +19,7 @@ import {
   rejectInDashboardCoordinator,
   studentToVolunteer,
   updateEventStatus,
+  updateStudentByCoordinator,
   verifyOtp,
   volunteerTostudent,
 } from "../controllers/coordinatorController.js";
@@ -37,6 +42,12 @@ coordinatorRoute.post(
 );
 coordinatorRoute.post("/verifyotp", verifyOtp);
 coordinatorRoute.post("/approvecoordinator", approveCoordinator);
+coordinatorRoute.get(
+  "/profile",
+  protect,
+  coordinatorOnly,
+  getCoordinatorProfile
+);
 coordinatorRoute.post("/logincoordinator", Login);
 coordinatorRoute.post(
   "/createevents",
@@ -137,5 +148,16 @@ coordinatorRoute.get(
   coordinatorOnly,
   getCoordinatorDashboard
 );
+
+// managestsudents
+coordinatorRoute.get("/students", protect, getAllStudentsByCoordinator);
+coordinatorRoute.get("/students/:id", protect, getStudentById);
+coordinatorRoute.get(
+  "/updatestudents/:id",
+  protect,
+  updateStudentByCoordinator
+);
+
+coordinatorRoute.get("/my-events", protect, coordinatorOnly, getMyEvents);
 
 export default coordinatorRoute;

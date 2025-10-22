@@ -31,6 +31,7 @@ const CoordinatorDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log(res)
 
       setData(res.data.data);
       setLoading(false);

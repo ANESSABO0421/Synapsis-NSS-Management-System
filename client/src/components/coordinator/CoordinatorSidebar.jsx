@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { BiLayout, BiMenuAltLeft, BiX } from "react-icons/bi";
 import { FaUsers, FaCertificate, FaCalendarAlt } from "react-icons/fa";
+import { BsFillCalendar2EventFill } from 'react-icons/bs';
 import { RiUserStarFill } from "react-icons/ri";
 
 const CoordinatorSidebar = () => {
@@ -10,9 +11,9 @@ const CoordinatorSidebar = () => {
   const navLinks = [
     { name: "Dashboard", path: "/coordinatorlayout", icon: <BiLayout size={18} /> },
     { name: "Create Events", path: "/coordinatorlayout/createevent", icon: <FaCalendarAlt size={18} /> },
-    { name: "Volunteers", path: "/coordinatorlayout/volunteers", icon: <FaUsers size={18} /> },
-    { name: "Generate Certificates", path: "/coordinatorlayout/certificates", icon: <FaCertificate size={18} /> },
-    { name: "Profile", path: "/coordinatorlayout/profile", icon: <RiUserStarFill size={18} /> },
+    { name: "Manage Students", path: "/coordinatorlayout/managestudents", icon: <FaUsers size={18} /> },
+    { name: "My Events", path: "/coordinatorlayout/myevents", icon: <BsFillCalendar2EventFill size={18} /> },
+    // { name: "Profile", path: "/coordinatorlayout/profile", icon: <RiUserStarFill size={18} /> },
   ];
 
   return (
