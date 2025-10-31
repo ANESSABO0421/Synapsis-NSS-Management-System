@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FiEdit2,
+  FiCalendar,
+  FiMapPin,
+  FiClock,
+  FiX,
+  FiRefreshCcw,
+} from "react-icons/fi";
 
 const ManageEvents = () => {
   const [events, setEvents] = useState([]);
@@ -32,7 +41,6 @@ const ManageEvents = () => {
     }
   };
 
-  // Open edit modal/form
   const handleEdit = (event) => {
     setEditingEvent(event);
     setFormData({
@@ -45,12 +53,10 @@ const ManageEvents = () => {
     });
   };
 
-  // Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Submit update
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -68,135 +74,166 @@ const ManageEvents = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold text-green-700 mb-6">Manage Events</h2>
-
-      {/* Events Table */}
-      <div className="overflow-x-auto bg-white shadow rounded-lg">
-        <table className="min-w-full text-left border">
-          <thead className="bg-green-600 text-white">
-            <tr>
-              <th className="p-3">Title</th>
-              <th className="p-3">Date</th>
-              <th className="p-3">Location</th>
-              <th className="p-3">Hours</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.length > 0 ? (
-              events.map((e) => (
-                <tr key={e._id} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-semibold">{e.title}</td>
-                  <td className="p-3">{new Date(e.date).toLocaleDateString()}</td>
-                  <td className="p-3">{e.location}</td>
-                  <td className="p-3">{e.hours}</td>
-                  <td className="p-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        e.status === "Completed"
-                          ? "bg-green-200 text-green-800"
-                          : "bg-yellow-200 text-yellow-800"
-                      }`}
-                    >
-                      {e.status}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => handleEdit(e)}
-                      className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="text-center p-4 text-gray-500">
-                  No events found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Edit Form Modal */}
-      {editingEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl w-[500px] shadow-lg">
-            <h3 className="text-xl font-bold text-green-700 mb-4">Edit Event</h3>
-            <form onSubmit={handleUpdate} className="space-y-3">
-              <input
-                type="text"
-                name="title"
-                placeholder="Title"
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              />
-              <textarea
-                name="description"
-                placeholder="Description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="text"
-                name="location"
-                placeholder="Location"
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="number"
-                name="hours"
-                placeholder="Hours"
-                value={formData.hours}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              />
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              >
-                <option value="Upcoming">Upcoming</option>
-                <option value="Completed">Completed</option>
-              </select>
-
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setEditingEvent(null)}
-                  className="bg-gray-300 px-4 py-2 rounded"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  Update
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-extrabold text-green-700">📅 Manage Events</h2>
+          <button
+            onClick={fetchEvents}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+          >
+            <FiRefreshCcw /> Refresh
+          </button>
         </div>
-      )}
+
+        {/* Events Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.length > 0 ? (
+            events.map((e) => (
+              <motion.div
+                key={e._id}
+                whileHover={{ scale: 1.02 }}
+                className="bg-white/70 backdrop-blur-md shadow-lg rounded-2xl p-5 border border-green-100 hover:shadow-xl transition"
+              >
+                <h3 className="text-xl font-bold text-green-700 mb-1">{e.title}</h3>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                  {e.description}
+                </p>
+
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <FiCalendar className="text-green-600" />
+                  <span>{new Date(e.date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <FiMapPin className="text-green-600" />
+                  <span>{e.location}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700 mb-2">
+                  <FiClock className="text-green-600" />
+                  <span>{e.hours} hrs</span>
+                </div>
+
+                <span
+                  className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
+                    e.status === "Completed"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {e.status}
+                </span>
+
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => handleEdit(e)}
+                    className="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition"
+                  >
+                    <FiEdit2 /> Edit
+                  </button>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 italic col-span-full">
+              No events found.
+            </p>
+          )}
+        </div>
+
+        {/* Edit Modal */}
+        <AnimatePresence>
+          {editingEvent && (
+            <motion.div
+              className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="bg-white rounded-2xl p-6 shadow-2xl w-[450px] relative"
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 50, opacity: 0 }}
+              >
+                <button
+                  onClick={() => setEditingEvent(null)}
+                  className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+                >
+                  <FiX size={22} />
+                </button>
+
+                <h3 className="text-2xl font-bold text-green-700 mb-4">Edit Event</h3>
+                <form onSubmit={handleUpdate} className="space-y-4">
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400"
+                  />
+                  <textarea
+                    name="description"
+                    placeholder="Description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows="3"
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400"
+                  />
+                  <input
+                    type="text"
+                    name="location"
+                    placeholder="Location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400"
+                  />
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400"
+                  />
+                  <input
+                    type="number"
+                    name="hours"
+                    placeholder="Hours"
+                    value={formData.hours}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400"
+                  />
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400"
+                  >
+                    <option value="Upcoming">Upcoming</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+
+                  <div className="flex justify-end gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setEditingEvent(null)}
+                      className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

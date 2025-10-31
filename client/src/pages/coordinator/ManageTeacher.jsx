@@ -268,7 +268,7 @@ const ManageTeacher = () => {
                               handleUnassign(event._id, teacher._id)
                             }
                             disabled={unassigning}
-                            className="bg-red-100 text-red-700 px-3 py-1 rounded-md text-xs font-medium hover:bg-red-200 mr-2 flex items-center justify-center gap-1 inline-flex"
+                            className="bg-red-100 text-red-700 px-3 py-1 rounded-md text-xs font-medium hover:bg-red-200 mr-2  items-center justify-center gap-1 inline-flex"
                           >
                             <FiTrash2 size={14} />
                             {unassigning ? "Removing..." : "Unassign"}
