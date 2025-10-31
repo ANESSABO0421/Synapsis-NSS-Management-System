@@ -22,6 +22,7 @@ import {
   rejectCoordinator,
   rejectInDashboardCoordinator,
   studentToVolunteer,
+  unassignTeacherFromEvent,
   updateEventStatus,
   updateStudentByCoordinator,
   verifyOtp,
@@ -189,5 +190,12 @@ coordinatorRoute.post(
   coordinatorOnly,
   assignTeacherToEvent
 );
+coordinatorRoute.delete(
+  "/unassign-teacher",
+  protect,
+  coordinatorOnly,
+  unassignTeacherFromEvent
+);
+
 
 export default coordinatorRoute;

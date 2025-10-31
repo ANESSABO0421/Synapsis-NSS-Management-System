@@ -5,8 +5,8 @@ import {
   FiUser,
   FiCalendar,
   FiCheckCircle,
-  FiBook,
   FiUserPlus,
+  FiTrash2, // 🆕 Unassign icon
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 
@@ -16,6 +16,7 @@ const ManageTeacher = () => {
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [selectedEvent, setSelectedEvent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [unassigning, setUnassigning] = useState(false); // 🆕 State for unassign loading
 
   const token = localStorage.getItem("token");
 
@@ -88,6 +89,28 @@ const ManageTeacher = () => {
     }
   };
 
+  // 🆕 Unassign Teacher
+  const handleUnassign = async (eventId, teacherId) => {
+    try {
+      setUnassigning(true);
+      const res = await axios.delete(
+        "http://localhost:3000/api/coordinator/unassign-teacher",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          data: { eventId, teacherId },
+        }
+      );
+
+      toast.success(res.data.message || "Teacher unassigned successfully!");
+      fetchEvents();
+    } catch (error) {
+      console.error("Unassign Teacher Error:", error);
+      toast.error(error.response?.data?.message || "Error unassigning teacher");
+    } finally {
+      setUnassigning(false);
+    }
+  };
+
   return (
     <div className="p-8 bg-gradient-to-br from-green-50 to-white min-h-screen">
       {/* Header */}
@@ -101,7 +124,7 @@ const ManageTeacher = () => {
           <FiUser className="text-green-600" /> Manage Teachers
         </h2>
         <p className="text-gray-500 mt-2">
-          Assign teachers to events and view assignment details.
+          Assign or unassign teachers to events and view assignment details.
         </p>
       </motion.div>
 
@@ -199,6 +222,9 @@ const ManageTeacher = () => {
                   <th className="px-6 py-3 border-b text-left font-semibold">
                     Departments
                   </th>
+                  <th className="px-6 py-3 border-b text-center font-semibold">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -228,6 +254,29 @@ const ManageTeacher = () => {
                             .map((t) => t.department)
                             .join(", ")
                         : "-"}
+                    </td>
+
+                    {/* 🆕 Unassign Button(s) */}
+                    <td className="px-6 py-3 text-center">
+                      {Array.isArray(event.assignedTeacher) &&
+                      event.assignedTeacher.length > 0 ? (
+                        event.assignedTeacher.map((teacher) => (
+                          <motion.button
+                            key={teacher._id}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() =>
+                              handleUnassign(event._id, teacher._id)
+                            }
+                            disabled={unassigning}
+                            className="bg-red-100 text-red-700 px-3 py-1 rounded-md text-xs font-medium hover:bg-red-200 mr-2 flex items-center justify-center gap-1 inline-flex"
+                          >
+                            <FiTrash2 size={14} />
+                            {unassigning ? "Removing..." : "Unassign"}
+                          </motion.button>
+                        ))
+                      ) : (
+                        <span className="text-gray-400 text-sm">—</span>
+                      )}
                     </td>
                   </motion.tr>
                 ))}

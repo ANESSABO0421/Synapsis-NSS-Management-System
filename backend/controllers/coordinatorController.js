@@ -2018,4 +2018,37 @@ export const getAllTeachersByCoordinator = async (req, res) => {
 };
 
 
+// DELETE /api/coordinator/unassign-teacher
+export const unassignTeacherFromEvent = async (req, res) => {
+  try {
+    const { eventId, teacherId } = req.body;
+    if (!eventId || !teacherId) {
+      return res.status(400).json({ message: "eventId and teacherId required" });
+    }
+
+    const coordinator = await Coordinator.findById(req.user._id);
+    if (!coordinator) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const event = await Event.findByIdAndUpdate(
+      eventId,
+      { $pull: { assignedTeacher: teacherId } },
+      { new: true }
+    ).populate("assignedTeacher", "name email department");
+
+    await Teacher.findByIdAndUpdate(teacherId, {
+      $pull: { assignedEvents: eventId },
+    });
+
+    res.json({
+      success: true,
+      message: "Teacher unassigned successfully",
+      event,
+    });
+  } catch (error) {
+    console.error("Unassign Teacher Error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
