@@ -25,6 +25,7 @@ import CreateInstitution from "./pages/admin/CreateInstitution";
 import ManageInstitute from "./pages/admin/ManageInstitute";
 import ManageStudents from "./pages/coordinator/ManageStudents";
 import MyEvents from "./pages/coordinator/MyEvents";
+import ManageTeacher from "./pages/coordinator/ManageTeacher";
 
 const App = () => {
   return (
@@ -65,6 +66,7 @@ const App = () => {
           <Route path="createevent" element={<CreateEvent />} />
           <Route path="managestudents" element={<ManageStudents />} />
           <Route path="myevents" element={<MyEvents />} />
+          <Route path="manageteacher" element={<ManageTeacher />} />
         </Route>
 
         <Route path="/studentdashboard" element={<StudentDashboard />} />

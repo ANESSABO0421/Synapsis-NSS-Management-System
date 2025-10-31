@@ -4,6 +4,7 @@ import { BiLayout, BiMenuAltLeft, BiX } from "react-icons/bi";
 import { FaUsers, FaCertificate, FaCalendarAlt } from "react-icons/fa";
 import { BsFillCalendar2EventFill } from 'react-icons/bs';
 import { RiUserStarFill } from "react-icons/ri";
+import { GiTeacher } from "react-icons/gi";
 
 const CoordinatorSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,7 @@ const CoordinatorSidebar = () => {
     { name: "Create Events", path: "/coordinatorlayout/createevent", icon: <FaCalendarAlt size={18} /> },
     { name: "Manage Students", path: "/coordinatorlayout/managestudents", icon: <FaUsers size={18} /> },
     { name: "My Events", path: "/coordinatorlayout/myevents", icon: <BsFillCalendar2EventFill size={18} /> },
+    { name: "Manage Teacher", path: "/coordinatorlayout/manageteacher", icon: <GiTeacher size={18} /> },
     // { name: "Profile", path: "/coordinatorlayout/profile", icon: <RiUserStarFill size={18} /> },
   ];
 

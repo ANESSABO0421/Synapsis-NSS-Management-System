@@ -1,14 +1,17 @@
 import express from "express";
 import {
   approveCoordinator,
+  assignTeacherToEvent,
   assignVoulnteerToEvent,
   coordinatorSignup,
   createEvent,
   editEvent,
   generateEventReport,
   getAllCoordinators,
+  getAllEventsByCoordinator,
   getAllPendingCoordinator,
   getAllStudentsByCoordinator,
+  getAllTeachersByCoordinator,
   getCoordinatorDashboard,
   getCoordinatorProfile,
   getMyEvents,
@@ -166,6 +169,25 @@ coordinatorRoute.put(
   protect,
   coordinatorOnly,
   editEvent
+);
+
+coordinatorRoute.get(
+  "/events",
+  protect,
+  coordinatorOnly,
+  getAllEventsByCoordinator
+);
+coordinatorRoute.get(
+  "/teachers",
+  protect,
+  coordinatorOnly,
+  getAllTeachersByCoordinator
+);
+coordinatorRoute.post(
+  "/assign-teacher",
+  protect,
+  coordinatorOnly,
+  assignTeacherToEvent
 );
 
 export default coordinatorRoute;

@@ -1898,7 +1898,6 @@ export const editEvent = async (req, res) => {
 
 
 
-// assign teacher to event
 export const assignTeacherToEvent = async (req, res) => {
   try {
     const { eventId, teacherIds } = req.body;
@@ -1916,47 +1915,32 @@ export const assignTeacherToEvent = async (req, res) => {
     }
 
     const event = await Event.findById(eventId);
-    if (!event) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
-    }
+    if (!event)
+      return res.status(404).json({ success: false, message: "Event not found" });
 
-    // ensure event belongs to coordinator's institution
     if (String(event.institution) !== String(coordinator.institution)) {
       return res.status(403).json({
         success: false,
-        message: "You cannot assign teachers to events outside your institution",
+        message: "Cannot assign teachers outside your institution",
       });
     }
 
-    // ensure all teachers exist and belong to same institution
-    const teachers = await Teacher.find({
-      _id: { $in: teacherIds },
+    const teacher = await Teacher.findOne({
+      _id: teacherIds[0],
       institution: coordinator.institution,
     });
 
-    if (!teachers.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No teachers found in your institution",
-      });
-    }
+    if (!teacher)
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found in your institution" });
 
-    const teacherObjectIds = teachers.map((t) => t._id);
+    event.assignedTeacher = teacher._id;
+    await event.save();
 
-    // update event with assigned teachers (avoid duplicates)
-    await Event.findByIdAndUpdate(
-      eventId,
-      { $addToSet: { assignedTeacher: { $each: teacherObjectIds } } },
-      { new: true }
-    );
-
-    // also update teachers’ assignedEvents array
-    await Teacher.updateMany(
-      { _id: { $in: teacherObjectIds } },
-      { $addToSet: { assignedEvents: event._id } }
-    );
+    await Teacher.findByIdAndUpdate(teacher._id, {
+      $addToSet: { assignedEvents: event._id },
+    });
 
     const updatedEvent = await Event.findById(eventId)
       .populate("assignedTeacher", "name email department")
@@ -1964,7 +1948,7 @@ export const assignTeacherToEvent = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Teachers assigned successfully to event",
+      message: "Teacher assigned successfully",
       event: updatedEvent,
     });
   } catch (error) {
@@ -1972,3 +1956,66 @@ export const assignTeacherToEvent = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// ✅ 1️⃣ Get All Events by Coordinator’s Institution
+export const getAllEventsByCoordinator = async (req, res) => {
+  try {
+    const coordinator = await Coordinator.findById(req.user._id);
+
+    if (!coordinator) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    const events = await Event.find({
+      institution: coordinator.institution,
+    })
+      .populate("assignedTeacher", "name email department")
+      .populate("assignedCoordinators", "name email")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: events.length,
+      events,
+    });
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+// ✅ 2️⃣ Get All Teachers in Coordinator’s Institution
+export const getAllTeachersByCoordinator = async (req, res) => {
+  try {
+    const coordinator = await Coordinator.findById(req.user._id);
+
+    if (!coordinator) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    const teachers = await Teacher.find({
+      institution: coordinator.institution,
+      status: "active",
+    }).select("name email department");
+
+    res.json({
+      success: true,
+      count: teachers.length,
+      teachers,
+    });
+  } catch (error) {
+    console.error("Error fetching teachers:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
