@@ -4,6 +4,7 @@ import {
   assignVoulnteerToEvent,
   coordinatorSignup,
   createEvent,
+  editEvent,
   generateEventReport,
   getAllCoordinators,
   getAllPendingCoordinator,
@@ -159,5 +160,12 @@ coordinatorRoute.get(
 );
 
 coordinatorRoute.get("/my-events", protect, coordinatorOnly, getMyEvents);
+coordinatorRoute.put(
+  "/events/:eventId",
+  upload.single("image"),
+  protect,
+  coordinatorOnly,
+  editEvent
+);
 
 export default coordinatorRoute;

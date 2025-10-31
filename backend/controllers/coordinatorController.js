@@ -1823,3 +1823,152 @@ export const getMyEvents = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+// Edit / Update an event created by the coordinator
+export const editEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { title, description, location, date, hours, status } = req.body;
+
+    // find coordinator
+    const coordinator = await Coordinator.findById(req.user._id);
+    if (!coordinator) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // find event
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ success: false, message: "Event not found" });
+    }
+
+    // ensure the event belongs to this coordinator's institution
+    if (String(event.institution) !== String(coordinator.institution)) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot edit events outside your institution",
+      });
+    }
+
+    // update image if new one uploaded
+    let updatedImage = event.images;
+    if (req.file) {
+      // delete old one (optional)
+      if (event.images?.[0]?.public_id) {
+        await cloudinary.uploader.destroy(event.images[0].public_id);
+      }
+
+      const uploaded = await cloudinary.uploader.upload(req.file.path, {
+        folder: "event_images",
+      });
+      updatedImage = [
+        {
+          url: uploaded.secure_url,
+          public_id: uploaded.public_id,
+          caption: req.body.caption || "",
+        },
+      ];
+    }
+
+    // update fields
+    event.title = title || event.title;
+    event.description = description || event.description;
+    event.location = location || event.location;
+    event.date = date || event.date;
+    event.hours = hours || event.hours;
+    event.status = status || event.status;
+    event.images = updatedImage;
+
+    await event.save();
+
+    res.json({
+      success: true,
+      message: "Event updated successfully",
+      event,
+    });
+  } catch (error) {
+    console.error("Error updating event:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+
+// assign teacher to event
+export const assignTeacherToEvent = async (req, res) => {
+  try {
+    const { eventId, teacherIds } = req.body;
+
+    if (!eventId || !Array.isArray(teacherIds) || teacherIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "eventId and teacherIds are required",
+      });
+    }
+
+    const coordinator = await Coordinator.findById(req.user._id);
+    if (!coordinator) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+
+    // ensure event belongs to coordinator's institution
+    if (String(event.institution) !== String(coordinator.institution)) {
+      return res.status(403).json({
+        success: false,
+        message: "You cannot assign teachers to events outside your institution",
+      });
+    }
+
+    // ensure all teachers exist and belong to same institution
+    const teachers = await Teacher.find({
+      _id: { $in: teacherIds },
+      institution: coordinator.institution,
+    });
+
+    if (!teachers.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No teachers found in your institution",
+      });
+    }
+
+    const teacherObjectIds = teachers.map((t) => t._id);
+
+    // update event with assigned teachers (avoid duplicates)
+    await Event.findByIdAndUpdate(
+      eventId,
+      { $addToSet: { assignedTeacher: { $each: teacherObjectIds } } },
+      { new: true }
+    );
+
+    // also update teachers’ assignedEvents array
+    await Teacher.updateMany(
+      { _id: { $in: teacherObjectIds } },
+      { $addToSet: { assignedEvents: event._id } }
+    );
+
+    const updatedEvent = await Event.findById(eventId)
+      .populate("assignedTeacher", "name email department")
+      .populate("assignedCoordinators", "name email");
+
+    res.json({
+      success: true,
+      message: "Teachers assigned successfully to event",
+      event: updatedEvent,
+    });
+  } catch (error) {
+    console.error("Assign Teacher Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
