@@ -12,6 +12,7 @@ import {
   getAllPendingCoordinator,
   getAllStudentsByCoordinator,
   getAllTeachersByCoordinator,
+  getAllVolunteers,
   getCoordinatorDashboard,
   getCoordinatorProfile,
   getMyEvents,
@@ -23,6 +24,7 @@ import {
   rejectInDashboardCoordinator,
   studentToVolunteer,
   unassignTeacherFromEvent,
+  unassignVolunteerFromEvent,
   updateEventStatus,
   updateStudentByCoordinator,
   verifyOtp,
@@ -197,5 +199,15 @@ coordinatorRoute.delete(
   unassignTeacherFromEvent
 );
 
+// Unassign volunteers from event
+coordinatorRoute.post(
+  "/unassign-volunteers",
+  protect,
+  coordinatorOnly,
+  unassignVolunteerFromEvent
+);
+
+// Get all volunteers of institution
+coordinatorRoute.get("/volunteers", protect,coordinatorOnly, getAllVolunteers);
 
 export default coordinatorRoute;

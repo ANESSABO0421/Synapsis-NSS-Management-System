@@ -5,6 +5,7 @@ import { FaUsers, FaCertificate, FaCalendarAlt } from "react-icons/fa";
 import { BsFillCalendar2EventFill } from 'react-icons/bs';
 import { RiUserStarFill } from "react-icons/ri";
 import { GiTeacher } from "react-icons/gi";
+import { MdOutlineVolunteerActivism } from "react-icons/md";
 
 const CoordinatorSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +16,7 @@ const CoordinatorSidebar = () => {
     { name: "Manage Students", path: "/coordinatorlayout/managestudents", icon: <FaUsers size={18} /> },
     { name: "My Events", path: "/coordinatorlayout/myevents", icon: <BsFillCalendar2EventFill size={18} /> },
     { name: "Manage Teacher", path: "/coordinatorlayout/manageteacher", icon: <GiTeacher size={18} /> },
+    { name: "Manage Volunteer", path: "/coordinatorlayout/managevolunteer", icon: <MdOutlineVolunteerActivism size={18} /> },
     // { name: "Profile", path: "/coordinatorlayout/profile", icon: <RiUserStarFill size={18} /> },
   ];
 
