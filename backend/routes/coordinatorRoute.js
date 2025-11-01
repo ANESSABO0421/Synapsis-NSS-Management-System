@@ -98,7 +98,7 @@ coordinatorRoute.post(
 );
 
 //pdf generation
-coordinatorRoute.get(
+coordinatorRoute.post(
   "/pdfgeneration/:eventId",
   protect,
   coordinatorOnly,

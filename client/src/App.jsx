@@ -27,6 +27,7 @@ import ManageStudents from "./pages/coordinator/ManageStudents";
 import MyEvents from "./pages/coordinator/MyEvents";
 import ManageTeacher from "./pages/coordinator/ManageTeacher";
 import ManageVolunteers from "./pages/coordinator/ManageVolunteers";
+import EventReportGenerator from "./pages/coordinator/EventReportGenerator";
 
 const App = () => {
   return (
@@ -69,6 +70,7 @@ const App = () => {
           <Route path="myevents" element={<MyEvents />} />
           <Route path="manageteacher" element={<ManageTeacher />} />
           <Route path="managevolunteer" element={<ManageVolunteers />} />
+          <Route path="eventreport" element={<EventReportGenerator />} />
         </Route>
 
         <Route path="/studentdashboard" element={<StudentDashboard />} />

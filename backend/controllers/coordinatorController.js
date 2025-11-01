@@ -10,6 +10,7 @@ import fs from "fs";
 import path from "path";
 import Teacher from "../models/Teacher.js";
 import Institution from "../models/Institution.js";
+import { HfInference } from "@huggingface/inference";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -20,6 +21,8 @@ const generateToken = (id) =>
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
 
 export const coordinatorSignup = async (req, res) => {
   try {
@@ -190,12 +193,10 @@ export const createEvent = async (req, res) => {
     }
     const institutionId = coordinator.institution;
     if (!institutionId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Coordinator not assigned to institution",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Coordinator not assigned to institution",
+      });
     }
 
     let imageData = null;
@@ -284,12 +285,10 @@ export const studentToVolunteer = async (req, res) => {
       institution: coordinator.institution,
     });
     if (!student) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Student not found in your institution",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Student not found in your institution",
+      });
     }
     student.role = "volunteer";
     await student.save();
@@ -316,12 +315,10 @@ export const volunteerTostudent = async (req, res) => {
       institution: coordinator.institution,
     });
     if (!student) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Student not found in your institution",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Student not found in your institution",
+      });
     }
     student.role = "student";
     await student.save();
@@ -358,13 +355,11 @@ export const assignVoulnteerToEvent = async (req, res) => {
 
     // ensure event belongs to coordinator's institution
     if (String(event.institution) !== String(coordinator.institution)) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message:
-            "Cannot assign volunteers to an event outside your institution",
-        });
+      return res.status(403).json({
+        success: false,
+        message:
+          "Cannot assign volunteers to an event outside your institution",
+      });
     }
 
     // ensure the provided id is volunteer and from same institution
@@ -375,12 +370,10 @@ export const assignVoulnteerToEvent = async (req, res) => {
       institution: coordinator.institution,
     });
     if (!volunteer.length) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "No volunteer found in your institution",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "No volunteer found in your institution",
+      });
     }
 
     // add participants without duplicates
@@ -432,12 +425,10 @@ export const recommendedGraceMark = async (req, res) => {
       institution: coordinator.institution,
     });
     if (!student) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Student not found in your institution",
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Student not found in your institution",
+      });
     }
 
     student.pendingGraceRecommendation = {
@@ -469,15 +460,183 @@ export const recommendedGraceMark = async (req, res) => {
 };
 
 // pdf genrateion for the coordinator
+// export const generateEventReport = async (req, res) => {
+//   try {
+//     const { eventId } = req.params;
+
+//     const coordinator = await Coordinator.findById(req.user._id);
+//     if (!coordinator) {
+//       return res.status(403).json({ success: false, message: "Unauthorized" });
+//     }
+
+//     const event = await Event.findById(eventId)
+//       .populate("assignedTeacher", "name")
+//       .populate("assignedCoordinators", "name")
+//       .populate("participants", "name department");
+
+//     if (!event) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Event not found" });
+//     }
+
+//     // ensure coordinator can only generate reports for events in their institution
+//     if (String(event.institution) !== String(coordinator.institution)) {
+//       return res
+//         .status(403)
+//         .json({
+//           success: false,
+//           message:
+//             "Cannot generate report for an event outside your institution",
+//         });
+//     }
+
+//     // Normalize data (make sure they are arrays)
+//     const assignedCoordinators = Array.isArray(event.assignedCoordinators)
+//       ? event.assignedCoordinators
+//       : event.assignedCoordinators
+//       ? [event.assignedCoordinators]
+//       : [];
+
+//     const assignedTeachers = Array.isArray(event.assignedTeacher)
+//       ? event.assignedTeacher
+//       : event.assignedTeacher
+//       ? [event.assignedTeacher]
+//       : [];
+
+//     const participants = Array.isArray(event.participants)
+//       ? event.participants
+//       : event.participants
+//       ? [event.participants]
+//       : [];
+
+//     // Ensure folder exists
+//     const uploadsDir = path.join("uploads");
+//     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+//     const fileName = `event_report_${event._id}.pdf`;
+//     const filePath = path.join(uploadsDir, fileName);
+
+//     const doc = new PDFDocument({ margin: 40 });
+//     const stream = fs.createWriteStream(filePath);
+//     doc.pipe(stream);
+
+//     // Header
+//     doc.fontSize(20).text("Event Report", { align: "center", underline: true });
+//     doc.moveDown(1.5);
+
+//     // Section: Basic Event Info
+//     doc.fontSize(12).text("Event Details", { underline: true });
+//     doc.moveDown(0.5);
+
+//     const tableLeftX = 60;
+//     const valueLeftX = 200;
+//     const rowHeight = 20;
+
+//     const drawRow = (label, value, yOffset) => {
+//       doc.font("Helvetica-Bold").text(`${label}:`, tableLeftX, yOffset);
+//       doc.font("Helvetica").text(value || "N/A", valueLeftX, yOffset);
+//     };
+
+//     let currentY = doc.y;
+//     drawRow("Title", event.title, currentY);
+//     drawRow(
+//       "Date",
+//       new Date(event.date).toLocaleDateString(),
+//       currentY + rowHeight
+//     );
+//     drawRow("Location", event.location, currentY + 2 * rowHeight);
+//     drawRow("Hours", event.hours.toString(), currentY + 3 * rowHeight);
+//     drawRow("Status", event.status || "Upcoming", currentY + 4 * rowHeight);
+
+//     currentY += 5 * rowHeight + 10;
+//     doc.moveDown();
+
+//     // Coordinators and Teachers
+//     doc.fontSize(12).text("Team Details", { underline: true });
+//     currentY = doc.y + 5;
+
+//     const coordinators =
+//       assignedCoordinators.map((c) => c.name).join(", ") || "N/A";
+//     const teachers = assignedTeachers.map((t) => t.name).join(", ") || "N/A";
+
+//     drawRow("Coordinators", coordinators, currentY);
+//     drawRow("Teachers", teachers, currentY + rowHeight);
+
+//     doc.moveDown(2);
+
+//     // Participants Table
+//     doc.fontSize(12).text("Volunteers", { underline: true });
+//     doc.moveDown(0.5);
+
+//     const startY = doc.y + 5;
+//     const col1 = 60; // #
+//     const col2 = 100; // Name
+//     const col3 = 300; // Department
+
+//     // Table header
+//     doc
+//       .font("Helvetica-Bold")
+//       .text("No.", col1, startY)
+//       .text("Name", col2, startY)
+//       .text("Department", col3, startY);
+
+//     doc
+//       .moveTo(60, startY + 15)
+//       .lineTo(500, startY + 15)
+//       .stroke();
+
+//     // Table rows
+//     doc.font("Helvetica");
+//     let y = startY + 25;
+//     if (participants.length > 0) {
+//       participants.forEach((p, i) => {
+//         doc
+//           .text(i + 1, col1, y)
+//           .text(p.name || "N/A", col2, y)
+//           .text(p.department || "N/A", col3, y);
+//         y += 20;
+//       });
+//     } else {
+//       doc.text("No participants recorded.", col2, y);
+//       y += 20;
+//     }
+
+//     // Total count
+//     doc.moveDown(1.5);
+//     doc
+//       .font("Helvetica-Bold")
+//       .text(`Total Volunteers: ${participants.length}`, { align: "right" });
+
+//     // Finalize and download
+//     doc.end();
+
+//     stream.on("finish", () => {
+//       res.download(filePath, fileName, (err) => {
+//         if (err) console.error("File download error:", err);
+//         fs.unlink(filePath, () => {}); // Delete file after sending
+//       });
+//     });
+//   } catch (err) {
+//     console.error("PDF Generation Error:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: err.message || "Internal Server Error during PDF generation",
+//     });
+//   }
+// };
+
 export const generateEventReport = async (req, res) => {
   try {
     const { eventId } = req.params;
 
+    // 🔐 Auth check
     const coordinator = await Coordinator.findById(req.user._id);
     if (!coordinator) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
+    // 📦 Fetch event
     const event = await Event.findById(eventId)
       .populate("assignedTeacher", "name")
       .populate("assignedCoordinators", "name")
@@ -489,18 +648,15 @@ export const generateEventReport = async (req, res) => {
         .json({ success: false, message: "Event not found" });
     }
 
-    // ensure coordinator can only generate reports for events in their institution
+    // 🏫 Ensure event belongs to coordinator's institution
     if (String(event.institution) !== String(coordinator.institution)) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message:
-            "Cannot generate report for an event outside your institution",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Cannot generate report for an event outside your institution",
+      });
     }
 
-    // Normalize data (make sure they are arrays)
+    // 🧩 Normalize data arrays
     const assignedCoordinators = Array.isArray(event.assignedCoordinators)
       ? event.assignedCoordinators
       : event.assignedCoordinators
@@ -519,10 +675,47 @@ export const generateEventReport = async (req, res) => {
       ? [event.participants]
       : [];
 
-    // Ensure folder exists
+    // 🧠 Generate AI summary
+    let aiSummary = "";
+    try {
+      const input = `
+        Event Title: ${event.title}
+        Description: ${event.description || "No description provided."}
+        Location: ${event.location}
+        Duration: ${event.hours} hours
+        Coordinators: ${
+          assignedCoordinators.map((c) => c.name).join(", ") ||
+          "NSS Coordinators"
+        }
+        Teachers: ${
+          assignedTeachers.map((t) => t.name).join(", ") || "Teachers"
+        }
+        Participants: ${
+          participants.map((p) => p.name).join(", ") || "Volunteers"
+        }
+        Generate a short, professional summary for this NSS event.
+      `;
+
+      const summaryRes = await hf.summarization({
+        model: "facebook/bart-large-cnn",
+        inputs: input,
+        parameters: { max_length: 200, min_length: 60 },
+      });
+
+      aiSummary =
+        summaryRes?.summary_text ||
+        summaryRes?.[0]?.summary_text ||
+        "Summary could not be generated.";
+    } catch (aiErr) {
+      console.error("AI Summary Generation Error:", aiErr);
+      aiSummary = "AI summary unavailable due to inference issue.";
+    }
+
+    // 📁 Ensure folder exists
     const uploadsDir = path.join("uploads");
     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
+    // 🧾 PDF setup
     const fileName = `event_report_${event._id}.pdf`;
     const filePath = path.join(uploadsDir, fileName);
 
@@ -530,18 +723,19 @@ export const generateEventReport = async (req, res) => {
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    // Header
+    // -----------------------------
+    // 🏷️ HEADER
+    // -----------------------------
     doc.fontSize(20).text("Event Report", { align: "center", underline: true });
     doc.moveDown(1.5);
 
-    // Section: Basic Event Info
+    // 📄 EVENT DETAILS
     doc.fontSize(12).text("Event Details", { underline: true });
     doc.moveDown(0.5);
 
     const tableLeftX = 60;
     const valueLeftX = 200;
     const rowHeight = 20;
-
     const drawRow = (label, value, yOffset) => {
       doc.font("Helvetica-Bold").text(`${label}:`, tableLeftX, yOffset);
       doc.font("Helvetica").text(value || "N/A", valueLeftX, yOffset);
@@ -555,13 +749,17 @@ export const generateEventReport = async (req, res) => {
       currentY + rowHeight
     );
     drawRow("Location", event.location, currentY + 2 * rowHeight);
-    drawRow("Hours", event.hours.toString(), currentY + 3 * rowHeight);
+    drawRow(
+      "Hours",
+      event.hours?.toString() || "N/A",
+      currentY + 3 * rowHeight
+    );
     drawRow("Status", event.status || "Upcoming", currentY + 4 * rowHeight);
 
     currentY += 5 * rowHeight + 10;
     doc.moveDown();
 
-    // Coordinators and Teachers
+    // 👥 TEAM DETAILS
     doc.fontSize(12).text("Team Details", { underline: true });
     currentY = doc.y + 5;
 
@@ -571,33 +769,36 @@ export const generateEventReport = async (req, res) => {
 
     drawRow("Coordinators", coordinators, currentY);
     drawRow("Teachers", teachers, currentY + rowHeight);
-
     doc.moveDown(2);
 
-    // Participants Table
+    // 🧠 AI SUMMARY
+    doc.fontSize(12).text("AI Generated Summary", { underline: true });
+    doc.moveDown(0.5);
+    doc.font("Helvetica").text(aiSummary, { align: "justify" });
+    doc.moveDown(1.5);
+
+    // 🧑‍🤝‍🧑 VOLUNTEERS TABLE
     doc.fontSize(12).text("Volunteers", { underline: true });
     doc.moveDown(0.5);
 
     const startY = doc.y + 5;
-    const col1 = 60; // #
-    const col2 = 100; // Name
-    const col3 = 300; // Department
+    const col1 = 60,
+      col2 = 100,
+      col3 = 300;
 
-    // Table header
     doc
       .font("Helvetica-Bold")
       .text("No.", col1, startY)
       .text("Name", col2, startY)
       .text("Department", col3, startY);
-
     doc
       .moveTo(60, startY + 15)
       .lineTo(500, startY + 15)
       .stroke();
 
-    // Table rows
     doc.font("Helvetica");
     let y = startY + 25;
+
     if (participants.length > 0) {
       participants.forEach((p, i) => {
         doc
@@ -611,19 +812,19 @@ export const generateEventReport = async (req, res) => {
       y += 20;
     }
 
-    // Total count
+    // ➕ TOTAL VOLUNTEERS
     doc.moveDown(1.5);
     doc
       .font("Helvetica-Bold")
       .text(`Total Volunteers: ${participants.length}`, { align: "right" });
 
-    // Finalize and download
+    // 🏁 END PDF
     doc.end();
 
     stream.on("finish", () => {
       res.download(filePath, fileName, (err) => {
         if (err) console.error("File download error:", err);
-        fs.unlink(filePath, () => {}); // Delete file after sending
+        fs.unlink(filePath, () => {}); // cleanup
       });
     });
   } catch (err) {
@@ -633,8 +834,7 @@ export const generateEventReport = async (req, res) => {
       message: err.message || "Internal Server Error during PDF generation",
     });
   }
-};
-
+}; 
 // update event status (simple version)
 export const updateEventStatus = async (req, res) => {
   try {
@@ -660,12 +860,10 @@ export const updateEventStatus = async (req, res) => {
 
     // Ensure event belongs to coordinator's institution
     if (String(event.institution) !== String(coordinator.institution)) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Cannot update an event outside your institution",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Cannot update an event outside your institution",
+      });
     }
 
     event.status = status;
@@ -935,8 +1133,6 @@ export const getCoordinatorProfile = async (req, res) => {
   }
 };
 
-
-
 // manage student (get students from the institute)
 export const getAllStudentsByCoordinator = async (req, res) => {
   try {
@@ -967,7 +1163,6 @@ export const getAllStudentsByCoordinator = async (req, res) => {
   }
 };
 
-
 export const getStudentById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -983,9 +1178,10 @@ export const getStudentById = async (req, res) => {
     }).select("-password");
 
     if (!student) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found in your institution" });
+      return res.status(404).json({
+        success: false,
+        message: "Student not found in your institution",
+      });
     }
 
     res.json({ success: true, student });
@@ -993,7 +1189,6 @@ export const getStudentById = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 export const updateStudentByCoordinator = async (req, res) => {
   try {
@@ -1012,9 +1207,10 @@ export const updateStudentByCoordinator = async (req, res) => {
     ).select("-password");
 
     if (!student) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found in your institution" });
+      return res.status(404).json({
+        success: false,
+        message: "Student not found in your institution",
+      });
     }
 
     res.json({
@@ -1027,7 +1223,6 @@ export const updateStudentByCoordinator = async (req, res) => {
   }
 };
 
-
 // Get all events created/managed by the logged-in coordinator
 export const getMyEvents = async (req, res) => {
   try {
@@ -1038,7 +1233,7 @@ export const getMyEvents = async (req, res) => {
 
     const myEvents = await Event.find({
       assignedCoordinators: coordinator._id, // events where this coordinator is assigned
-      institution: coordinator.institution,  // within same institution
+      institution: coordinator.institution, // within same institution
     })
       .populate("participants", "name department role")
       .populate("assignedTeacher", "name email")
@@ -1053,8 +1248,6 @@ export const getMyEvents = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
 
 // Edit / Update an event created by the coordinator
 export const editEvent = async (req, res) => {
@@ -1071,7 +1264,9 @@ export const editEvent = async (req, res) => {
     // find event
     const event = await Event.findById(eventId);
     if (!event) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     // ensure the event belongs to this coordinator's institution
@@ -1124,10 +1319,6 @@ export const editEvent = async (req, res) => {
   }
 };
 
-
-
-
-
 export const assignTeacherToEvent = async (req, res) => {
   try {
     const { eventId, teacherIds } = req.body;
@@ -1146,7 +1337,9 @@ export const assignTeacherToEvent = async (req, res) => {
 
     const event = await Event.findById(eventId);
     if (!event)
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
 
     if (String(event.institution) !== String(coordinator.institution)) {
       return res.status(403).json({
@@ -1161,9 +1354,10 @@ export const assignTeacherToEvent = async (req, res) => {
     });
 
     if (!teacher)
-      return res
-        .status(404)
-        .json({ success: false, message: "Teacher not found in your institution" });
+      return res.status(404).json({
+        success: false,
+        message: "Teacher not found in your institution",
+      });
 
     event.assignedTeacher = teacher._id;
     await event.save();
@@ -1217,8 +1411,6 @@ export const getAllEventsByCoordinator = async (req, res) => {
   }
 };
 
-
-
 // ✅ 2️⃣ Get All Teachers in Coordinator’s Institution
 export const getAllTeachersByCoordinator = async (req, res) => {
   try {
@@ -1247,13 +1439,14 @@ export const getAllTeachersByCoordinator = async (req, res) => {
   }
 };
 
-
 // DELETE /api/coordinator/unassign-teacher
 export const unassignTeacherFromEvent = async (req, res) => {
   try {
     const { eventId, teacherId } = req.body;
     if (!eventId || !teacherId) {
-      return res.status(400).json({ message: "eventId and teacherId required" });
+      return res
+        .status(400)
+        .json({ message: "eventId and teacherId required" });
     }
 
     const coordinator = await Coordinator.findById(req.user._id);
@@ -1282,16 +1475,15 @@ export const unassignTeacherFromEvent = async (req, res) => {
   }
 };
 
-
-
 // Unassign volunteer(s) from an event
 export const unassignVolunteerFromEvent = async (req, res) => {
   try {
     const { eventId, volunteerIds } = req.body;
     if (!eventId || !Array.isArray(volunteerIds) || volunteerIds.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "eventId and volunteerIds are required" });
+      return res.status(400).json({
+        success: false,
+        message: "eventId and volunteerIds are required",
+      });
     }
 
     const coordinator = await Coordinator.findById(req.user._id);
@@ -1301,14 +1493,17 @@ export const unassignVolunteerFromEvent = async (req, res) => {
 
     const event = await Event.findById(eventId);
     if (!event) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     // Ensure the event belongs to the coordinator's institution
     if (String(event.institution) !== String(coordinator.institution)) {
       return res.status(403).json({
         success: false,
-        message: "You cannot unassign volunteers from another institution's event",
+        message:
+          "You cannot unassign volunteers from another institution's event",
       });
     }
 
@@ -1320,9 +1515,10 @@ export const unassignVolunteerFromEvent = async (req, res) => {
     });
 
     if (!volunteers.length) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No valid volunteers found in your institution" });
+      return res.status(400).json({
+        success: false,
+        message: "No valid volunteers found in your institution",
+      });
     }
 
     // Remove volunteers from event participants
@@ -1352,8 +1548,6 @@ export const unassignVolunteerFromEvent = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
 
 // Get all volunteers under the coordinator's institution
 export const getAllVolunteers = async (req, res) => {

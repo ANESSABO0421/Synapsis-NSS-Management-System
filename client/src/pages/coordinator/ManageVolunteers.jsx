@@ -7,7 +7,6 @@ import {
   FiUserMinus,
   FiUsers,
   FiCalendar,
-  FiCheckCircle,
 } from "react-icons/fi";
 
 const ManageVolunteers = () => {
@@ -15,14 +14,12 @@ const ManageVolunteers = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedVolunteers, setSelectedVolunteers] = useState([]);
+  const [assignedVolunteers, setAssignedVolunteers] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
-
   const axiosConfig = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   };
 
   // Fetch volunteers
@@ -53,12 +50,33 @@ const ManageVolunteers = () => {
     }
   };
 
+  // Fetch assigned volunteers for a selected event
+  const fetchAssignedVolunteers = async (eventId) => {
+    if (!eventId) return;
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/api/coordinator/events/${eventId}`,
+        axiosConfig
+      );
+      const assigned = res.data?.event?.participants || [];
+      setAssignedVolunteers(assigned);
+    } catch (error) {
+      console.error("Assigned Fetch Error:", error);
+      setAssignedVolunteers([]);
+    }
+  };
+
   useEffect(() => {
     fetchVolunteers();
     fetchEvents();
   }, []);
 
-  // Handle volunteer selection
+  // refetch assigned volunteers when event changes
+  useEffect(() => {
+    fetchAssignedVolunteers(selectedEvent);
+    setSelectedVolunteers([]);
+  }, [selectedEvent]);
+
   const handleVolunteerSelection = (id) => {
     setSelectedVolunteers((prev) =>
       prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
@@ -71,7 +89,6 @@ const ManageVolunteers = () => {
       toast.warning("Please select an event and at least one volunteer");
       return;
     }
-
     try {
       setLoading(true);
       const res = await axios.post(
@@ -84,8 +101,7 @@ const ManageVolunteers = () => {
       );
       toast.success(res.data.message || "Volunteers assigned successfully!");
       setSelectedVolunteers([]);
-      setSelectedEvent("");
-      fetchEvents();
+      fetchAssignedVolunteers(selectedEvent);
     } catch (error) {
       console.error("Assign Error:", error);
       toast.error(error.response?.data?.message || "Error assigning volunteers");
@@ -113,8 +129,7 @@ const ManageVolunteers = () => {
       );
       toast.success(res.data.message || "Volunteers unassigned successfully!");
       setSelectedVolunteers([]);
-      setSelectedEvent("");
-      fetchEvents();
+      fetchAssignedVolunteers(selectedEvent);
     } catch (error) {
       console.error("Unassign Error:", error);
       toast.error(error.response?.data?.message || "Error unassigning volunteers");
@@ -234,31 +249,40 @@ const ManageVolunteers = () => {
                 </tr>
               </thead>
               <tbody>
-                {volunteers.map((v, index) => (
-                  <motion.tr
-                    key={v._id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.03 }}
-                    className="hover:bg-green-50 border-b"
-                  >
-                    <td className="px-6 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedVolunteers.includes(v._id)}
-                        onChange={() => handleVolunteerSelection(v._id)}
-                        className="w-4 h-4 accent-green-600"
-                      />
-                    </td>
-                    <td className="px-6 py-3 font-medium text-gray-800">
-                      {v.name}
-                    </td>
-                    <td className="px-6 py-3 text-gray-700">{v.email}</td>
-                    <td className="px-6 py-3 text-gray-600">
-                      {v.department || "—"}
-                    </td>
-                  </motion.tr>
-                ))}
+                {volunteers.map((v, index) => {
+                  const alreadyAssigned = assignedVolunteers.some(
+                    (a) => a._id === v._id
+                  );
+
+                  return (
+                    <motion.tr
+                      key={v._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className={`border-b ${
+                        alreadyAssigned ? "bg-gray-100 opacity-60" : "hover:bg-green-50"
+                      }`}
+                    >
+                      <td className="px-6 py-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedVolunteers.includes(v._id)}
+                          onChange={() => handleVolunteerSelection(v._id)}
+                          className="w-4 h-4 accent-green-600"
+                          disabled={alreadyAssigned}
+                        />
+                      </td>
+                      <td className="px-6 py-3 font-medium text-gray-800">
+                        {v.name}
+                      </td>
+                      <td className="px-6 py-3 text-gray-700">{v.email}</td>
+                      <td className="px-6 py-3 text-gray-600">
+                        {v.department || "—"}
+                      </td>
+                    </motion.tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
