@@ -10,7 +10,7 @@ const Gallery = () => {
         "http://localhost:3000/api/events/getalleventimage"
       );
       if (res.data.success) {
-        setImages(res.data.images);
+        setImages(res.data.images.slice(0,3));
       }
     } catch (err) {
       console.error("Error fetching images:", err);
