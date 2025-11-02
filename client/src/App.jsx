@@ -29,6 +29,7 @@ import ManageTeacher from "./pages/coordinator/ManageTeacher";
 import ManageVolunteers from "./pages/coordinator/ManageVolunteers";
 import EventReportGenerator from "./pages/coordinator/EventReportGenerator";
 import RecommendGraceMark from "./pages/coordinator/RecommendGraceMark";
+import TeacherLayout from "./pages/teacher/teacherLayout";
 
 const App = () => {
   return (
@@ -75,6 +76,10 @@ const App = () => {
           <Route path="recommendgracemark" element={<RecommendGraceMark />} />
         </Route>
 
+        <Route path="/teacherLayout" element={<TeacherLayout />}>
+            
+        
+        </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>
     </>
