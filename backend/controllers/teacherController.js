@@ -9,6 +9,7 @@ import fs from "fs";
 import path from "path";
 import Event from "../models/Event.js";
 import Institution from "../models/Institution.js";
+import Coordinator from "../models/Coordinator.js";
 
 const generateToken = (id) =>
   jwt.sign({ id, role: "teacher" }, process.env.JWT_SECRET, {
@@ -470,6 +471,156 @@ export const rejectInDashboardTeacher = async (req, res) => {
       message: "teacher rejected successfully",
       teacher,
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const teacherOverview = async (req, res) => {
+  try {
+    const teacherId = req.user._id; // assuming added by JWT middleware
+    const teacher = await Teacher.findById(teacherId).populate("institution");
+
+    if (!teacher) {
+      return res.status(404).json({
+        success: false,
+        message: "Teacher not found",
+      });
+    }
+
+    const institutionId = teacher.institution?._id;
+    if (!institutionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Teacher is not linked to any institution",
+      });
+    }
+
+    // 🔹 Fetch institution events
+    const institutionEvents = await Event.find({ institution: institutionId });
+
+    // 🔹 Fetch events assigned specifically to this teacher
+    const assignedEvents = await Event.find({
+      assignedTeacher: teacherId,
+    }).sort({ createdAt: -1 });
+
+    // 🔹 Event Stats
+    const totalEvents = assignedEvents.length;
+    const completedEvents = assignedEvents.filter(
+      (e) => e.status?.toLowerCase() === "completed"
+    ).length;
+    const upcomingEvents = assignedEvents.filter(
+      (e) => e.status?.toLowerCase() === "upcoming"
+    ).length;
+
+    // 🔹 Students under same institution
+    const students = await Student.find({ institution: institutionId });
+    const totalStudents = students.length;
+    const volunteers = students.filter(
+      (s) => s.role?.toLowerCase() === "volunteer"
+    ).length;
+
+    // 🔹 Grace Mark Recommendations
+    // --- Grace Mark Recommendations ---
+  // --- Grace Mark Recommendations ---
+const recommendations = students.filter((s) => {
+  const rec = s.pendingGraceRecommendation;
+  if (!rec || !rec.assignedTeachers || !Array.isArray(rec.assignedTeachers)) return false;
+
+  // check if teacher is in assignedTeachers array
+  return rec.assignedTeachers.some(
+    (t) => t.toString() === teacherId.toString()
+  );
+});
+
+// total recommendation count for this teacher
+const totalRecommendations = recommendations.length;
+
+// status-based filtering
+const pendingRecommendations = recommendations.filter(
+  (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "pending"
+).length;
+
+const approvedRecommendations = recommendations.filter(
+  (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "approved"
+).length;
+
+const rejectedRecommendations = recommendations.filter(
+  (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "rejected"
+).length;
+
+
+    // 🔹 Grace marks given (approved)
+    const graceMarksGiven = approvedRecommendations;
+
+    // 🔹 Recent Events (limit 5)
+    const recentEvents = assignedEvents.slice(0, 5).map((event) => ({
+      _id: event._id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      location: event.location,
+      status: event.status,
+      hours: event.hours,
+      createdAt: event.createdAt,
+    }));
+
+    // 🔹 Prepare overview response
+    const overview = {
+      teacherName: teacher.name,
+      institutionName: teacher.institution?.name || "N/A",
+      totalStudents,
+      volunteers,
+      totalEvents,
+      completedEvents,
+      upcomingEvents,
+      institutionEvents: institutionEvents.length,
+      graceMarksGiven,
+      graceMarkStats: {
+        total: totalRecommendations,
+        pending: pendingRecommendations,
+        approved: approvedRecommendations,
+        rejected: rejectedRecommendations,
+      },
+      recentEvents,
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: overview,
+    });
+  } catch (error) {
+    console.error("❌ Error in teacherOverview:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later.",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+// pending recomendtaion
+export const getPendingRecommendations = async (req, res) => {
+  try {
+    const teacherId = req.user._id;
+    const students = await Student.find({
+      "pendingGraceRecommendation.assignedTeachers": teacherId,
+      "pendingGraceRecommendation.status": "pending",
+    });
+
+    const data = students.map((s) => ({
+      id: s._id,
+      name: s.name,
+      marks: s.pendingGraceRecommendation.marks,
+      reason: s.pendingGraceRecommendation.reason,
+      date: s.pendingGraceRecommendation.date,
+      status: s.pendingGraceRecommendation.status,
+    }));
+
+    res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

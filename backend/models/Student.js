@@ -39,6 +39,7 @@ const StudentSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Coordinator",
       },
+      assignedTeachers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Teacher" }], 
       status: {
         type: String,
         enum: ["pending", "approved", "rejected"],

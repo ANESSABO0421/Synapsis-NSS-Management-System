@@ -78,16 +78,7 @@ const TeacherSidebar = ({ setIsOpen }) => {
         ))}
       </nav>
 
-      {/* Logout Button */}
-      <div className="p-4 border-t border-green-500">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 text-white py-2 rounded-xl transition-all"
-        >
-          <MdLogout size={18} />
-          Logout
-        </button>
-      </div>
+    
     </div>
   );
 };

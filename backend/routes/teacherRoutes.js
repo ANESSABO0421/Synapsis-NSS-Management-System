@@ -13,10 +13,15 @@ import {
   approveTeacher,
   getAllTeacher,
   rejectInDashboardTeacher,
+  // teacherOverview,
+  // getTeacherDashboard,
+  teacherOverview,
+  getPendingRecommendations,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
   adminOnly,
+  coordinatorOnly,
   protect,
   teacherOnly,
 } from "../middleware/authMiddleware.js";
@@ -76,6 +81,20 @@ teacherRoute.put(
 );
 
 teacherRoute.get("/getallteacher", protect, adminOnly, getAllTeacher);
-teacherRoute.put("/rejectteacherindashboard/:id", protect, adminOnly,rejectInDashboardTeacher);
+teacherRoute.put(
+  "/rejectteacherindashboard/:id",
+  protect,
+  adminOnly,
+  rejectInDashboardTeacher
+);
+
+teacherRoute.get("/overview", protect, teacherOnly, teacherOverview);
+
+teacherRoute.get(
+  "/pending-recommendations",
+  protect,
+  teacherOnly,
+  getPendingRecommendations
+);
 
 export default teacherRoute;

@@ -460,27 +460,130 @@ export const assignVoulnteerToEvent = async (req, res) => {
 // };
 
 // 📘 Grace Mark Recommendation (Coordinator recommends)
+// export const recommendedGraceMark = async (req, res) => {
+//   try {
+//     const { studentId, marks, reason } = req.body;
+
+//     if (!studentId || marks === undefined) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "studentId and marks are required",
+//       });
+//     }
+
+//     // Verify coordinator identity
+//     const coordinator = await Coordinator.findById(req.user._id);
+//     if (!coordinator) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Unauthorized access",
+//       });
+//     }
+
+//     // Check if student belongs to same institution
+//     const student = await Student.findOne({
+//       _id: studentId,
+//       institution: coordinator.institution,
+//     });
+
+//     if (!student) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Student not found in your institution",
+//       });
+//     }
+
+//     // ✅ Ensure student is an NSS volunteer
+//     if (student.role!=="volunteer") {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This student is not an NSS volunteer",
+//       });
+//     }
+
+//     // ✅ Check if already has pending recommendation
+//     if (
+//       student.pendingGraceRecommendation &&
+//       student.pendingGraceRecommendation.status === "pending"
+//     ) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This student already has a pending grace mark request",
+//       });
+//     }
+
+//     // ✅ Optional: check if student has completed at least one event
+//     const completedEvents = await Event.find({
+//       participants: student._id,
+//       status: "Completed",
+//     });
+
+//     if (completedEvents.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Student has not participated in any completed NSS events",
+//       });
+//     }
+
+//     // ✅ Save recommendation in student document
+//     student.pendingGraceRecommendation = {
+//       marks: Number(marks),
+//       reason: reason || "Recommended by coordinator",
+//       recommendedBy: req.user._id,
+//       status: "pending",
+//       date: new Date(),
+//     };
+//     await student.save();
+
+//     // ✅ Log recommendation in coordinator record
+//     await Coordinator.findByIdAndUpdate(req.user._id, {
+//       $push: {
+//         graceRecommendations: {
+//           student: studentId,
+//           marks: Number(marks),
+//           reason: reason || "",
+//           date: new Date(),
+//           status: "pending",
+//         },
+//       },
+//     });
+
+//     res.json({
+//       success: true,
+//       message: "Grace mark recommendation submitted successfully",
+//       student,
+//     });
+//   } catch (error) {
+//     console.error("Grace mark recommendation error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
 export const recommendedGraceMark = async (req, res) => {
   try {
     const { studentId, marks, reason } = req.body;
 
+    // --- Basic validation
     if (!studentId || marks === undefined) {
       return res.status(400).json({
         success: false,
-        message: "studentId and marks are required",
+        message: "Student ID and marks are required",
       });
     }
 
-    // Verify coordinator identity
+    // --- Verify coordinator
     const coordinator = await Coordinator.findById(req.user._id);
     if (!coordinator) {
       return res.status(403).json({
         success: false,
-        message: "Unauthorized access",
+        message: "Unauthorized: Coordinator not found",
       });
     }
 
-    // Check if student belongs to same institution
+    // --- Find student within coordinator’s institution
     const student = await Student.findOne({
       _id: studentId,
       institution: coordinator.institution,
@@ -493,15 +596,15 @@ export const recommendedGraceMark = async (req, res) => {
       });
     }
 
-    // ✅ Ensure student is an NSS volunteer
-    if (student.role!=="volunteer") {
+    // --- Check volunteer role
+    if (student.role !== "volunteer") {
       return res.status(400).json({
         success: false,
         message: "This student is not an NSS volunteer",
       });
     }
 
-    // ✅ Check if already has pending recommendation
+    // --- Prevent duplicate pending recommendations
     if (
       student.pendingGraceRecommendation &&
       student.pendingGraceRecommendation.status === "pending"
@@ -512,7 +615,7 @@ export const recommendedGraceMark = async (req, res) => {
       });
     }
 
-    // ✅ Optional: check if student has completed at least one event
+    // --- Find completed events for the student
     const completedEvents = await Event.find({
       participants: student._id,
       status: "Completed",
@@ -525,17 +628,35 @@ export const recommendedGraceMark = async (req, res) => {
       });
     }
 
-    // ✅ Save recommendation in student document
+    // --- Collect all assigned teachers from completed events
+    const assignedTeacherIds = new Set();
+    for (const event of completedEvents) {
+      if (Array.isArray(event.assignedTeacher)) {
+        event.assignedTeacher.forEach((t) =>
+          assignedTeacherIds.add(t.toString())
+        );
+      } else if (event.assignedTeacher) {
+        assignedTeacherIds.add(event.assignedTeacher.toString());
+      }
+    }
+
+    const assignedTeachers = Array.from(assignedTeacherIds);
+
+    // --- Save pending grace recommendation in student record
     student.pendingGraceRecommendation = {
       marks: Number(marks),
       reason: reason || "Recommended by coordinator",
-      recommendedBy: req.user._id,
+      recommendedBy: req.user._id, // coordinator ID
+      assignedTeachers,
       status: "pending",
       date: new Date(),
     };
+
+    // ✅ Force Mongoose to register nested changes if schema not strict
+    student.markModified("pendingGraceRecommendation");
     await student.save();
 
-    // ✅ Log recommendation in coordinator record
+    // --- Also record this recommendation in coordinator’s log
     await Coordinator.findByIdAndUpdate(req.user._id, {
       $push: {
         graceRecommendations: {
@@ -548,20 +669,25 @@ export const recommendedGraceMark = async (req, res) => {
       },
     });
 
-    res.json({
+    // --- Response
+    return res.status(200).json({
       success: true,
       message: "Grace mark recommendation submitted successfully",
-      student,
+      student: {
+        id: student._id,
+        name: student.name,
+        pendingGraceRecommendation: student.pendingGraceRecommendation,
+      },
+      assignedTeachers,
     });
   } catch (error) {
     console.error("Grace mark recommendation error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Server error: " + error.message,
     });
   }
 };
-
 
 // pdf genrateion for the coordinator
 // export const generateEventReport = async (req, res) => {
@@ -938,7 +1064,7 @@ export const generateEventReport = async (req, res) => {
       message: err.message || "Internal Server Error during PDF generation",
     });
   }
-}; 
+};
 // update event status (simple version)
 export const updateEventStatus = async (req, res) => {
   try {

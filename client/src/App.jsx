@@ -30,6 +30,7 @@ import ManageVolunteers from "./pages/coordinator/ManageVolunteers";
 import EventReportGenerator from "./pages/coordinator/EventReportGenerator";
 import RecommendGraceMark from "./pages/coordinator/RecommendGraceMark";
 import TeacherLayout from "./pages/teacher/teacherLayout";
+import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 
 const App = () => {
   return (
@@ -77,8 +78,7 @@ const App = () => {
         </Route>
 
         <Route path="/teacherLayout" element={<TeacherLayout />}>
-            
-        
+          <Route index element={<TeacherDashboard />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>
