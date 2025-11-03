@@ -17,6 +17,9 @@ import {
   // getTeacherDashboard,
   teacherOverview,
   getPendingRecommendations,
+  getMyEvents,
+  uploadEventImages,
+  editEvent,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
@@ -96,5 +99,19 @@ teacherRoute.get(
   teacherOnly,
   getPendingRecommendations
 );
+
+teacherRoute.get("/teachermyevents", protect, teacherOnly, getMyEvents);
+
+// Image upload route
+teacherRoute.post(
+  "/:id/uploadimages",
+  upload.array("images", 10),
+  protect,
+  teacherOnly,
+  uploadEventImages
+);
+
+// Edit event route
+teacherRoute.put("/:id/edit", protect, teacherOnly, editEvent);
 
 export default teacherRoute;

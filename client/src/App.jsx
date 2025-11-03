@@ -80,7 +80,7 @@ const App = () => {
 
         <Route path="/teacherLayout" element={<TeacherLayout />}>
           <Route index element={<TeacherDashboard />} />
-          <Route path="myevents" element={<MyEventsTeacher />} />
+          <Route path="myeventsteacher" element={<MyEventsTeacher />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>

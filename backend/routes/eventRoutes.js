@@ -13,7 +13,7 @@ import {
   updateEvent,
   uploadEventImages,
 } from "../controllers/eventController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, teacherOnly } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 
 const eventRouter = express.Router();
@@ -37,6 +37,8 @@ eventRouter.put("/updateevent/:id", updateEvent);
 eventRouter.post(
   "/:id/uploadimages",
   upload.array("images", 10),
+  protect,
+  teacherOnly,
   uploadEventImages
 );
 
