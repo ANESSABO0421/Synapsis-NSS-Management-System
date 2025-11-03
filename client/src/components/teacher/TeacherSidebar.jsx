@@ -19,7 +19,7 @@ const TeacherSidebar = ({ setIsOpen }) => {
       icon: <FaChalkboardTeacher />,
     },
     {
-      path: "/teacherLayout/events",
+      path: "/teacherLayout/myevents",
       label: "My Events",
       icon: <MdEvent />,
     },
