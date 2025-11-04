@@ -32,6 +32,7 @@ import RecommendGraceMark from "./pages/coordinator/RecommendGraceMark";
 import TeacherLayout from "./pages/teacher/teacherLayout";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import MyEventsTeacher from "./pages/teacher/MyEventsTeacher";
+import AttendanceByTeacher from "./pages/teacher/AttendanceByTeacher";
 
 const App = () => {
   return (
@@ -81,6 +82,7 @@ const App = () => {
         <Route path="/teacherLayout" element={<TeacherLayout />}>
           <Route index element={<TeacherDashboard />} />
           <Route path="myeventsteacher" element={<MyEventsTeacher />} />
+          <Route path="attendanceByTeacher" element={<AttendanceByTeacher />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>

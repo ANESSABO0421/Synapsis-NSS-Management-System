@@ -6,7 +6,7 @@ import {
   verifyOtp,
   markAttendance,
   assignGraceMark,
-  genrateAttendncePdfs,
+  generateAttendancePdf,
   approveRecommendedGraceMark,
   rejectPendingTeacher,
   getAllPendingTeacher,
@@ -52,7 +52,7 @@ teacherRoute.get(
   "/attendance/pdf/:eventId",
   protect,
   teacherOnly,
-  genrateAttendncePdfs
+  generateAttendancePdf
 );
 
 // Grace marks

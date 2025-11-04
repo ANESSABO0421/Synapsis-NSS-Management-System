@@ -10,11 +10,19 @@ import path from "path";
 import Event from "../models/Event.js";
 import Institution from "../models/Institution.js";
 import Coordinator from "../models/Coordinator.js";
+import { HfInference } from "@huggingface/inference";
+import OpenAI from "openai";
 
 const generateToken = (id) =>
   jwt.sign({ id, role: "teacher" }, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
+
+const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
+
+const openai = new OpenAI({
+  apiKey: process.env.OPEN_AI_KEY,
+});
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 
@@ -266,57 +274,240 @@ export const markAttendance = async (req, res) => {
 };
 
 // genarate attendance pdf
-export const genrateAttendncePdfs = async (req, res) => {
+// export const genrateAttendncePdfs = async (req, res) => {
+//   try {
+//     const event = await Event.findById(req.params.eventId).populate(
+//       // inside events attendance arrays inside student only take name department graceMarks
+//       "attendance.student",
+//       "name department graceMarks"
+//     );
+//     if (!event) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Event not found" });
+//     }
+
+//     const doc = new PDFDocument({ margin: 40 });
+//     const fileName = `attandance_${event._id}.pdf`;
+//     const filePath = path.join("uploads", fileName);
+
+//     if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
+
+//     const stream = fs.createWriteStream(filePath);
+//     doc.pipe(stream);
+
+//     doc
+//       .fontSize(20)
+//       .text(`Attendance Report - ${event.title}`, { align: "center" });
+
+//     doc.moveDown();
+//     doc.fontSize(12).text(`Date:${new Date(event.date).toLocaleDateString()}`);
+//     doc.text(`Location: ${event.location}`);
+//     doc.text(`Hours: ${event.hours}`);
+//     doc.moveDown();
+//     doc.text(
+//       "No.  Name                         Dept          Status      GraceMarks"
+//     );
+//     (event.attendance || []).forEach((a, i) => {
+//       const s = a.student || {};
+//       doc.text(
+//         `${i + 1}.     ${s.name || "-"}            ${
+//           s.department || "-"
+//         }              ${a.status}      ${s.graceMarks || 0}`
+//       );
+//     });
+//     doc.end();
+//     stream.on("finish", () => {
+//       res.download(filePath, fileName, () => fs.unlinkSync(filePath));
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+export const generateAttendancePdf = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId).populate(
-      // inside events attendance arrays inside student only take name department graceMarks
       "attendance.student",
       "name department graceMarks"
     );
     if (!event) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
+      return res.status(404).json({ success: false, message: "Event not found" });
     }
 
-    const doc = new PDFDocument({ margin: 40 });
-    const fileName = `attandance_${event._id}.pdf`;
-    const filePath = path.join("uploads", fileName);
+    const total = event.attendance.length;
+    const present = event.attendance.filter((a) => a.status === "Present").length;
+    const percent = total ? ((present / total) * 100).toFixed(2) : 0;
 
-    if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
+    // === AI Insight ===
+    let aiInsight = "AI insight could not be generated.";
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You write formal, impressive NSS-style attendance insights." },
+          {
+            role: "user",
+            content: `Generate a 3-sentence formal paragraph for an NSS attendance report based on:
+Event: ${event.title}
+Date: ${new Date(event.date).toDateString()}
+Location: ${event.location}
+Attendance Rate: ${percent}%
+Total Volunteers: ${total}
+Focus on social impact, volunteer engagement, and community value.`,
+          },
+        ],
+      });
+      aiInsight = completion.choices[0]?.message?.content?.trim() || aiInsight;
+    } catch (err) {
+      console.error("AI Error:", err.message);
+    }
 
+    // === PDF GENERATION ===
+    const doc = new PDFDocument({ margin: 50 });
+    const folder = "uploads";
+    if (!fs.existsSync(folder)) fs.mkdirSync(folder);
+
+    const fileName = `attendance_${event._id}.pdf`;
+    const filePath = path.join(folder, fileName);
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    doc
-      .fontSize(20)
-      .text(`Attendance Report - ${event.title}`, { align: "center" });
+    const pageWidth = doc.page.width;
+    const pageHeight = doc.page.height;
 
-    doc.moveDown();
-    doc.fontSize(12).text(`Date:${new Date(event.date).toLocaleDateString()}`);
-    doc.text(`Location: ${event.location}`);
-    doc.text(`Hours: ${event.hours}`);
-    doc.moveDown();
-    doc.text(
-      "No.  Name                         Dept          Status      GraceMarks"
-    );
-    (event.attendance || []).forEach((a, i) => {
-      const s = a.student || {};
-      doc.text(
-        `${i + 1}.     ${s.name || "-"}            ${
-          s.department || "-"
-        }              ${a.status}      ${s.graceMarks || 0}`
-      );
+    // === GREEN THEME (Replaced Blue) ===
+    const primaryColor = "#2e7d32";    // Deep Green
+    const borderColor = "#4caf50";     // Light Green
+    const lightBg = "#e8f5e9";         // Very Light Green
+
+    // === HEADER BAR (Now with Event Name & Green) ===
+    doc.rect(0, 0, pageWidth, 80).fill(primaryColor);
+    doc
+      .fillColor("#ffffff")
+      .font("Helvetica-Bold")
+      .fontSize(22)
+      .text(event.title.toUpperCase(), 0, 28, { align: "center" }); // ← EVENT NAME
+    doc
+      .fontSize(13)
+      .font("Helvetica")
+      .text("Attendance Report", 0, 55, { align: "center" });
+
+    // === BORDER BOX ===
+    doc.lineWidth(1.2).strokeColor(borderColor);
+    doc.rect(40, 100, pageWidth - 80, pageHeight - 160).stroke();
+
+    // === EVENT DETAILS ===
+    doc.fillColor("black").font("Helvetica").fontSize(12);
+    doc.text(`Date: ${new Date(event.date).toLocaleDateString()}`, 60, 120);
+    doc.text(`Location: ${event.location}`, 60, 140);
+    doc.text(`Hours: ${event.hours || "-"} hrs`, 60, 160);
+    doc.text(`Total Volunteers: ${total}`, 60, 180);
+    doc.text(`Attendance Rate: ${percent}%`, 60, 200);
+
+    // === AI INSIGHT SECTION ===
+    const aiStartY = 240;
+    doc.font("Helvetica-Bold").fontSize(14).fillColor(primaryColor).text("AI Attendance Insight", 60, aiStartY, {
+      underline: true,
     });
+
+    const aiTextHeight = doc.heightOfString(aiInsight, {
+      width: pageWidth - 120,
+      align: "justify",
+      lineGap: 4,
+    });
+
+    doc
+      .font("Helvetica")
+      .fontSize(11)
+      .fillColor("black")
+      .text(aiInsight, 60, aiStartY + 25, {
+        width: pageWidth - 120,
+        align: "justify",
+        indent: 25,
+        lineGap: 4,
+      });
+
+    // === TABLE SETUP (Fits perfectly inside border) ===
+    const tableX = 60;
+    const tableWidth = pageWidth - 120;
+    const colWidths = [40, 120, 130, 80, 90];
+    const headers = ["No.", "Name", "Department", "Status", "Grace Marks"];
+
+    let y = aiStartY + aiTextHeight + 50;
+
+    // === TABLE HEADER ===
+    doc.rect(tableX, y, tableWidth, 28).fillAndStroke(lightBg, borderColor);
+    doc.fillColor(primaryColor).font("Helvetica-Bold").fontSize(11);
+    let x = tableX + 10;
+    headers.forEach((h, i) => {
+      const align = i === 0 || i === 4 ? "center" : "left";
+      doc.text(h, x, y + 8, { width: colWidths[i] - 10, align });
+      x += colWidths[i];
+    });
+    y += 28;
+
+    // === TABLE ROWS ===
+    doc.font("Helvetica").fontSize(10).fillColor("black");
+    event.attendance.forEach((a, i) => {
+      const s = a.student || {};
+      const bg = i % 2 === 0 ? "#ffffff" : "#f9f9f9";
+      const rowHeight = 25;
+
+      doc.rect(tableX, y, tableWidth, rowHeight).fillAndStroke(bg, "#c5cae9");
+      let x = tableX + 10;
+      const row = [
+        i + 1,
+        s.name || "-",
+        s.department || "-",
+        a.status || "-",
+        s.graceMarks || 0,
+      ];
+
+      row.forEach((val, j) => {
+        const align = j === 0 || j === 4 ? "center" : "left";
+        doc.fillColor("black").text(String(val), x, y + 7, {
+          width: colWidths[j] - 10,
+          align,
+        });
+        x += colWidths[j];
+      });
+      y += rowHeight;
+    });
+
+    // === WATERMARK (Updated to Green) ===
+    doc.fontSize(60).fillColor("#e8f5e9").opacity(0.15);
+    doc.rotate(-30, { origin: [pageWidth / 2, pageHeight / 2] });
+    doc.text("NSS", pageWidth / 2 - 100, pageHeight / 2);
+    doc.rotate(30).opacity(1);
+
+    // === FOOTER ===
+    doc
+      .moveTo(50, pageHeight - 80)
+      .lineTo(pageWidth - 50, pageHeight - 80)
+      .strokeColor(borderColor)
+      .lineWidth(1.2)
+      .stroke();
+    doc
+      .fontSize(10)
+      .fillColor("gray")
+      .text(
+        "Generated automatically by NSS Attendance Management System | AI Insights powered by OpenAI",
+        0,
+        pageHeight - 65,
+        { align: "center" }
+      );
+
     doc.end();
+
     stream.on("finish", () => {
       res.download(filePath, fileName, () => fs.unlinkSync(filePath));
     });
   } catch (error) {
+    console.error("PDF Generation Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 // grace mark assigning
 export const assignGraceMark = async (req, res) => {
   try {
@@ -522,33 +713,33 @@ export const teacherOverview = async (req, res) => {
 
     // 🔹 Grace Mark Recommendations
     // --- Grace Mark Recommendations ---
-  // --- Grace Mark Recommendations ---
-const recommendations = students.filter((s) => {
-  const rec = s.pendingGraceRecommendation;
-  if (!rec || !rec.assignedTeachers || !Array.isArray(rec.assignedTeachers)) return false;
+    // --- Grace Mark Recommendations ---
+    const recommendations = students.filter((s) => {
+      const rec = s.pendingGraceRecommendation;
+      if (!rec || !rec.assignedTeachers || !Array.isArray(rec.assignedTeachers))
+        return false;
 
-  // check if teacher is in assignedTeachers array
-  return rec.assignedTeachers.some(
-    (t) => t.toString() === teacherId.toString()
-  );
-});
+      // check if teacher is in assignedTeachers array
+      return rec.assignedTeachers.some(
+        (t) => t.toString() === teacherId.toString()
+      );
+    });
 
-// total recommendation count for this teacher
-const totalRecommendations = recommendations.length;
+    // total recommendation count for this teacher
+    const totalRecommendations = recommendations.length;
 
-// status-based filtering
-const pendingRecommendations = recommendations.filter(
-  (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "pending"
-).length;
+    // status-based filtering
+    const pendingRecommendations = recommendations.filter(
+      (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "pending"
+    ).length;
 
-const approvedRecommendations = recommendations.filter(
-  (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "approved"
-).length;
+    const approvedRecommendations = recommendations.filter(
+      (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "approved"
+    ).length;
 
-const rejectedRecommendations = recommendations.filter(
-  (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "rejected"
-).length;
-
+    const rejectedRecommendations = recommendations.filter(
+      (s) => s.pendingGraceRecommendation.status?.toLowerCase() === "rejected"
+    ).length;
 
     // 🔹 Grace marks given (approved)
     const graceMarksGiven = approvedRecommendations;
@@ -599,9 +790,6 @@ const rejectedRecommendations = recommendations.filter(
   }
 };
 
-
-
-
 // pending recomendtaion
 export const getPendingRecommendations = async (req, res) => {
   try {
@@ -626,8 +814,6 @@ export const getPendingRecommendations = async (req, res) => {
   }
 };
 
-
-
 // get events assigned to teacher
 export const getMyEvents = async (req, res) => {
   try {
@@ -638,7 +824,9 @@ export const getMyEvents = async (req, res) => {
       .sort({ date: -1 });
 
     if (!events.length) {
-      return res.status(200).json({ success: true, data: [], message: "No events found" });
+      return res
+        .status(200)
+        .json({ success: true, data: [], message: "No events found" });
     }
 
     const formatted = events.map((e) => ({
@@ -656,8 +844,6 @@ export const getMyEvents = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
 
 // ===============================
 // 📸 Upload Event Images
@@ -755,7 +941,9 @@ export const editEvent = async (req, res) => {
 
     const event = await Event.findById(id);
     if (!event) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     // update editable fields

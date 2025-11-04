@@ -227,7 +227,7 @@ const MyEventsTeacher = () => {
                 </button>
                 <button
                   onClick={() => setSelectedEvent(event)}
-                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition"
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition"
                 >
                   <ImagePlus size={16} /> Upload
                 </button>

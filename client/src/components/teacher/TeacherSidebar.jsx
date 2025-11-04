@@ -24,7 +24,7 @@ const TeacherSidebar = ({ setIsOpen }) => {
       icon: <MdEvent />,
     },
     {
-      path: "/teacherLayout/attendance",
+      path: "/teacherLayout/attendanceByTeacher",
       label: "Attendance",
       icon: <FaUserCheck />,
     },
