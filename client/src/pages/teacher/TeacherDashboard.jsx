@@ -14,6 +14,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
+import { Calendar, GraduationCap, Star } from "lucide-react";
 
 const COLORS = ["#16a34a", "#f97316", "#8b5cf6", "#ef4444"];
 
@@ -121,7 +122,7 @@ const TeacherDashboard = () => {
       <div className="grid lg:grid-cols-3 sm:grid-cols-1 gap-6 mb-8">
         {/* My Events */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-green-100 hover:shadow-lg transition-all duration-300">
-          <h3 className="font-semibold text-gray-800 mb-3 text-lg">📅 My Events</h3>
+          <h3 className="font-semibold text-gray-800 mb-3 text-lg"><Calendar size={40} color="#16a34a"/> My Events</h3>
           <div className="text-sm text-gray-600 mb-4 space-y-1">
             <p>Total: <span className="font-semibold">{totalEvents}</span></p>
             <p className="text-green-600">Completed: {completedEvents}</p>
@@ -149,7 +150,7 @@ const TeacherDashboard = () => {
 
         {/* Students */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-blue-100 hover:shadow-lg transition-all duration-300">
-          <h3 className="font-semibold text-gray-800 mb-3 text-lg">🎓 Students</h3>
+          <h3 className="font-semibold text-gray-800 mb-3 text-lg"><GraduationCap size={40} color="#16a34a"/> Students</h3>
           <div className="text-sm text-gray-600 mb-4 space-y-1">
             <p>Total Students: <span className="font-semibold">{totalStudents}</span></p>
             <p className="text-blue-600">Volunteers: {volunteers}</p>
@@ -176,7 +177,7 @@ const TeacherDashboard = () => {
 
         {/* Grace Marks */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-purple-100 hover:shadow-lg transition-all duration-300">
-          <h3 className="font-semibold text-gray-800 mb-3 text-lg">⭐ Grace Marks Given</h3>
+          <h3 className="font-semibold text-gray-800 mb-3 text-lg"><Star size={40} color="#16a34a"/> Grace Marks Given</h3>
           <p className="text-sm text-gray-600 mb-3">
             Total Given: <span className="font-semibold">{graceMarksGiven}</span>
           </p>

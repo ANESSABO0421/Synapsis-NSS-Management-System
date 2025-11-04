@@ -1,5 +1,50 @@
 import { HfInference } from "@huggingface/inference";
 const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
+import OpenAI from "openai";
+import dotenv from "dotenv";
+dotenv.config();
+
+
+
+
+const openai = new OpenAI({
+  apiKey: process.env.OPEN_AI_KEY,
+});
+
+export const generateAIInsight = async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    if (!prompt)
+      return res.status(400).json({ success: false, message: "Prompt required" });
+
+    // Call OpenAI model
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // Or "gpt-4o" for more advanced
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI assistant that gives event and attendance insights.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    const aiResponse = completion.choices[0].message.content;
+
+    res.json({ success: true, insight: aiResponse });
+  } catch (error) {
+    console.error("AI Insight Error:", error);
+    res.status(500).json({ success: false, message: "AI generation failed" });
+  }
+};
+
+
+
+
 
 export const generateEventSummary = async (req, res) => {
   try {

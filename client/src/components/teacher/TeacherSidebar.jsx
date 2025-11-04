@@ -29,12 +29,12 @@ const TeacherSidebar = ({ setIsOpen }) => {
       icon: <FaUserCheck />,
     },
     {
-      path: "/teacherLayout/attendance-pdf",
+      path: "/teacherLayout/attendancepdf",
       label: "Generate Attendance PDF",
       icon: <FaFilePdf />,
     },
     {
-      path: "/teacherLayout/grace-marks",
+      path: "/teacherLayout/assigngracemarks",
       label: "Assign Grace Marks",
       icon: <FaAward />,
     },

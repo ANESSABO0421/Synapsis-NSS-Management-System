@@ -33,6 +33,8 @@ import TeacherLayout from "./pages/teacher/teacherLayout";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import MyEventsTeacher from "./pages/teacher/MyEventsTeacher";
 import AttendanceByTeacher from "./pages/teacher/AttendanceByTeacher";
+import GeneratePdfTeacher from "./pages/teacher/GeneratePdfTeacher";
+import AssignGraceMark from "./pages/teacher/AssignGraceMark";
 
 const App = () => {
   return (
@@ -83,6 +85,8 @@ const App = () => {
           <Route index element={<TeacherDashboard />} />
           <Route path="myeventsteacher" element={<MyEventsTeacher />} />
           <Route path="attendanceByTeacher" element={<AttendanceByTeacher />} />
+          <Route path="attendancepdf" element={<GeneratePdfTeacher />} />
+          <Route path="assigngracemarks" element={<AssignGraceMark />} />
         </Route>
         <Route path="/studentdashboard" element={<StudentDashboard />} />
       </Routes>
