@@ -550,7 +550,7 @@ export const updateGraceMark = async (req, res) => {
     const student = await Student.findById(studentId);
     if (!student) return res.status(404).json({ success: false, message: "Student not found" });
 
-    student.graceMarks = Number(marks); // 🟢 overwrite instead of adding
+    student.graceMarks = Number(marks); 
     await student.save();
 
     res.json({ success: true, message: "Grace marks updated", student });
