@@ -332,11 +332,15 @@ export const generateAttendancePdf = async (req, res) => {
       "name department graceMarks"
     );
     if (!event) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     const total = event.attendance.length;
-    const present = event.attendance.filter((a) => a.status === "Present").length;
+    const present = event.attendance.filter(
+      (a) => a.status === "Present"
+    ).length;
     const percent = total ? ((present / total) * 100).toFixed(2) : 0;
 
     // === AI Insight ===
@@ -345,7 +349,11 @@ export const generateAttendancePdf = async (req, res) => {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "You write formal, impressive NSS-style attendance insights." },
+          {
+            role: "system",
+            content:
+              "You write formal, impressive NSS-style attendance insights.",
+          },
           {
             role: "user",
             content: `Generate a 3-sentence formal paragraph for an NSS attendance report based on:
@@ -377,9 +385,9 @@ Focus on social impact, volunteer engagement, and community value.`,
     const pageHeight = doc.page.height;
 
     // === GREEN THEME (Replaced Blue) ===
-    const primaryColor = "#2e7d32";    // Deep Green
-    const borderColor = "#4caf50";     // Light Green
-    const lightBg = "#e8f5e9";         // Very Light Green
+    const primaryColor = "#2e7d32"; // Deep Green
+    const borderColor = "#4caf50"; // Light Green
+    const lightBg = "#e8f5e9"; // Very Light Green
 
     // === HEADER BAR (Now with Event Name & Green) ===
     doc.rect(0, 0, pageWidth, 80).fill(primaryColor);
@@ -407,9 +415,13 @@ Focus on social impact, volunteer engagement, and community value.`,
 
     // === AI INSIGHT SECTION ===
     const aiStartY = 240;
-    doc.font("Helvetica-Bold").fontSize(14).fillColor(primaryColor).text("AI Attendance Insight", 60, aiStartY, {
-      underline: true,
-    });
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .fillColor(primaryColor)
+      .text("AI Attendance Insight", 60, aiStartY, {
+        underline: true,
+      });
 
     const aiTextHeight = doc.heightOfString(aiInsight, {
       width: pageWidth - 120,
@@ -515,7 +527,9 @@ export const assignGraceMark = async (req, res) => {
 
     const student = await Student.findById(studentId);
     if (!student) {
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
     }
 
     // Check if already assigned for this event
@@ -548,9 +562,12 @@ export const updateGraceMark = async (req, res) => {
     const { marks } = req.body;
 
     const student = await Student.findById(studentId);
-    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+    if (!student)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
 
-    student.graceMarks = Number(marks); 
+    student.graceMarks = Number(marks);
     await student.save();
 
     res.json({ success: true, message: "Grace marks updated", student });
@@ -559,12 +576,14 @@ export const updateGraceMark = async (req, res) => {
   }
 };
 
-
 export const deleteGraceMark = async (req, res) => {
   try {
     const { studentId } = req.params;
     const student = await Student.findById(studentId);
-    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+    if (!student)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
 
     student.graceMarks = 0; // 🧹 reset marks
     await student.save();
@@ -575,44 +594,155 @@ export const deleteGraceMark = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
 // gracemark recommended by coordinator approve
+// ✅ Approve or reject a pending grace mark recommendation
+// export const approveRecommendedGraceMark = async (req, res) => {
+//   try {
+//     const { studentId, approve } = req.body;
+
+//     const student = await Student.findById(studentId);
+//     if (!student || !student.pendingGraceRecommendation) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "No pending grace mark recommendation found",
+//       });
+//     }
+
+//     // If approved — add marks and store in grace history
+//     if (approve) {
+//       const { marks } = student.pendingGraceRecommendation;
+//       const { recommendedBy } = student.pendingGraceRecommendation;
+
+//       student.graceMarks += Number(marks);
+
+//       // Add to grace history
+//       student.graceHistory.push({
+//         eventId: null, // Optional: you can include eventId if it’s linked to a specific event
+//         marks: Number(marks),
+//         date: new Date(),
+//       });
+
+//       // Update recommendation status
+//       student.pendingGraceRecommendation.status = "approved";
+//       console.log(student.pendingGraceRecommendation.status)
+
+//       await student.save();
+
+//       return res.json({
+//         success: true,
+//         message: "Grace marks approved and added successfully",
+//         student,
+//       });
+//     } else {
+//       // If rejected
+//       student.pendingGraceRecommendation.status = "rejected";
+//       await student.save();
+
+//       return res.json({
+//         success: true,
+//         message: "Grace mark recommendation rejected",
+//         student,
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error approving/rejecting grace mark:", error);
+//     res.status(500).json({ success: false, message: "Action failed" });
+//   }
+// };
+
 export const approveRecommendedGraceMark = async (req, res) => {
   try {
     const { studentId, approve } = req.body;
-    const student = await Student.findById(studentId).select("-password");
+
+    if (!studentId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Student ID required" });
+    }
+
+    const teacher = await Teacher.findById(req.user._id);
+    if (!teacher) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized teacher" });
+    }
+
+    const student = await Student.findById(studentId);
     if (!student || !student.pendingGraceRecommendation) {
       return res.status(404).json({
         success: false,
-        message: "No pending grace mark recommendation found",
+        message: "No pending grace mark recommendation found for this student",
       });
     }
+
+    if (
+      !student.pendingGraceRecommendation.assignedTeachers.includes(
+        req.user._id.toString()
+      )
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not assigned to review this recommendation",
+      });
+    }
+
+    // ✅ Update status & log review
+    student.pendingGraceRecommendation.status = approve
+      ? "approved"
+      : "rejected";
+    student.pendingGraceRecommendation.reviewedBy = req.user._id;
+    student.pendingGraceRecommendation.reviewedDate = new Date();
+
+    // ✅ If approved, add to graceMarks and history
     if (approve) {
-      student.graceMarks += student.pendingGraceRecommendation.marks;
-      student.pendingGraceRecommendation.status = "approved";
+      student.graceMarks =
+        (student.graceMarks || 0) + student.pendingGraceRecommendation.marks;
+
+      student.graceHistory.push({
+        marks: student.pendingGraceRecommendation.marks,
+        reason: student.pendingGraceRecommendation.reason,
+        approvedBy: req.user._id,
+        date: new Date(),
+        status: "approved",
+      });
     } else {
-      student.pendingGraceRecommendation.status = "rejected";
+      student.graceHistory.push({
+        marks: student.pendingGraceRecommendation.marks,
+        reason: student.pendingGraceRecommendation.reason,
+        approvedBy: req.user._id,
+        date: new Date(),
+        status: "rejected",
+      });
     }
 
     await student.save();
-    res.json({
+
+    // ✅ Update coordinator’s log
+    await Coordinator.updateOne(
+      {
+        _id: student.pendingGraceRecommendation.recommendedBy,
+        "graceRecommendations.student": student._id,
+      },
+      {
+        $set: {
+          "graceRecommendations.$.status": approve ? "approved" : "rejected",
+        },
+      }
+    );
+
+    // ⚠️ DO NOT remove pendingGraceRecommendation
+    // Keep it for record/history, so coordinators can see status
+
+    res.status(200).json({
       success: true,
-      message: approve
-        ? "Grace marks approved and added"
-        : "Grace marks recommendation rejected",
+      message: `Grace mark ${approve ? "approved" : "rejected"} successfully`,
       student,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Approve grace mark error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error: " + error.message });
   }
 };
 
@@ -848,26 +978,39 @@ export const teacherOverview = async (req, res) => {
 };
 
 // pending recomendtaion
+// ✅ Get all pending grace mark recommendations assigned to a teacher
 export const getPendingRecommendations = async (req, res) => {
   try {
     const teacherId = req.user._id;
+
+    // Find all students where this teacher is assigned in recommendation
     const students = await Student.find({
       "pendingGraceRecommendation.assignedTeachers": teacherId,
       "pendingGraceRecommendation.status": "pending",
-    });
+    })
+      .populate("pendingGraceRecommendation.recommendedBy", "name email")
+      .select("name email department pendingGraceRecommendation");
 
-    const data = students.map((s) => ({
-      id: s._id,
-      name: s.name,
-      marks: s.pendingGraceRecommendation.marks,
-      reason: s.pendingGraceRecommendation.reason,
-      date: s.pendingGraceRecommendation.date,
-      status: s.pendingGraceRecommendation.status,
+    // Format the response
+    const data = students.map((student) => ({
+      id: student._id,
+      name: student.name,
+      email: student.email,
+      department: student.department,
+      marks: student.pendingGraceRecommendation.marks,
+      reason: student.pendingGraceRecommendation.reason,
+      recommendedBy:
+        student.pendingGraceRecommendation.recommendedBy?.name || "N/A",
+      status: student.pendingGraceRecommendation.status,
+      date: student.pendingGraceRecommendation.date,
     }));
 
     res.status(200).json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error fetching pending recommendations:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch recommendations" });
   }
 };
 
