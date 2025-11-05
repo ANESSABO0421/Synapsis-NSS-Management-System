@@ -36,6 +36,8 @@ import AttendanceByTeacher from "./pages/teacher/AttendanceByTeacher";
 import GeneratePdfTeacher from "./pages/teacher/GeneratePdfTeacher";
 import AssignGraceMark from "./pages/teacher/AssignGraceMark";
 import ApproveGraceMark from "./pages/teacher/ApproveGraceMark";
+import StudentLayout from "./pages/student/StudentLayout";
+import OAuthSuccess from "./pages/OAuthSuccess";
 
 const App = () => {
   return (
@@ -43,6 +45,7 @@ const App = () => {
       <ToastContainer position="top-center" autoClose={3000} />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/auth/success" element={<OAuthSuccess />} />
         <Route path="/verifyotp" element={<VerifyOTP />} />
 
         {/* login */}
@@ -90,7 +93,9 @@ const App = () => {
           <Route path="assigngracemarks" element={<AssignGraceMark />} />
           <Route path="approvegracebyteacher" element={<ApproveGraceMark />} />
         </Route>
-        <Route path="/studentdashboard" element={<StudentDashboard />} />
+        <Route path="/studentlayout" element={<StudentLayout />} >
+
+        </Route>
       </Routes>
     </>
   );

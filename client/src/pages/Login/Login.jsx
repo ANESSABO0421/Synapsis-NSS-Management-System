@@ -302,7 +302,7 @@ const Login = () => {
               window.location.href = "/coordinatorlayout";
             else if (role === "teacher")
               window.location.href = "/teacherLayout";
-            else window.location.href = "/studentdashboard";
+            else window.location.href = "/studentlayout";
           }, 1000);
 
           break;
