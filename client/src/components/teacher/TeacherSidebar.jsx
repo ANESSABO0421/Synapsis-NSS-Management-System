@@ -39,7 +39,7 @@ const TeacherSidebar = ({ setIsOpen }) => {
       icon: <FaAward />,
     },
     {
-      path: "/teacherLayout/approve-grace",
+      path: "/teacherLayout/approvegracebyteacher",
       label: "Approve Grace Marks",
       icon: <FaClipboardList />,
     },

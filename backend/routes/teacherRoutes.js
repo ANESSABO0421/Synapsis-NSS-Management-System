@@ -20,6 +20,8 @@ import {
   getMyEvents,
   uploadEventImages,
   editEvent,
+  updateGraceMark,
+  deleteGraceMark,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
@@ -57,6 +59,16 @@ teacherRoute.get(
 
 // Grace marks
 teacherRoute.post("/grace-marks", protect, teacherOnly, assignGraceMark);
+
+
+
+// gracemark update
+teacherRoute.put("/grace-marks/:studentId", updateGraceMark);
+
+
+// grace mark delete
+teacherRoute.delete("/grace-marks/:studentId", deleteGraceMark);
+
 
 // recommended gracemark approve
 teacherRoute.put(

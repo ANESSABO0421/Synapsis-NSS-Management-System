@@ -511,15 +511,29 @@ Focus on social impact, volunteer engagement, and community value.`,
 // grace mark assigning
 export const assignGraceMark = async (req, res) => {
   try {
-    const { studentId, marks } = req.body;
+    const { studentId, eventId, marks } = req.body;
+
     const student = await Student.findById(studentId);
     if (!student) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
+      return res.status(404).json({ success: false, message: "Student not found" });
     }
 
+    // Check if already assigned for this event
+    const alreadyAssigned = student.graceHistory.some(
+      (record) => record.eventId.toString() === eventId
+    );
+
+    if (alreadyAssigned) {
+      return res.status(400).json({
+        success: false,
+        message: "Grace marks already assigned for this event",
+      });
+    }
+
+    // Add to history and update total
+    student.graceHistory.push({ eventId, marks });
     student.graceMarks += Number(marks);
+
     await student.save();
 
     res.json({ success: true, message: "Grace marks assigned", student });
@@ -527,6 +541,49 @@ export const assignGraceMark = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const updateGraceMark = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { marks } = req.body;
+
+    const student = await Student.findById(studentId);
+    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+
+    student.graceMarks = Number(marks); // 🟢 overwrite instead of adding
+    await student.save();
+
+    res.json({ success: true, message: "Grace marks updated", student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+export const deleteGraceMark = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const student = await Student.findById(studentId);
+    if (!student) return res.status(404).json({ success: false, message: "Student not found" });
+
+    student.graceMarks = 0; // 🧹 reset marks
+    await student.save();
+
+    res.json({ success: true, message: "Grace marks deleted", student });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
 
 // gracemark recommended by coordinator approve
 export const approveRecommendedGraceMark = async (req, res) => {

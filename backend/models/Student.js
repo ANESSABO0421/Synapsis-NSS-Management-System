@@ -21,6 +21,13 @@ const StudentSchema = new mongoose.Schema(
       enum: ["pending", "active", "rejected"],
       default: "pending",
     },
+    graceHistory: [
+      {
+        eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
+        marks: { type: Number, default: 0 },
+        date: { type: Date, default: Date.now },
+      },
+    ],
     graceMarks: { type: Number, default: 0 },
     password: { type: String, required: true },
     otp: { type: Number },
@@ -39,7 +46,9 @@ const StudentSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Coordinator",
       },
-      assignedTeachers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Teacher" }], 
+      assignedTeachers: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
+      ],
       status: {
         type: String,
         enum: ["pending", "approved", "rejected"],
