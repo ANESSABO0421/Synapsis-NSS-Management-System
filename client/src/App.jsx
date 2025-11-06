@@ -38,65 +38,74 @@ import AssignGraceMark from "./pages/teacher/AssignGraceMark";
 import ApproveGraceMark from "./pages/teacher/ApproveGraceMark";
 import StudentLayout from "./pages/student/StudentLayout";
 import OAuthSuccess from "./pages/OAuthSuccess";
+import { SocketProvider } from "./context/SocketContext";
 
 const App = () => {
   return (
     <>
-      <ToastContainer position="top-center" autoClose={3000} />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/auth/success" element={<OAuthSuccess />} />
-        <Route path="/verifyotp" element={<VerifyOTP />} />
+      <SocketProvider>
+        <ToastContainer position="top-center" autoClose={3000} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/auth/success" element={<OAuthSuccess />} />
+          <Route path="/verifyotp" element={<VerifyOTP />} />
 
-        {/* login */}
-        <Route path="/login" element={<Login />} />
+          {/* login */}
+          <Route path="/login" element={<Login />} />
 
-        {/* signup */}
-        <Route path="/signup/student" element={<Signup />} />
-        <Route path="/signup/teacher" element={<TeacherSignup />} />
-        <Route path="/signup/coordinator" element={<CoordinatorSignup />} />
-        <Route path="/signup/alumni" element={<AlumniSignup />} />
+          {/* signup */}
+          <Route path="/signup/student" element={<Signup />} />
+          <Route path="/signup/teacher" element={<TeacherSignup />} />
+          <Route path="/signup/coordinator" element={<CoordinatorSignup />} />
+          <Route path="/signup/alumni" element={<AlumniSignup />} />
 
-        {/* admin dashboard */}
-        <Route path="/adminpanel" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="pendingstudent" element={<GetAllPendingStudent />} />
-          <Route path="pendingteacher" element={<GetAllPendingTeacher />} />
-          <Route
-            path="pendingcoordinator"
-            element={<GetAllPendingCoordinator />}
-          />
-          <Route path="allstudent" element={<AllStudent />} />
-          <Route path="allteachers" element={<AllTeacher />} />
-          <Route path="allcoordinators" element={<AllCoordinators />} />
-          <Route path="createinstitution" element={<CreateInstitution />} />
-          <Route path="manageinstitute" element={<ManageInstitute />} />
-        </Route>
+          {/* admin dashboard */}
+          <Route path="/adminpanel" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="pendingstudent" element={<GetAllPendingStudent />} />
+            <Route path="pendingteacher" element={<GetAllPendingTeacher />} />
+            <Route
+              path="pendingcoordinator"
+              element={<GetAllPendingCoordinator />}
+            />
+            <Route path="allstudent" element={<AllStudent />} />
+            <Route path="allteachers" element={<AllTeacher />} />
+            <Route path="allcoordinators" element={<AllCoordinators />} />
+            <Route path="createinstitution" element={<CreateInstitution />} />
+            <Route path="manageinstitute" element={<ManageInstitute />} />
+          </Route>
 
-        {/* coordinator dashboard */}
-        <Route path="/coordinatorlayout" element={<CoordinatorLayout />}>
-          <Route index element={<CoordinatorDashboard />} />
-          <Route path="createevent" element={<CreateEvent />} />
-          <Route path="managestudents" element={<ManageStudents />} />
-          <Route path="myevents" element={<MyEvents />} />
-          <Route path="manageteacher" element={<ManageTeacher />} />
-          <Route path="managevolunteer" element={<ManageVolunteers />} />
-          <Route path="eventreport" element={<EventReportGenerator />} />
-          <Route path="recommendgracemark" element={<RecommendGraceMark />} />
-        </Route>
+          {/* coordinator dashboard */}
+          <Route path="/coordinatorlayout" element={<CoordinatorLayout />}>
+            <Route index element={<CoordinatorDashboard />} />
+            <Route path="createevent" element={<CreateEvent />} />
+            <Route path="managestudents" element={<ManageStudents />} />
+            <Route path="myevents" element={<MyEvents />} />
+            <Route path="manageteacher" element={<ManageTeacher />} />
+            <Route path="managevolunteer" element={<ManageVolunteers />} />
+            <Route path="eventreport" element={<EventReportGenerator />} />
+            <Route path="recommendgracemark" element={<RecommendGraceMark />} />
+          </Route>
 
-        <Route path="/teacherLayout" element={<TeacherLayout />}>
-          <Route index element={<TeacherDashboard />} />
-          <Route path="myeventsteacher" element={<MyEventsTeacher />} />
-          <Route path="attendanceByTeacher" element={<AttendanceByTeacher />} />
-          <Route path="attendancepdf" element={<GeneratePdfTeacher />} />
-          <Route path="assigngracemarks" element={<AssignGraceMark />} />
-          <Route path="approvegracebyteacher" element={<ApproveGraceMark />} />
-        </Route>
-        <Route path="/studentlayout" element={<StudentLayout />}>
-          <Route index  element={<StudentDashboard />} />
-        </Route>
-      </Routes>
+          <Route path="/teacherLayout" element={<TeacherLayout />}>
+            <Route index element={<TeacherDashboard />} />
+            <Route path="myeventsteacher" element={<MyEventsTeacher />} />
+            <Route
+              path="attendanceByTeacher"
+              element={<AttendanceByTeacher />}
+            />
+            <Route path="attendancepdf" element={<GeneratePdfTeacher />} />
+            <Route path="assigngracemarks" element={<AssignGraceMark />} />
+            <Route
+              path="approvegracebyteacher"
+              element={<ApproveGraceMark />}
+            />
+          </Route>
+          <Route path="/studentlayout" element={<StudentLayout />}>
+            <Route index element={<StudentDashboard />} />
+          </Route>
+        </Routes>
+      </SocketProvider>
     </>
   );
 };
