@@ -8,7 +8,6 @@ import {
   FaClock,
   FaHeadset,
 } from "react-icons/fa";
-import { MdLogout } from "react-icons/md";
 
 const StudentSidebar = ({ setIsOpen }) => {
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ const StudentSidebar = ({ setIsOpen }) => {
   };
 
   const navItems = [
-    { to: "/student/dashboard", icon: <FaHome />, label: "Dashboard" },
+    { to: "/studentlayout", icon: <FaHome />, label: "Dashboard" },
     { to: "/student/events", icon: <FaCalendarCheck />, label: "My Events" },
     { to: "/student/certificates", icon: <FaAward />, label: "Certificates" },
     { to: "/student/hours", icon: <FaClock />, label: "Service Hours" },
@@ -59,9 +58,6 @@ const StudentSidebar = ({ setIsOpen }) => {
           </NavLink>
         ))}
       </nav>
-
-      {/* Logout */}
-      
     </aside>
   );
 };

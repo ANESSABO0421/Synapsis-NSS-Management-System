@@ -93,8 +93,8 @@ const App = () => {
           <Route path="assigngracemarks" element={<AssignGraceMark />} />
           <Route path="approvegracebyteacher" element={<ApproveGraceMark />} />
         </Route>
-        <Route path="/studentlayout" element={<StudentLayout />} >
-
+        <Route path="/studentlayout" element={<StudentLayout />}>
+          <Route index  element={<StudentDashboard />} />
         </Route>
       </Routes>
     </>
