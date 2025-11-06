@@ -41,6 +41,7 @@ import OAuthSuccess from "./pages/OAuthSuccess";
 import { SocketProvider } from "./context/SocketContext";
 import SocketTest from "./components/SocketTest";
 import ChatPage from "./pages/coordinator/Chat/ChatPage";
+import TeacherChatPage from "./pages/teacher/Chat/TeacherChatPage";
 
 const App = () => {
   return (
@@ -104,6 +105,7 @@ const App = () => {
               path="approvegracebyteacher"
               element={<ApproveGraceMark />}
             />
+            <Route path="teacherchat" element={<TeacherChatPage />} />
           </Route>
           <Route path="/studentlayout" element={<StudentLayout />}>
             <Route index element={<StudentDashboard />} />

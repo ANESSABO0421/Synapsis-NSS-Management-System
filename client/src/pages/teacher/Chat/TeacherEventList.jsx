@@ -1,13 +1,15 @@
 import React from "react";
 import { CalendarDays } from "lucide-react";
 
-const EventList = ({ events, onSelect, selected }) => {
+const TeacherEventList = ({ events, onSelect, selected }) => {
   return (
     <div className="h-full flex flex-col bg-white border-r border-gray-200 shadow-md">
       {/* Header */}
       <div className="p-4 border-b bg-green-600 text-white flex items-center gap-2 sticky top-0 z-10">
         <CalendarDays className="w-5 h-5 text-white" />
-        <h2 className="text-lg font-semibold tracking-wide">Your Events</h2>
+        <h2 className="text-lg font-semibold tracking-wide">
+          My Teaching Events
+        </h2>
       </div>
 
       {/* Event List */}
@@ -19,29 +21,31 @@ const EventList = ({ events, onSelect, selected }) => {
         ) : (
           events.map((event) => {
             const isSelected = selected?._id === event._id;
-
             return (
               <div
                 key={event._id}
                 onClick={() => onSelect(event)}
                 className={`cursor-pointer p-4 mb-2 rounded-xl border transition-all shadow-sm ${
                   isSelected
-                    ? "bg-green-100 border-green-400 ring-1 ring-green-300"
+                    ? "bg-green-50 border-green-400 ring-1 ring-green-300"
                     : "bg-white hover:bg-gray-50 hover:border-green-200"
                 }`}
               >
                 <h3
                   className={`font-semibold text-sm sm:text-base ${
-                    isSelected ? "text-green-800" : "text-gray-800"
+                    isSelected ? "text-green-700" : "text-gray-800"
                   }`}
                 >
-                  {event.title}
+                  {event.title || "Untitled Event"}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                  📅 {event.date ? new Date(event.date).toLocaleDateString() : "No date"}
+                  📆{" "}
+                  {event.date
+                    ? new Date(event.date).toLocaleDateString()
+                    : "No date available"}
                 </p>
                 <p className="text-xs text-gray-400 mt-1 truncate">
-                  {event.description || "No description available"}
+                  {event.Description || "No description provided"}
                 </p>
               </div>
             );
@@ -52,4 +56,4 @@ const EventList = ({ events, onSelect, selected }) => {
   );
 };
 
-export default EventList;
+export default TeacherEventList;

@@ -6,6 +6,7 @@ import {
   FaFilePdf,
   FaAward,
   FaClipboardList,
+  FaComment,
 } from "react-icons/fa";
 import { MdEvent, MdLogout } from "react-icons/md";
 
@@ -42,6 +43,11 @@ const TeacherSidebar = ({ setIsOpen }) => {
       path: "/teacherLayout/approvegracebyteacher",
       label: "Approve Grace Marks",
       icon: <FaClipboardList />,
+    },
+    {
+      path: "/teacherLayout/teacherchat",
+      label: "Chat",
+      icon: <FaComment />,
     },
   ];
 
