@@ -39,6 +39,8 @@ import ApproveGraceMark from "./pages/teacher/ApproveGraceMark";
 import StudentLayout from "./pages/student/StudentLayout";
 import OAuthSuccess from "./pages/OAuthSuccess";
 import { SocketProvider } from "./context/SocketContext";
+import SocketTest from "./components/SocketTest";
+import ChatPage from "./pages/coordinator/Chat/ChatPage";
 
 const App = () => {
   return (
@@ -49,6 +51,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/auth/success" element={<OAuthSuccess />} />
           <Route path="/verifyotp" element={<VerifyOTP />} />
+          {/* <Route path="/testmessage" element={<SocketTest />} /> */}
 
           {/* login */}
           <Route path="/login" element={<Login />} />
@@ -85,6 +88,7 @@ const App = () => {
             <Route path="managevolunteer" element={<ManageVolunteers />} />
             <Route path="eventreport" element={<EventReportGenerator />} />
             <Route path="recommendgracemark" element={<RecommendGraceMark />} />
+            <Route path="chat" element={<ChatPage />} />
           </Route>
 
           <Route path="/teacherLayout" element={<TeacherLayout />}>

@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { BiLayout, BiMenuAltLeft, BiX } from "react-icons/bi";
-import { FaUsers, FaCertificate, FaCalendarAlt, FaRegComment, FaRegCommentDots } from "react-icons/fa";
-import { BsFillCalendar2EventFill } from 'react-icons/bs';
+import {
+  FaUsers,
+  FaCertificate,
+  FaCalendarAlt,
+  FaRegComment,
+  FaRegCommentDots,
+} from "react-icons/fa";
+import { BsFillCalendar2EventFill } from "react-icons/bs";
 import { RiUserStarFill } from "react-icons/ri";
 import { GiTeacher } from "react-icons/gi";
 import { MdOutlineVolunteerActivism, MdRecommend } from "react-icons/md";
@@ -12,14 +18,51 @@ const CoordinatorSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { name: "Dashboard", path: "/coordinatorlayout", icon: <BiLayout size={18} /> },
-    { name: "Create Events", path: "/coordinatorlayout/createevent", icon: <FaCalendarAlt size={18} /> },
-    { name: "Manage Students", path: "/coordinatorlayout/managestudents", icon: <FaUsers size={18} /> },
-    { name: "My Events", path: "/coordinatorlayout/myevents", icon: <BsFillCalendar2EventFill size={18} /> },
-    { name: "Manage Teacher", path: "/coordinatorlayout/manageteacher", icon: <GiTeacher size={18} /> },
-    { name: "Manage Volunteer", path: "/coordinatorlayout/managevolunteer", icon: <MdOutlineVolunteerActivism size={18} /> },
-    { name: "Event Report", path: "/coordinatorlayout/eventreport", icon: <File size={18} /> },
-    { name: "Recommend Grace Mark", path: "/coordinatorlayout/recommendgracemark", icon: <FaRegCommentDots size={18} /> },
+    {
+      name: "Dashboard",
+      path: "/coordinatorlayout",
+      icon: <BiLayout size={18} />,
+    },
+    {
+      name: "Create Events",
+      path: "/coordinatorlayout/createevent",
+      icon: <FaCalendarAlt size={18} />,
+    },
+    {
+      name: "Manage Students",
+      path: "/coordinatorlayout/managestudents",
+      icon: <FaUsers size={18} />,
+    },
+    {
+      name: "My Events",
+      path: "/coordinatorlayout/myevents",
+      icon: <BsFillCalendar2EventFill size={18} />,
+    },
+    {
+      name: "Manage Teacher",
+      path: "/coordinatorlayout/manageteacher",
+      icon: <GiTeacher size={18} />,
+    },
+    {
+      name: "Manage Volunteer",
+      path: "/coordinatorlayout/managevolunteer",
+      icon: <MdOutlineVolunteerActivism size={18} />,
+    },
+    {
+      name: "Event Report",
+      path: "/coordinatorlayout/eventreport",
+      icon: <File size={18} />,
+    },
+    {
+      name: "Recommend Grace Mark",
+      path: "/coordinatorlayout/recommendgracemark",
+      icon: <FaRegCommentDots size={18} />,
+    },
+    {
+      name: "Chat",
+      path: "/coordinatorlayout/chat",
+      icon: <FaRegComment size={18} />,
+    },
     // { name: "Profile", path: "/coordinatorlayout/profile", icon: <RiUserStarFill size={18} /> },
   ];
 

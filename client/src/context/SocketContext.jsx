@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token"); // use your stored login token if any
-    const newSocket = io("http://localhost:5000", {
+    const newSocket = io("http://localhost:3000", {
       auth: { token },
       transports: ["websocket"],
     });
