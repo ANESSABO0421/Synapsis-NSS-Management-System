@@ -24,7 +24,7 @@ const StudentSidebar = ({ setIsOpen }) => {
 
   const navItems = [
     { to: "/studentlayout", icon: <FaHome />, label: "Dashboard" },
-    { to: "/student/events", icon: <FaCalendarCheck />, label: "My Events" },
+    { to: "/studentlayout/studentevents", icon: <FaCalendarCheck />, label: "My Events" },
     { to: "/student/certificates", icon: <FaAward />, label: "Certificates" },
     { to: "/student/hours", icon: <FaClock />, label: "Service Hours" },
     { to: "/student/profile", icon: <FaUser />, label: "Profile" },

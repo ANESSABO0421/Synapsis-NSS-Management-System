@@ -138,3 +138,4 @@ const MessagePanel = ({ event, socket }) => {
 };
 
 export default MessagePanel;
+  

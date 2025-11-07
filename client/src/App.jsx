@@ -42,6 +42,7 @@ import { SocketProvider } from "./context/SocketContext";
 import SocketTest from "./components/SocketTest";
 import ChatPage from "./pages/coordinator/Chat/ChatPage";
 import TeacherChatPage from "./pages/teacher/Chat/TeacherChatPage";
+import StudentMyEvents from "./pages/student/StudentMyEvents";
 
 const App = () => {
   return (
@@ -108,7 +109,8 @@ const App = () => {
             <Route path="teacherchat" element={<TeacherChatPage />} />
           </Route>
           <Route path="/studentlayout" element={<StudentLayout />}>
-            <Route index element={<StudentDashboard />} />
+            <Route  element={<StudentDashboard />} />
+            <Route path="studentevents" element={<StudentMyEvents />} />
           </Route>
         </Routes>
       </SocketProvider>
