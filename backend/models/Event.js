@@ -20,6 +20,11 @@ const eventSchema = new mongoose.Schema(
       required: true,
     },
 
+    // event based award
+    startTime: { type: Date },
+    endTime: { type: Date },
+    calculatedHours: { type: Number, default: 0 },
+
     attendance: [
       {
         student: { type: mongoose.Schema.Types.ObjectId, ref: "student" },

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   assignStudentToEvent,
+  completeEvent,
   createEvents,
   deleteEvent,
   deleteEventImage,
@@ -10,10 +11,15 @@ import {
   getEventImages,
   getEventParticipants,
   getEvents,
+  startEvent,
   updateEvent,
   uploadEventImages,
 } from "../controllers/eventController.js";
-import { protect, teacherOnly } from "../middleware/authMiddleware.js";
+import {
+  coordinatorOnly,
+  protect,
+  teacherOnly,
+} from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 
 const eventRouter = express.Router();
@@ -47,5 +53,9 @@ eventRouter.get("/:id/images", getEventImages);
 eventRouter.delete("/:id/images/:imageId", deleteEventImage);
 
 eventRouter.get("/getalleventimage", getAllEventImages);
+
+eventRouter.put("/:id/start", protect, coordinatorOnly, startEvent);
+
+eventRouter.put("/:id/complete", protect, coordinatorOnly, completeEvent);
 
 export default eventRouter;

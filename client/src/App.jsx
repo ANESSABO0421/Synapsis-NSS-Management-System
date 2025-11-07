@@ -109,7 +109,7 @@ const App = () => {
             <Route path="teacherchat" element={<TeacherChatPage />} />
           </Route>
           <Route path="/studentlayout" element={<StudentLayout />}>
-            <Route  element={<StudentDashboard />} />
+            <Route index element={<StudentDashboard />} />
             <Route path="studentevents" element={<StudentMyEvents />} />
           </Route>
         </Routes>
