@@ -8,7 +8,9 @@ import {
   generateOwnCertificate,
   getAllStudents,
   getPendingStudent,
+  getStudentDashboard,
   getStudentEvents,
+  getStudentProfile,
   rejectInDashboardStudent,
   rejectStudent,
   removeStudentFromEvent,
@@ -80,5 +82,10 @@ studentRouter.put("/rejectstuedent/:id", protect, adminOnly, rejectStudent);
 studentRouter.get("/getallstudent", protect, adminOnly, getAllStudents);
 
 studentRouter.put("/rejectinallstudent/:id", protect, adminOnly, rejectInDashboardStudent);
+
+
+studentRouter.get("/dashboard",protect,volunteerOnly,getStudentDashboard)
+
+studentRouter.get("/profile", protect,volunteerOnly, getStudentProfile);
 
 export default studentRouter;

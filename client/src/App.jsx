@@ -5,7 +5,7 @@ import Signup from "./pages/Signup/Signup";
 import VerifyOTP from "./pages/VerifyOtp";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
+import StudentDashboard from "./pages/student/StudentDashboard";
 import AdminLayout from "./pages/admin/AdminLayout";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
