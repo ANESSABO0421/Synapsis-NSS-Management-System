@@ -834,3 +834,58 @@ export const getStudentProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// edit
+// Edit Student Profile
+export const editStudentProfile = async (req, res) => {
+  try {
+    const studentId = req.user.id; // ✅ Extracted from JWT token
+    const { name, phoneNumber, department, talents } = req.body;
+
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+
+    // ✅ Update fields only if provided
+    if (name) student.name = name;
+    if (phoneNumber) student.phoneNumber = phoneNumber;
+    if (department) student.department = department;
+    if (talents) {
+      student.talents = Array.isArray(talents) ? talents : [talents];
+    }
+
+    // ✅ Profile image update
+    if (req.file) {
+      // Delete old image from cloudinary if exists
+      if (student.profileImage?.public_id) {
+        await cloudinary.uploader.destroy(student.profileImage.public_id);
+      }
+
+      student.profileImage = {
+        url: req.file.path,
+        public_id: req.file.filename,
+      };
+    }
+
+    await student.save();
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      student: {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        phoneNumber: student.phoneNumber,
+        department: student.department,
+        talents: student.talents,
+        profileImage: student.profileImage?.url || null,
+        institution: student.institution,
+      },
+    });
+  } catch (error) {
+    console.error("Profile Edit Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

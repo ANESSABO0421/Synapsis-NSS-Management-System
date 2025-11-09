@@ -5,6 +5,7 @@ import {
   approvePendingStudent,
   approveStudent,
   deleteStudent,
+  editStudentProfile,
   generateOwnCertificate,
   getAllStudents,
   getPendingStudent,
@@ -87,5 +88,7 @@ studentRouter.put("/rejectinallstudent/:id", protect, adminOnly, rejectInDashboa
 studentRouter.get("/dashboard",protect,volunteerOnly,getStudentDashboard)
 
 studentRouter.get("/profile", protect,volunteerOnly, getStudentProfile);
+
+studentRouter.put("/profile/edit", protect,volunteerOnly, upload.single("profileImage"), editStudentProfile);
 
 export default studentRouter;

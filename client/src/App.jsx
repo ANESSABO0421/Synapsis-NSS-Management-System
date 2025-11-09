@@ -111,6 +111,7 @@ const App = () => {
           </Route>
           <Route path="/studentlayout" element={<StudentLayout />}>
             <Route index element={<StudentDashboard />} />
+            <Route path="/studentlayout/dashboard" element={<StudentDashboard />} />
             <Route path="studentevents" element={<StudentMyEvents />} />
             <Route path="studentprofile" element={<MyProfile />} />
           </Route>
