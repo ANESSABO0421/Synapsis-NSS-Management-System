@@ -46,6 +46,7 @@ import StudentMyEvents from "./pages/student/StudentMyEvents";
 import MyProfile from "./pages/student/MyProfile";
 import StudentChatPage from "./pages/student/Chat/StudentChatPage";
 import StudentCertificate from "./pages/student/StudentCertificate";
+import StudentAttendance from "./pages/student/StudentAttendance";
 
 const App = () => {
   return (
@@ -118,6 +119,7 @@ const App = () => {
             <Route path="studentprofile" element={<MyProfile />} />
             <Route path="certificates" element={<StudentCertificate />} />
             <Route path="chatstudent" element={<StudentChatPage />} />
+            <Route path="studentattendance" element={<StudentAttendance />} />
           </Route>
         </Routes>
       </SocketProvider>

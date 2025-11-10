@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { IoMdCheckmarkCircle } from "react-icons/io";
 import {
   FaUser,
   FaCalendarCheck,
@@ -26,9 +27,22 @@ const StudentSidebar = ({ setIsOpen }) => {
 
   const navItems = [
     { to: "/studentlayout/dashboard", icon: <FaHome />, label: "Dashboard" },
-    { to: "/studentlayout/studentevents", icon: <FaCalendarCheck />, label: "My Events" },
-    { to: "/studentlayout/certificates", icon: <FaAward />, label: "Certificates" },
+    {
+      to: "/studentlayout/studentevents",
+      icon: <FaCalendarCheck />,
+      label: "My Events",
+    },
+    {
+      to: "/studentlayout/certificates",
+      icon: <FaAward />,
+      label: "Certificates",
+    },
     // { to: "/student/hours", icon: <FaClock />, label: "Service Hours" },
+    {
+      to: "/studentlayout/studentattendance",
+      icon: <IoMdCheckmarkCircle />,
+      label: "View Attendance",
+    },
     { to: "/studentlayout/chatstudent", icon: <BiComment />, label: "Chat" },
     { to: "/studentlayout/studentprofile", icon: <FaUser />, label: "Profile" },
   ];
