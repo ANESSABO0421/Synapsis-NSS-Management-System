@@ -1,102 +1,113 @@
-import React from "react";
-import { useEffect } from "react";
-import {
-  FaUsers,
-  FaCalendarCheck,
-  FaChartLine,
-  FaHandshake,
-} from "react-icons/fa";
+import React, { useEffect, useRef } from "react";
+import { FaUsers, FaCalendarCheck, FaChartLine, FaHandshake } from "react-icons/fa";
 import gsap from "gsap";
-import ScrollTrigger from "gsap/all";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const featuresData = [
   {
     icon: <FaUsers />,
     title: "Volunteer Management",
-    desc: "Register, track, and manage volunteers with ease while building strong NSS teams.",
-    color: "from-green-400 to-teal-300",
-    glow: "shadow-[0_0_30px_0_rgba(16,185,129,0.20)]",
+    desc: "Register, track, and manage volunteers efficiently while building strong NSS teams.",
   },
   {
     icon: <FaCalendarCheck />,
     title: "Event Tracking",
-    desc: "Organize and join events, monitor participation, and keep everyone informed.",
-    color: "from-cyan-400 to-green-300",
-    glow: "shadow-[0_0_30px_0_rgba(6,182,212,0.20)]",
+    desc: "Organize and monitor events effortlessly while keeping everyone in sync.",
   },
   {
     icon: <FaChartLine />,
     title: "Performance Insights",
-    desc: "Gain insights into volunteer hours, activities, and overall impact in real time.",
-    color: "from-blue-400 to-green-200",
-    glow: "shadow-[0_0_30px_0_rgba(59,130,246,0.22)]",
+    desc: "Get real-time insights into volunteer hours, participation, and overall impact.",
   },
   {
     icon: <FaHandshake />,
     title: "Alumni Connect",
-    desc: "Build a bridge between students, alumni, and mentors to strengthen NSS connections.",
-    color: "from-teal-400 to-blue-300",
-    glow: "shadow-[0_0_30px_0_rgba(45,212,191,0.20)]",
+    desc: "Bridge students, alumni, and mentors to strengthen the NSS network.",
   },
 ];
 
 const Features = () => {
+  const sectionRef = useRef(null);
+  const cardsRef = useRef([]);
+
   useEffect(() => {
+    const section = sectionRef.current;
+
+    // Section fade-in
     gsap.fromTo(
-      "#features",
-      { y: -200, opacity: 0, scale: 0.8 },
-      { y: 0, opacity: 1, scale: 1, duration:1}
+      section,
+      { opacity: 0 },
+      {
+        opacity: 1,
+        duration: 1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 85%",
+        },
+      }
+    );
+
+    // Cards slide-up + stagger
+    gsap.fromTo(
+      cardsRef.current,
+      { y: 40, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        stagger: 0.2,
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 80%",
+        },
+      }
     );
   }, []);
 
   return (
     <section
       id="features"
-      className="w-full bg-white py-16 px-3 md:px-6 lg:px-16"
+      ref={sectionRef}
+      className="relative w-full bg-white py-28 px-8 sm:px-16 lg:px-24 overflow-hidden"
     >
-      <div className="max-w-7xl mx-auto text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-800 drop-shadow">
-          Key Features of <span className="text-green-600">Synapsis</span>
-        </h2>
-        <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-          Synapsis helps NSS volunteers, teachers, and alumni connect
-          seamlessly, making it easy to track contributions, organize events,
-          and celebrate impact.
+      {/* Header */}
+      <div className="max-w-7xl mx-auto text-center mb-16">
+        <div className="inline-block border-l-4 border-green-600 pl-4 mb-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-green-800 tracking-tight">
+            Key <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-teal-500">Features</span>
+          </h2>
+        </div>
+        <p className="text-green-700 max-w-2xl mx-auto text-base md:text-lg">
+          Experience a smarter way to manage NSS — built for collaboration, insight, and impact.
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 md:gap-10">
+
+      {/* Feature Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-7xl mx-auto">
         {featuresData.map((f, i) => (
           <div
             key={f.title}
-            className={`relative group transition-all duration-400
-              bg-white/70 backdrop-blur-[5px] bg-clip-padding
-              border border-green-200 rounded-3xl px-6 py-7
-              shadow-xl ${f.glow}
-              hover:bg-gradient-to-br ${f.color} hover:bg-opacity-90
-              hover:scale-[1.04] hover:shadow-2xl cursor-pointer
-              flex flex-col items-center min-h-[260px] md:min-h-[220px]`}
-            style={{
-              boxShadow: "0 6px 24px 0px rgba(52,211,153,0.10)",
-            }}
+            ref={(el) => (cardsRef.current[i] = el)}
+            className="group relative bg-white border border-green-200 rounded-3xl p-8 shadow-[0_10px_40px_rgba(34,197,94,0.1)] hover:shadow-[0_15px_60px_rgba(34,197,94,0.2)] transition-all duration-500 hover:-translate-y-2"
           >
-            {/* Abstract Gradient Glow */}
-            <span
-              className={`absolute inset-0 z-0 rounded-3xl blur-2xl opacity-0 group-hover:opacity-50 pointer-events-none bg-gradient-to-br ${f.color}`}
-            ></span>
-            {/* Icon */}
-            <div
-              className={`z-10 relative mb-5 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full bg-white/70 border-4 border-white shadow-md group-hover:bg-white/90 transition-all text-3xl md:text-4xl text-green-700`}
-            >
-              {f.icon}
+            {/* Accent border glow */}
+            <span className="absolute inset-0 rounded-3xl border border-transparent group-hover:border-green-400/50 transition-all duration-300 pointer-events-none"></span>
+
+            <div className="flex flex-col items-center text-center relative z-10">
+              <div className="text-5xl mb-5 text-green-600 group-hover:text-green-700 transition-colors duration-300">
+                {f.icon}
+              </div>
+              <h3 className="text-xl font-semibold text-green-800 mb-3 group-hover:text-green-900 transition-colors duration-300">
+                {f.title}
+              </h3>
+              <p className="text-green-700 text-sm leading-relaxed group-hover:text-green-800 transition-colors duration-300">
+                {f.desc}
+              </p>
             </div>
-            {/* Title */}
-            <h3 className="z-10 relative text-lg md:text-xl text-gray-800 font-bold mb-3 group-hover:text-white text-center transition-all">
-              {f.title}
-            </h3>
-            {/* Description */}
-            <p className="z-10 relative text-gray-600 group-hover:text-white/90 text-sm md:text-md text-center transition-all min-h-[44px] md:min-h-[64px] px-1">
-              {f.desc}
-            </p>
           </div>
         ))}
       </div>

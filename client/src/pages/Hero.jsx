@@ -1,28 +1,75 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade, Navigation } from "swiper/modules";
+import { Autoplay } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/effect-fade";
 
 const Hero = () => {
+  const sectionRef = useRef(null);
+  const titleRef = useRef(null);
+  const textRef = useRef(null);
+  const buttonsRef = useRef(null);
+  const blob1Ref = useRef(null);
+  const blob2Ref = useRef(null);
+
   const bgImages = [
     "/Images/IMG2.png",
     "/Images/IMG3.png",
-    "/Images/IMG4.png"
-  ]; 
+    "/Images/IMG4.png",
+  ];
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Initial fade-in animation for section content
+      gsap.from(sectionRef.current, {
+        opacity: 0,
+        duration: 1.5,
+        ease: "power2.out",
+      });
+
+      // Text & button stagger animation
+      gsap.from([titleRef.current, textRef.current, buttonsRef.current], {
+        y: 60,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.3,
+        ease: "power3.out",
+        delay: 0.5,
+      });
+
+      // Floating blob animations (looping)
+      gsap.to(blob1Ref.current, {
+        y: -30,
+        scale: 1.1,
+        duration: 5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      gsap.to(blob2Ref.current, {
+        y: 40,
+        rotate: 20,
+        duration: 6,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1.5, ease: "easeOut" }}
-      className="relative text-gray-900 overflow-hidden min-h-screen flex items-center justify-center"
+    <section
+      id="home"
+      ref={sectionRef}
+      className="relative min-h-screen flex items-center justify-center text-center overflow-hidden"
     >
+      {/* Background Swiper */}
       <div className="absolute inset-0 z-0">
         <Swiper
-          modules={[Autoplay, Navigation]}
+          modules={[Autoplay]}
           slidesPerView={1}
           autoplay={{ delay: 4000, disableOnInteraction: false }}
           loop
@@ -32,78 +79,66 @@ const Hero = () => {
             <SwiperSlide key={i}>
               <img
                 src={img}
-                alt={`background-${i}`}
-                className="w-full h-full object-cover opacity-70"
+                alt={`bg-${i}`}
+                className="w-full h-full object-cover brightness-75"
               />
             </SwiperSlide>
           ))}
         </Swiper>
-        {/* Optional dark overlay for better text contrast */}
-        <div className="absolute inset-0 bg-black/30"></div>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-green-900/40 to-black/60 mix-blend-overlay"></div>
       </div>
 
-      <div className="absolute top-0 left-0 w-80 h-80 bg-green-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse opacity-70 z-5"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse opacity-70 z-5"></div>
-      <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-teal-400/20 rounded-full mix-blend-multiply filter blur-2xl animate-pulse opacity-50 z-5"></div>
+      {/* Floating Animated Blobs */}
+      <div
+        ref={blob1Ref}
+        className="absolute top-10 left-10 w-72 h-72 bg-green-500/30 blur-3xl rounded-full mix-blend-screen"
+      ></div>
 
-      <section
-        id="Home"
-        className="relative z-10 pt-[12vh] flex flex-col items-center justify-center min-h-screen text-center px-4 sm:px-6 lg:px-8"
-      >
-        {/* Heading */}
-        <motion.h1
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-tight mb-5 tracking-tight text-white drop-shadow-lg"
+      <div
+        ref={blob2Ref}
+        className="absolute bottom-10 right-16 w-80 h-80 bg-blue-500/20 blur-3xl rounded-full mix-blend-screen"
+      ></div>
+
+      {/* Content */}
+      <div className="relative z-10 px-6 sm:px-8 md:px-16 text-white max-w-5xl">
+        <h1
+          ref={titleRef}
+          className="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight mb-6"
         >
           Welcome to{" "}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-blue-400 to-teal-400">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-teal-300 to-blue-400 animate-gradient-x">
             Synapsis
           </span>
-        </motion.h1>
+        </h1>
 
-        <motion.h2
-          initial={{ y: -30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1.2, delay: 0.4, ease: "easeOut" }}
-          className="text-lg sm:text-xl lg:text-2xl text-gray-100 mb-6 font-medium max-w-3xl drop-shadow"
+        <p
+          ref={textRef}
+          className="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-8"
         >
-          NSS Management Portal for Students, Teachers, Alumni & Volunteers
-        </motion.h2>
-
-        <motion.p
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-          className="text-gray-200 max-w-2xl mb-10 text-sm sm:text-base lg:text-lg leading-relaxed px-4 drop-shadow"
-        >
-          Seamlessly track volunteer hours, manage events, connect with alumni,
-          and amplify your impact with our intuitive platform.
-        </motion.p>
+          Your all-in-one NSS Management Platform — empowering students,
+          teachers, alumni, and volunteers to create meaningful social impact.
+        </p>
 
         {/* Buttons */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6"
+        <div
+          ref={buttonsRef}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <a
-            href="#signup"
-            className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-full shadow-lg hover:shadow-2xl hover:scale-105 transform transition-all duration-300"
-          >
+          <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-500 rounded-full font-semibold shadow-lg hover:scale-105 hover:shadow-2xl hover:from-green-700 hover:to-blue-600 transition-all duration-300">
             Get Started
-          </a>
-          <a
-            href="#features"
-            className="px-8 py-4 border-2 border-blue-400 text-blue-200 font-semibold rounded-full hover:bg-gradient-to-r hover:from-green-500 hover:to-blue-500 hover:text-white transition-all duration-300"
-          >
+          </button>
+
+          <button className="px-8 py-4 border-2 border-green-400/70 rounded-full font-semibold text-green-300 hover:bg-gradient-to-r hover:from-green-500 hover:to-teal-500 hover:text-white transition-all duration-300 shadow-md">
             Explore Features
-          </a>
-        </motion.div>
-      </section>
-    </motion.div>
+          </button>
+        </div>
+      </div>
+
+      {/* Subtle Glass Overlay */}
+      <div className="absolute inset-0 pointer-events-none backdrop-blur-[2px] bg-white/5"></div>
+    </section>
   );
 };
 

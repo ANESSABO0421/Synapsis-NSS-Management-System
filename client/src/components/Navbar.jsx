@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BiMenu, BiX, BiChevronDown } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,62 +6,77 @@ import { motion, AnimatePresence } from "framer-motion";
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
   const roles = ["Student", "Teacher", "Coordinator", "Alumni"];
 
-  const linkVariants = {
+  // Scroll detection for blur effect
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Link motion variants
+  const linkMotion = {
     hidden: { opacity: 0, y: -20 },
     visible: (i) => ({
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4, delay: i * 0.1 },
+      transition: { duration: 0.6, delay: i * 0.1, ease: "easeOut" },
     }),
   };
 
-  const dropdownVariants = {
-    hidden: { opacity: 0, y: -10 },
+  const dropdownMotion = {
+    hidden: { opacity: 0, y: -10, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, ease: "easeOut" },
+      scale: 1,
+      transition: { duration: 0.25, ease: "easeOut" },
     },
     exit: {
       opacity: 0,
       y: -10,
+      scale: 0.95,
       transition: { duration: 0.2, ease: "easeIn" },
     },
   };
 
-  const mobileMenuVariants = {
-    hidden: { opacity: 0, y: -20, height: 0 },
+  const mobileMotion = {
+    hidden: { opacity: 0, y: -30 },
     visible: {
       opacity: 1,
       y: 0,
-      height: "auto",
-      transition: { duration: 0.5, ease: "easeOut" },
+      transition: { duration: 0.4, ease: "easeOut" },
     },
-    exit: {
-      opacity: 0,
-      y: -20,
-      height: 0,
-      transition: { duration: 0.3, ease: "easeIn" },
-    },
+    exit: { opacity: 0, y: -30, transition: { duration: 0.3, ease: "easeIn" } },
   };
 
   return (
     <div className="relative z-50">
-      <nav className="w-full fixed top-0 left-0 flex justify-between items-center px-4 sm:px-8 lg:px-16 py-4 bg-gradient-to-r from-green-600 via-teal-500 to-blue-600 backdrop-blur-xl shadow-lg border-b border-green-500/20">
+      {/* Navbar container */}
+      <motion.nav
+        className={`fixed top-0 left-0 w-full flex justify-between items-center px-5 sm:px-10 lg:px-16 py-4 transition-all duration-500 border-b border-white/10 ${
+          scrollY > 20
+            ? "backdrop-blur-2xl bg-gradient-to-r from-green-700/90 via-teal-600/90 to-blue-700/90 shadow-xl"
+            : "bg-gradient-to-r from-green-600 via-teal-500 to-blue-600"
+        }`}
+        initial={{ y: -80 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
         {/* Logo */}
         <motion.div
-          className="flex items-center gap-3 text-white font-extrabold text-xl sm:text-2xl lg:text-3xl"
-          initial={{ opacity: 0, x: -20 }}
+          className="flex items-center gap-3 text-white font-extrabold text-xl sm:text-2xl"
+          initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <img
             src="/Synapsis-Logo-bgRemover.png"
             alt="Synapsis Logo"
-            className="h-10 sm:h-12 object-contain"
+            className="h-10 sm:h-12 object-contain drop-shadow-lg"
             onError={(e) =>
               (e.target.src = "https://via.placeholder.com/40?text=Logo")
             }
@@ -72,20 +87,20 @@ const Navbar = () => {
         </motion.div>
 
         {/* Desktop Navigation */}
-        <ul className="hidden md:flex gap-6 lg:gap-10 text-white font-medium text-base lg:text-lg">
+        <ul className="hidden md:flex gap-8 lg:gap-10 text-white font-medium text-base lg:text-lg">
           {["Home", "About", "Features", "Events", "Contact"].map(
             (item, index) => (
               <motion.li
                 key={item}
-                className="relative group cursor-pointer"
                 custom={index}
                 initial="hidden"
                 animate="visible"
-                variants={linkVariants}
+                variants={linkMotion}
+                className="relative group"
               >
                 <Link
                   to={`/${item.toLowerCase()}`}
-                  className="hover:text-yellow-200 transition-colors duration-300"
+                  className="hover:text-green-200 transition-colors duration-300"
                 >
                   {item}
                 </Link>
@@ -96,16 +111,15 @@ const Navbar = () => {
         </ul>
 
         {/* Desktop Buttons */}
-        <div className="hidden md:flex gap-3 relative">
-          {/* Simple Login Button */}
+        <div className="hidden md:flex items-center gap-3 relative">
           <Link
             to="/login"
-            className="px-5 py-2 border border-white/80 text-white rounded-full hover:bg-white hover:text-gray-900 font-medium transition-all duration-300 shadow-sm"
+            className="px-5 py-2 border border-white/80 text-white rounded-full hover:bg-white hover:text-gray-900 font-medium transition-all duration-300 shadow-md"
           >
             Login
           </Link>
 
-          {/* Signup Dropdown */}
+          {/* Signup dropdown */}
           <div
             className="relative"
             onMouseEnter={() => setSignupOpen(true)}
@@ -118,17 +132,17 @@ const Navbar = () => {
             <AnimatePresence>
               {signupOpen && (
                 <motion.div
-                  className="absolute right-0 mt-2 w-44 bg-white text-gray-800 rounded-xl shadow-lg overflow-hidden z-50"
+                  className="absolute right-0 mt-3 w-44 bg-white text-gray-800 rounded-xl shadow-2xl overflow-hidden origin-top-right"
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  variants={dropdownVariants}
+                  variants={dropdownMotion}
                 >
                   {roles.map((role) => (
                     <Link
                       key={role}
                       to={`/signup/${role.toLowerCase()}`}
-                      className="block px-4 py-2 hover:bg-green-100 transition"
+                      className="block px-4 py-2 hover:bg-green-100 transition-all duration-200"
                     >
                       {role}
                     </Link>
@@ -139,7 +153,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu Icon */}
+        {/* Mobile Icon */}
         <motion.div
           className="md:hidden text-white text-3xl cursor-pointer"
           onClick={() => setOpen(!open)}
@@ -148,17 +162,17 @@ const Navbar = () => {
         >
           {open ? <BiX /> : <BiMenu />}
         </motion.div>
-      </nav>
+      </motion.nav>
 
-      {/* Mobile Dropdown Menu */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed top-[68px] left-0 w-full bg-gradient-to-br from-green-600/95 via-teal-500/95 to-blue-600/95 backdrop-blur-xl border-t border-green-500/30 text-white flex flex-col items-center gap-6 py-8"
+            className="fixed top-[72px] left-0 w-full bg-gradient-to-br from-green-700/95 via-teal-600/95 to-blue-700/95 backdrop-blur-xl border-t border-green-400/20 text-white flex flex-col items-center gap-6 py-8 shadow-lg"
             initial="hidden"
             animate="visible"
             exit="exit"
-            variants={mobileMenuVariants}
+            variants={mobileMotion}
           >
             {["Home", "About", "Features", "Events", "Contact"].map(
               (item, index) => (
@@ -171,7 +185,7 @@ const Navbar = () => {
                 >
                   <Link
                     to={`/${item.toLowerCase()}`}
-                    className="text-lg font-medium hover:text-yellow-200 transition"
+                    className="text-lg font-medium hover:text-green-200 transition-all duration-300"
                     onClick={() => setOpen(false)}
                   >
                     {item}
@@ -180,18 +194,16 @@ const Navbar = () => {
               )
             )}
 
-            {/* Mobile Login Button */}
             <Link
-              to="/login/admin"
+              to="/login"
               onClick={() => setOpen(false)}
               className="px-6 py-2 border border-white/80 text-white rounded-full hover:bg-white hover:text-gray-900 font-medium transition-all duration-300"
             >
               Login
             </Link>
 
-            {/* Mobile Signup Dropdown */}
-            <div className="flex flex-col gap-2 mt-4">
-              <p className="text-lg font-semibold">Signup as</p>
+            <div className="flex flex-col gap-2 mt-3">
+              <p className="text-lg font-semibold text-green-100">Signup as</p>
               {roles.map((role) => (
                 <Link
                   key={role}
@@ -207,7 +219,7 @@ const Navbar = () => {
         )}
       </AnimatePresence>
 
-      {/* Glow effect */}
+      {/* Ambient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 sm:w-80 h-12 bg-green-400/30 blur-3xl rounded-full pointer-events-none" />
     </div>
   );

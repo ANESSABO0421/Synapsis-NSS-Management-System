@@ -1,16 +1,20 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
+  const cardsRef = useRef([]);
 
   const getImages = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:3000/api/events/getalleventimage"
-      );
+      const res = await axios.get("http://localhost:3000/api/events/getalleventimage");
       if (res.data.success) {
-        setImages(res.data.images.slice(0,3));
+        // Limit to 4 images only
+        setImages(res.data.images.slice(0, 4));
       }
     } catch (err) {
       console.error("Error fetching images:", err);
@@ -21,65 +25,114 @@ const Gallery = () => {
     getImages();
   }, []);
 
+  useEffect(() => {
+    if (!images.length) return;
+
+    gsap.set(cardsRef.current, { y: 50, opacity: 0 });
+    gsap.to(cardsRef.current, {
+      scrollTrigger: {
+        trigger: "#gallery",
+        start: "top 85%",
+      },
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "power3.out",
+      stagger: 0.15,
+    });
+
+    // 3D tilt effect on hover
+    cardsRef.current.forEach((card) => {
+      if (!card) return;
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        gsap.to(card, {
+          rotationY: x / 25,
+          rotationX: -y / 25,
+          transformPerspective: 600,
+          ease: "power2.out",
+          duration: 0.4,
+        });
+      });
+      card.addEventListener("mouseleave", () => {
+        gsap.to(card, {
+          rotationY: 0,
+          rotationX: 0,
+          ease: "power3.out",
+          duration: 0.6,
+        });
+      });
+    });
+  }, [images]);
+
   return (
-    <div className="p-8 flex flex-col items-center bg-gradient-to-br from-green-50 to-cyan-50 min-h-[80vh]">
-      <div className="max-w-7xl mx-auto text-center mb-16">
-        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 drop-shadow">
-          The Spirit of <span className="text-green-600">Togetherness</span>
+    <section
+      id="gallery"
+      className="relative py-20 px-6 md:px-12 bg-gradient-to-br from-green-50 via-white to-cyan-50 overflow-hidden"
+    >
+      {/* Background glow accents */}
+      <div className="absolute -top-20 -left-20 w-72 h-72 bg-green-300/20 rounded-full blur-[120px]"></div>
+      <div className="absolute bottom-[-6rem] right-[-6rem] w-[25rem] h-[25rem] bg-cyan-300/30 rounded-full blur-[150px]"></div>
+
+      {/* Header */}
+      <div className="relative z-10 max-w-5xl mx-auto text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+          The Spirit of{" "}
+          <span className="bg-gradient-to-r from-green-500 to-teal-400 bg-clip-text text-transparent">
+            Togetherness
+          </span>
         </h2>
-        <p className="text-gray-700 mt-4 max-w-2xl mx-auto text-lg">
-          Showcasing stories of service, compassion, and collective progress.
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          Capturing moments of unity, compassion, and social impact through the NSS journey.
         </p>
       </div>
 
-      {/* Gallery Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 w-full max-w-6xl">
+      {/* Gallery Grid — 2 Columns × 2 Rows */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
         {images.length === 0 ? (
-          <p className="text-gray-400 text-xl col-span-full text-center transition-all">
+          <p className="text-gray-400 text-xl col-span-full text-center">
             No images available yet.
           </p>
         ) : (
-          images.map((img, indx) => (
+          images.map((img, i) => (
             <div
-              key={indx}
-              className="relative overflow-hidden rounded-3xl group border border-green-200
-                bg-white/80 backdrop-blur-xl shadow-2xl shadow-green-100/[0.15]
-                transition-all duration-400 hover:shadow-green-400/30"
+              key={i}
+              ref={(el) => (cardsRef.current[i] = el)}
+              className="relative group bg-white/70 backdrop-blur-xl border border-green-200 rounded-3xl overflow-hidden 
+                shadow-lg hover:shadow-green-300/40 hover:-translate-y-2 transition-all duration-500"
             >
-              {/* Colored floating glow in the background */}
-              <div className="absolute inset-0 z-0 pointer-events-none">
-                <span className="absolute -bottom-4 -left-8 w-36 h-20 bg-green-300/30 blur-2xl rounded-full"></span>
-                <span className="absolute top-2 right-0 w-24 h-14 bg-cyan-200/30 blur-xl rounded-full"></span>
-              </div>
-              {/* Image with zoom animation on hover */}
+              {/* Subtle gradient glow */}
+              <span className="absolute inset-0 rounded-3xl bg-gradient-to-br from-green-200/20 via-transparent to-cyan-100/10 opacity-0 group-hover:opacity-100 transition duration-500"></span>
+
+              {/* Image */}
               <img
                 src={img.url}
-                alt={img.caption || `Event image ${indx + 1}`}
-                className="w-full h-64 object-cover object-center rounded-2xl z-10 relative
-                  group-hover:scale-105 group-hover:brightness-110 transition-all duration-500"
+                alt={img.caption || `Gallery image ${i + 1}`}
                 loading="lazy"
+                className="w-full h-72 object-cover object-center rounded-3xl group-hover:scale-105 transition-transform duration-500"
               />
-              {/* Gradient overlay on hover */}
-              <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 
-                bg-gradient-to-t from-green-500/50 to-transparent transition-all duration-400"
-              />
-              {/* Caption */}
-              <div className="relative z-30 px-4 py-3 bg-white/75 backdrop-blur-2xl border-t border-green-100
-                text-center rounded-b-2xl">
+
+              {/* Overlay gradient on hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-3xl"></div>
+
+              {/* Caption area */}
+              <div className="absolute bottom-0 w-full px-5 py-4 bg-white/80 backdrop-blur-xl border-t border-green-100 rounded-b-3xl text-center">
                 {img.eventTitle && (
-                  <p className="font-bold text-green-700 text-base tracking-wide truncate">
+                  <h3 className="text-lg font-semibold text-green-700 truncate">
                     {img.eventTitle}
-                  </p>
+                  </h3>
                 )}
                 {img.caption && (
-                  <p className="text-gray-600 text-xs mt-0.5">{img.caption}</p>
+                  <p className="text-gray-600 text-sm mt-1">{img.caption}</p>
                 )}
               </div>
             </div>
           ))
         )}
       </div>
-    </div>
+    </section>
   );
 };
 
