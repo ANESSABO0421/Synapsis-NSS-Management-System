@@ -12,6 +12,7 @@ import {
   getFilteredStudentEvents,
   getMyEvents,
   getPendingStudent,
+  getStudentAttendanceForEvent,
   getStudentDashboard,
   getStudentEvents,
   getStudentProfile,
@@ -68,9 +69,6 @@ studentRouter.delete(
 //   generateOwnCertificate
 // );
 
-
-
-
 //dashboard(admin)
 studentRouter.get(
   "/getallpendingstudent",
@@ -116,7 +114,18 @@ studentRouter.get(
 
 studentRouter.get("/my-events", protect, volunteerOnly, getMyEvents);
 
+studentRouter.get(
+  "/generate/:eventId",
+  protect,
+  volunteerOnly,
+  generateAICertificate
+);
 
-studentRouter.get("/generate/:eventId", protect,volunteerOnly, generateAICertificate);
+studentRouter.get(
+  "/event/:eventId/attendance",
+  protect,
+  volunteerOnly,
+  getStudentAttendanceForEvent
+);
 
 export default studentRouter;

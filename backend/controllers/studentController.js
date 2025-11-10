@@ -1337,3 +1337,79 @@ export const generateAICertificate = async (req, res) => {
       res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+
+// ✅ Get Student Attendance for a Specific Event
+export const getStudentAttendanceForEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const studentId = req.user._id; // 🟢 from JWT middleware
+
+    // 1️⃣ Find event and populate attendance
+    const event = await Event.findById(eventId)
+      .populate("attendance.student", "name department")
+      .populate("attendance.markedBy", "name email");
+
+    if (!event)
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+
+    // 2️⃣ Find student attendance record
+    const record = event.attendance.find(
+      (a) => a.student._id.toString() === studentId.toString()
+    );
+
+    if (!record) {
+      return res.status(200).json({
+        success: true,
+        message: "Attendance not marked yet for this student",
+        event: {
+          id: event._id,
+          title: event.title,
+          date: event.date,
+          location: event.location,
+        },
+        attendance: {
+          status: "Not Marked",
+          markedBy: null,
+          date: null,
+        },
+      });
+    }
+
+    // 3️⃣ Return attendance info
+    res.status(200).json({
+      success: true,
+      message: "Attendance fetched successfully",
+      event: {
+        id: event._id,
+        title: event.title,
+        date: event.date,
+        location: event.location,
+      },
+      attendance: {
+        status: record.status,
+        markedBy: record.markedBy
+          ? {
+              id: record.markedBy._id,
+              name: record.markedBy.name,
+              email: record.markedBy.email,
+            }
+          : null,
+        date: record.date,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Attendance Fetch Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
