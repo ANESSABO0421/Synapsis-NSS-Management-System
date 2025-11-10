@@ -8,6 +8,8 @@ import {
   editStudentProfile,
   generateOwnCertificate,
   getAllStudents,
+  getFilteredStudentEvents,
+  getMyEvents,
   getPendingStudent,
   getStudentDashboard,
   getStudentEvents,
@@ -82,13 +84,32 @@ studentRouter.put("/rejectstuedent/:id", protect, adminOnly, rejectStudent);
 
 studentRouter.get("/getallstudent", protect, adminOnly, getAllStudents);
 
-studentRouter.put("/rejectinallstudent/:id", protect, adminOnly, rejectInDashboardStudent);
+studentRouter.put(
+  "/rejectinallstudent/:id",
+  protect,
+  adminOnly,
+  rejectInDashboardStudent
+);
 
+studentRouter.get("/dashboard", protect, volunteerOnly, getStudentDashboard);
 
-studentRouter.get("/dashboard",protect,volunteerOnly,getStudentDashboard)
+studentRouter.get("/profile", protect, volunteerOnly, getStudentProfile);
 
-studentRouter.get("/profile", protect,volunteerOnly, getStudentProfile);
+studentRouter.put(
+  "/profile/edit",
+  protect,
+  volunteerOnly,
+  upload.single("profileImage"),
+  editStudentProfile
+);
 
-studentRouter.put("/profile/edit", protect,volunteerOnly, upload.single("profileImage"), editStudentProfile);
+studentRouter.get(
+  "/events/filter",
+  protect,
+  volunteerOnly,
+  getFilteredStudentEvents
+);
+
+studentRouter.get("/my-events", protect, volunteerOnly, getMyEvents);
 
 export default studentRouter;

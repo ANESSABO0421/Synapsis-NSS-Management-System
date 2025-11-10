@@ -9,6 +9,7 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { BiComment } from "react-icons/bi";
 
 const StudentSidebar = ({ setIsOpen }) => {
   const navigate = useNavigate();
@@ -27,7 +28,8 @@ const StudentSidebar = ({ setIsOpen }) => {
     { to: "/studentlayout/dashboard", icon: <FaHome />, label: "Dashboard" },
     { to: "/studentlayout/studentevents", icon: <FaCalendarCheck />, label: "My Events" },
     { to: "/student/certificates", icon: <FaAward />, label: "Certificates" },
-    { to: "/student/hours", icon: <FaClock />, label: "Service Hours" },
+    // { to: "/student/hours", icon: <FaClock />, label: "Service Hours" },
+    { to: "/studentlayout/chatstudent", icon: <BiComment />, label: "Chat" },
     { to: "/studentlayout/studentprofile", icon: <FaUser />, label: "Profile" },
   ];
 

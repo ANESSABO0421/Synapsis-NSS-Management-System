@@ -44,6 +44,7 @@ import ChatPage from "./pages/coordinator/Chat/ChatPage";
 import TeacherChatPage from "./pages/teacher/Chat/TeacherChatPage";
 import StudentMyEvents from "./pages/student/StudentMyEvents";
 import MyProfile from "./pages/student/MyProfile";
+import StudentChatPage from "./pages/student/Chat/StudentChatPage";
 
 const App = () => {
   return (
@@ -114,6 +115,7 @@ const App = () => {
             <Route path="/studentlayout/dashboard" element={<StudentDashboard />} />
             <Route path="studentevents" element={<StudentMyEvents />} />
             <Route path="studentprofile" element={<MyProfile />} />
+            <Route path="chatstudent" element={<StudentChatPage />} />
           </Route>
         </Routes>
       </SocketProvider>

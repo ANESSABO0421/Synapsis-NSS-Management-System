@@ -889,3 +889,217 @@ export const editStudentProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+// controllers/studentController.js
+
+
+export const getFilteredStudentEvents = async (req, res) => {
+  try {
+    const studentId = req.user?.id; // From JWT middleware
+    const { status, teacherId, coordinatorId, startDate, endDate } = req.query;
+
+    if (!studentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing student ID in token",
+      });
+    }
+
+    // ✅ Base query: find events where student is a participant
+    const query = { participants: studentId };
+
+    if (status) query.status = new RegExp(`^${status}$`, "i");
+    if (teacherId) query.assignedTeacher = teacherId;
+    if (coordinatorId) query.assignedCoordinators = coordinatorId;
+    if (startDate && endDate) {
+      query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
+
+    const events = await Event.find(query)
+      .populate("assignedTeacher", "name email department phoneNumber")
+      .populate("assignedCoordinators", "name email department phoneNumber")
+      .populate("institution", "name address")
+      .sort({ date: -1 });
+
+    if (!events || events.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No events found for this student",
+        filters: { statuses: [], teachers: [], coordinators: [] },
+        events: [],
+      });
+    }
+
+    // ✅ Build dropdown filters safely
+    const uniqueTeachers = new Map();
+    const uniqueCoordinators = new Map();
+    const statuses = new Set();
+
+    events.forEach((e) => {
+      if (e.status) statuses.add(e.status);
+
+      // 🧑‍🏫 Assigned Teachers (handle both array and single)
+      if (e.assignedTeacher) {
+        const teachers = Array.isArray(e.assignedTeacher)
+          ? e.assignedTeacher
+          : [e.assignedTeacher];
+
+        teachers.forEach((t) => {
+          if (t?._id) {
+            uniqueTeachers.set(String(t._id), {
+              id: t._id,
+              name: t.name,
+              email: t.email,
+              department: t.department || "N/A",
+              phoneNumber: t.phoneNumber || "N/A",
+            });
+          }
+        });
+      }
+
+      // 👨‍🏫 Assigned Coordinators (handle both array and single)
+      if (e.assignedCoordinators) {
+        const coordinators = Array.isArray(e.assignedCoordinators)
+          ? e.assignedCoordinators
+          : [e.assignedCoordinators];
+
+        coordinators.forEach((c) => {
+          if (c?._id) {
+            uniqueCoordinators.set(String(c._id), {
+              id: c._id,
+              name: c.name,
+              email: c.email,
+              department: c.department || "N/A",
+              phoneNumber: c.phoneNumber || "N/A",
+            });
+          }
+        });
+      }
+    });
+
+    const dropdownData = {
+      statuses: Array.from(statuses),
+      teachers: Array.from(uniqueTeachers.values()),
+      coordinators: Array.from(uniqueCoordinators.values()),
+    };
+
+    // ✅ Format final events
+    const formattedEvents = events.map((ev) => ({
+      id: ev._id,
+      title: ev.title,
+      description: ev.description,
+      date: ev.date,
+      status: ev.status,
+      hours: ev.hours,
+      location: ev.location,
+      teacher: Array.isArray(ev.assignedTeacher)
+        ? ev.assignedTeacher.map((t) => ({
+            id: t._id,
+            name: t.name,
+            email: t.email,
+            department: t.department || "N/A",
+            phoneNumber: t.phoneNumber || "N/A",
+          }))
+        : ev.assignedTeacher
+        ? {
+            id: ev.assignedTeacher._id,
+            name: ev.assignedTeacher.name,
+            email: ev.assignedTeacher.email,
+            department: ev.assignedTeacher.department || "N/A",
+            phoneNumber: ev.assignedTeacher.phoneNumber || "N/A",
+          }
+        : null,
+      coordinator: Array.isArray(ev.assignedCoordinators)
+        ? ev.assignedCoordinators.map((c) => ({
+            id: c._id,
+            name: c.name,
+            email: c.email,
+            department: c.department || "N/A",
+            phoneNumber: c.phoneNumber || "N/A",
+          }))
+        : ev.assignedCoordinators
+        ? {
+            id: ev.assignedCoordinators._id,
+            name: ev.assignedCoordinators.name,
+            email: ev.assignedCoordinators.email,
+            department: ev.assignedCoordinators.department || "N/A",
+            phoneNumber: ev.assignedCoordinators.phoneNumber || "N/A",
+          }
+        : null,
+      institution: ev.institution
+        ? {
+            id: ev.institution._id,
+            name: ev.institution.name,
+            address: ev.institution.address,
+          }
+        : null,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: "Student events fetched successfully",
+      filters: dropdownData,
+      events: formattedEvents,
+    });
+  } catch (error) {
+    console.error("❌ Get Filtered Events Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+
+
+// get event of student/volunteer
+export const getMyEvents = async (req, res) => {
+  try {
+    const studentId = req.user._id; // from protect middleware
+    const student = await Student.findById(studentId).populate("assignedEvents");
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    // If no assigned events
+    if (!student.assignedEvents || student.assignedEvents.length === 0) {
+      return res.status(200).json({
+        success: true,
+        events: [],
+        message: "No events assigned yet",
+      });
+    }
+
+    // ✅ Fetch full event details
+    // Check if "coordinator" exists in Event schema before populating
+    const populateOptions = [
+      { path: "institution", select: "name" }, // only if institution exists
+    ];
+
+    // If your Event schema actually includes coordinator, uncomment this:
+    // populateOptions.push({ path: "coordinator", select: "name email" });
+
+    const events = await Event.find({
+      _id: { $in: student.assignedEvents },
+    })
+      .populate(populateOptions)
+      .sort({ date: -1 });
+
+    return res.status(200).json({
+      success: true,
+      events,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching student events:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error fetching student events",
+    });
+  }
+};
