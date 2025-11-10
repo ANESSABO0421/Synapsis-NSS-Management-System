@@ -6,6 +6,7 @@ import {
   approveStudent,
   deleteStudent,
   editStudentProfile,
+  generateAICertificate,
   generateOwnCertificate,
   getAllStudents,
   getFilteredStudentEvents,
@@ -60,12 +61,15 @@ studentRouter.delete(
   removeStudentFromEvent
 );
 
-studentRouter.get(
-  "/eventcerificate/:eventId",
-  protect,
-  volunteerOnly,
-  generateOwnCertificate
-);
+// studentRouter.get(
+//   "/eventcerificate/:eventId",
+//   protect,
+//   volunteerOnly,
+//   generateOwnCertificate
+// );
+
+
+
 
 //dashboard(admin)
 studentRouter.get(
@@ -111,5 +115,8 @@ studentRouter.get(
 );
 
 studentRouter.get("/my-events", protect, volunteerOnly, getMyEvents);
+
+
+studentRouter.get("/generate/:eventId", protect,volunteerOnly, generateAICertificate);
 
 export default studentRouter;

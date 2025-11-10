@@ -9,6 +9,16 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import { count } from "console";
 import Institution from "../models/Institution.js";
+import OpenAI from "openai";
+import { HfInference } from "@huggingface/inference";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// Initialize AI Clients
+const openai = new OpenAI({
+  apiKey: process.env.OPEN_AI_KEY,
+});
 
 // OTP generation (6 digits)
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
@@ -64,7 +74,7 @@ export const studentSignUp = async (req, res) => {
       otpExpiry: Date.now() + 5 * 60 * 1000, // 5 mins
       status: "pending",
       profileImage,
-      institution
+      institution,
     });
 
     await Institution.findByIdAndUpdate(institution, {
@@ -422,7 +432,7 @@ export const generateOwnCertificate = async (req, res) => {
       .stroke();
 
     // Watermark logo (light)
-    const logoPath = "public/nss-logo.png"; // path to your NSS logo
+    const logoPath = "/logo.png"; // path to your NSS logo
     if (fs.existsSync(logoPath)) {
       doc.opacity(0.08);
       doc.image(logoPath, doc.page.width / 2 - 150, doc.page.height / 2 - 150, {
@@ -653,8 +663,6 @@ export const rejectInDashboardStudent = async (req, res) => {
   }
 };
 
-
-
 // dashboard
 // export const getStudentDashboard = async (req, res) => {
 //   try {
@@ -701,8 +709,6 @@ export const rejectInDashboardStudent = async (req, res) => {
 //   }
 // };
 
-
-
 export const getStudentDashboard = async (req, res) => {
   try {
     const studentId = req.user.id; // ✅ Extract from token (protect middleware)
@@ -746,7 +752,10 @@ export const getStudentDashboard = async (req, res) => {
     else if (totalHours >= 200) graceMarks = 10;
 
     // ✅ Auto-update totalHours and graceMarks if needed
-    if (student.totalHours !== totalHours || student.graceMarks !== graceMarks) {
+    if (
+      student.totalHours !== totalHours ||
+      student.graceMarks !== graceMarks
+    ) {
       student.totalHours = totalHours;
       student.graceMarks = graceMarks;
       await student.save();
@@ -811,7 +820,6 @@ export const getStudentDashboard = async (req, res) => {
   }
 };
 
-
 // profile
 export const getStudentProfile = async (req, res) => {
   try {
@@ -822,7 +830,9 @@ export const getStudentProfile = async (req, res) => {
       .populate("institution", "name address");
 
     if (!student) {
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
     }
 
     res.json({
@@ -844,7 +854,9 @@ export const editStudentProfile = async (req, res) => {
 
     const student = await Student.findById(studentId);
     if (!student) {
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
     }
 
     // ✅ Update fields only if provided
@@ -890,9 +902,7 @@ export const editStudentProfile = async (req, res) => {
   }
 };
 
-
 // controllers/studentController.js
-
 
 export const getFilteredStudentEvents = async (req, res) => {
   try {
@@ -1052,13 +1062,13 @@ export const getFilteredStudentEvents = async (req, res) => {
   }
 };
 
-
-
 // get event of student/volunteer
 export const getMyEvents = async (req, res) => {
   try {
     const studentId = req.user._id; // from protect middleware
-    const student = await Student.findById(studentId).populate("assignedEvents");
+    const student = await Student.findById(studentId).populate(
+      "assignedEvents"
+    );
 
     if (!student) {
       return res.status(404).json({
@@ -1101,5 +1111,229 @@ export const getMyEvents = async (req, res) => {
       success: false,
       message: "Server error fetching student events",
     });
+  }
+};
+
+export const generateAICertificate = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const studentId = req.user._id;
+
+    const event = await Event.findById(eventId).populate(
+      "participants",
+      "_id name department"
+    );
+    if (!event)
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+
+    if (event.status !== "Completed")
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Certificate available only after event completion",
+        });
+
+    const isParticipant = event.participants.some(
+      (p) => p._id.toString() === studentId.toString()
+    );
+    if (!isParticipant)
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "You are not a participant in this event",
+        });
+
+    const student = await Student.findById(studentId);
+    if (!student)
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
+
+    // ---------------- AI TEXT GENERATION ----------------
+    const eventDate = new Date(event.date).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    const prompt = `
+      Write exactly 2 elegant, formal sentences for a National Service Scheme certificate.
+      - Student: ${student.name}, Department of ${student.department}
+      - Event: "${event.title}" held on ${eventDate}
+      - Emphasize dedication, leadership, and social commitment.
+      - Do not use quotes or headings.
+    `;
+
+    let aiText = "";
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are an NSS certificate text generator.",
+          },
+          { role: "user", content: prompt },
+        ],
+        max_tokens: 120,
+        temperature: 0.7,
+      });
+      aiText = completion.choices[0].message.content.trim();
+    } catch {
+      aiText = `This is to certify that ${student.name} from the Department of ${student.department} actively participated in "${event.title}" on ${eventDate}. Their enthusiasm and commitment reflect the true spirit of the National Service Scheme.`;
+    }
+
+    // ---------------- PDF DESIGN ----------------
+    const folder = path.join("uploads", "certificates");
+    if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+
+    const fileName = `NSS_Certificate_${event._id}_${student._id}.pdf`;
+    const filePath = path.join(folder, fileName);
+
+    const doc = new PDFDocument({ autoFirstPage: false });
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Create ONE page manually (A4 landscape)
+    const W = 842; // width in points
+    const H = 595; // height in points
+    doc.addPage({ size: [W, H], margin: 40 });
+
+    // Colors
+    const navy = "#0B3D91";
+    const gold = "#C8A600";
+    const textDark = "#1C1C1C";
+
+    // Borders
+    doc.rect(0, 0, W, H).fill("#FFFFFF");
+    doc
+      .lineWidth(10)
+      .strokeColor(navy)
+      .rect(25, 25, W - 50, H - 50)
+      .stroke();
+    doc
+      .lineWidth(3)
+      .strokeColor(gold)
+      .rect(40, 40, W - 80, H - 80)
+      .stroke();
+
+    // Fixed Y coordinates (everything fits in one page)
+    const headerY = 70;
+    const subtitleY = 110;
+    const titleY = 160;
+    const textY = 240;
+    const nameY = 345;
+    const deptY = 380;
+    const dateY = 400;
+    const sigY = 455;
+    const footerY = 530;
+
+    // Header
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(28)
+      .fillColor(navy)
+      .text("National Service Scheme (NSS)", 0, headerY, { align: "center" });
+
+    doc
+      .font("Helvetica")
+      .fontSize(13)
+      .fillColor("#555")
+      .text(
+        "Under the Ministry of Youth Affairs & Sports, Government of India",
+        0,
+        subtitleY,
+        { align: "center" }
+      );
+
+    // Title
+    doc
+      .font("Times-BoldItalic")
+      .fontSize(36)
+      .fillColor(gold)
+      .text("Certificate of Appreciation", 0, titleY, { align: "center" });
+
+    // AI body text (bounded box)
+    const textWidth = W - 200;
+    doc
+      .font("Times-Roman")
+      .fontSize(16)
+      .fillColor(textDark)
+      .text(aiText, (W - textWidth) / 2, textY, {
+        width: textWidth,
+        align: "center",
+        lineGap: 6,
+        height: 90,
+        ellipsis: true,
+      });
+
+    // Name & Dept
+    doc
+      .font("Times-BoldItalic")
+      .fontSize(24)
+      .fillColor(navy)
+      .text(student.name, 0, nameY, { align: "center" });
+    doc
+      .font("Times-Italic")
+      .fontSize(15)
+      .fillColor("#555")
+      .text(`Department of ${student.department}`, 0, deptY, {
+        align: "center",
+      });
+
+    // Signatures
+    doc
+      .font("Helvetica")
+      .fontSize(12)
+      .fillColor(textDark)
+      .text("_______________________", 120, sigY);
+    doc.font("Helvetica-Bold").text("Teacher", 175, sigY + 18);
+
+    doc
+      .font("Helvetica")
+      .fontSize(12)
+      .text("_______________________", W - 300, sigY);
+    doc
+      .font("Helvetica-Bold")
+      .text("Principal / NSS Coordinator", W - 300, sigY + 18);
+
+    // Date
+    const issueDate = new Date().toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    doc
+      .font("Helvetica-Oblique")
+      .fontSize(12)
+      .fillColor("#333")
+      .text(`Date of Issue: ${issueDate}`, 0, dateY, { align: "center" });
+
+    // Footer
+    doc
+      .font("Helvetica-Oblique")
+      .fontSize(10)
+      .fillColor("#777")
+      .text("Generated by SYNAPSIS NSS Management Portal", 0, footerY, {
+        align: "center",
+      });
+
+    doc.end();
+
+    // ---------------- SEND FILE ----------------
+    stream.on("finish", () => {
+      res.download(filePath, fileName, (err) => {
+        if (err) console.error("Download error:", err);
+        fs.unlink(filePath, () => {});
+      });
+    });
+  } catch (error) {
+    console.error("Certificate Error:", error);
+    if (!res.headersSent)
+      res.status(500).json({ success: false, message: error.message });
   }
 };
