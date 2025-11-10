@@ -3,18 +3,18 @@ import { CalendarDays } from "lucide-react";
 
 const StudentEventList = ({ events, onSelect, selected }) => {
   return (
-    <div className="h-full flex flex-col bg-white border-r border-gray-200 shadow-md">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b bg-green-600 text-white flex items-center gap-2 sticky top-0 z-10">
+      <div className="p-4 border-b bg-gradient-to-r from-green-600 to-emerald-500 text-white flex items-center gap-2 sticky top-0 z-10 shadow-md">
         <CalendarDays className="w-5 h-5 text-white" />
-        <h2 className="text-lg font-semibold tracking-wide">My Events</h2>
+        <h2 className="text-lg font-semibold">My Events</h2>
       </div>
 
       {/* Events */}
       <div className="flex-1 overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-green-300 scrollbar-track-transparent">
         {events.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm italic">
-            No registered events yet.
+          <div className="flex items-center justify-center h-full text-gray-500 italic text-sm">
+            No registered events yet 🌱
           </div>
         ) : (
           events.map((event) => {
@@ -23,17 +23,13 @@ const StudentEventList = ({ events, onSelect, selected }) => {
               <div
                 key={event._id}
                 onClick={() => onSelect(event)}
-                className={`cursor-pointer p-4 mb-2 rounded-xl border transition-all shadow-sm ${
+                className={`cursor-pointer p-4 mb-3 rounded-xl border transition-all shadow-sm ${
                   isSelected
-                    ? "bg-green-100 border-green-400 ring-1 ring-green-300"
-                    : "bg-white hover:bg-gray-50 hover:border-green-200"
+                    ? "bg-emerald-100 border-green-500 ring-1 ring-green-400"
+                    : "bg-white hover:bg-green-50 hover:border-emerald-200"
                 }`}
               >
-                <h3
-                  className={`font-semibold text-sm sm:text-base ${
-                    isSelected ? "text-green-800" : "text-gray-800"
-                  }`}
-                >
+                <h3 className={`font-semibold ${isSelected ? "text-green-700" : "text-gray-800"}`}>
                   {event.title}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
