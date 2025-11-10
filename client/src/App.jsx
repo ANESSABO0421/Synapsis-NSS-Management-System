@@ -45,6 +45,7 @@ import TeacherChatPage from "./pages/teacher/Chat/TeacherChatPage";
 import StudentMyEvents from "./pages/student/StudentMyEvents";
 import MyProfile from "./pages/student/MyProfile";
 import StudentChatPage from "./pages/student/Chat/StudentChatPage";
+import StudentCertificate from "./pages/student/StudentCertificate";
 
 const App = () => {
   return (
@@ -115,6 +116,7 @@ const App = () => {
             <Route path="/studentlayout/dashboard" element={<StudentDashboard />} />
             <Route path="studentevents" element={<StudentMyEvents />} />
             <Route path="studentprofile" element={<MyProfile />} />
+            <Route path="certificates" element={<StudentCertificate />} />
             <Route path="chatstudent" element={<StudentChatPage />} />
           </Route>
         </Routes>
