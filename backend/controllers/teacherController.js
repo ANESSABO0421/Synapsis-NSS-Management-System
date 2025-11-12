@@ -1168,3 +1168,73 @@ export const editEvent = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+// ==============================
+// 🟢 Get Teacher Profile
+// ==============================
+export const getTeacherProfile = async (req, res) => {
+  try {
+    const teacherId = req.user._id; // ✅ from auth middleware
+
+    const teacher = await Teacher.findById(teacherId)
+      .select("-password -otp -otpExpiry -__v");
+
+    if (!teacher) {
+      return res.status(404).json({ success: false, message: "Teacher not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Teacher profile fetched successfully",
+      teacher,
+    });
+  } catch (error) {
+    console.error("Error fetching teacher profile:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// ==============================
+// 🟡 Update Teacher Profile
+// ==============================
+export const updateTeacherProfile = async (req, res) => {
+  try {
+    const teacherId = req.user._id;
+    const { name, email, phoneNumber, department } = req.body;
+
+    const updateData = { name, email, phoneNumber, department };
+
+    // ✅ If profile image is updated
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "teacher_profiles",
+      });
+      updateData.profileImage = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
+    }
+
+    // ✅ Update teacher info
+    const updatedTeacher = await Teacher.findByIdAndUpdate(
+      teacherId,
+      updateData,
+      { new: true }
+    ).select("-password -otp -otpExpiry -__v");
+
+    if (!updatedTeacher) {
+      return res.status(404).json({ success: false, message: "Teacher not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Teacher profile updated successfully",
+      teacher: updatedTeacher,
+    });
+  } catch (error) {
+    console.error("Error updating teacher profile:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};

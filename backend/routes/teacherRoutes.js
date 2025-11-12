@@ -22,6 +22,8 @@ import {
   editEvent,
   updateGraceMark,
   deleteGraceMark,
+  getTeacherProfile,
+  updateTeacherProfile,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
@@ -60,15 +62,11 @@ teacherRoute.get(
 // Grace marks
 teacherRoute.post("/grace-marks", protect, teacherOnly, assignGraceMark);
 
-
-
 // gracemark update
 teacherRoute.put("/grace-marks/:studentId", updateGraceMark);
 
-
 // grace mark delete
 teacherRoute.delete("/grace-marks/:studentId", deleteGraceMark);
-
 
 // recommended gracemark approve
 teacherRoute.put(
@@ -121,6 +119,15 @@ teacherRoute.post(
   protect,
   teacherOnly,
   uploadEventImages
+);
+
+teacherRoute.get("/profile", protect, teacherOnly, getTeacherProfile);
+teacherRoute.put(
+  "/profile",
+  protect,
+  teacherOnly,
+  upload.single("profileImage"),
+  updateTeacherProfile
 );
 
 // Edit event route

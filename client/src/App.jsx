@@ -49,6 +49,7 @@ import StudentCertificate from "./pages/student/StudentCertificate";
 import StudentAttendance from "./pages/student/StudentAttendance";
 import AdminProfile from "./pages/admin/AdminProfile";
 import CoordinatorMyProfile from "./pages/coordinator/CoordinatorMyProfile";
+import TeacherProfile from "./pages/teacher/TeacherProfile";
 
 const App = () => {
   return (
@@ -115,6 +116,7 @@ const App = () => {
               element={<ApproveGraceMark />}
             />
             <Route path="teacherchat" element={<TeacherChatPage />} />
+            <Route path="teacherprofile" element={<TeacherProfile />} />
           </Route>
           <Route path="/studentlayout" element={<StudentLayout />}>
             <Route index element={<StudentDashboard />} />

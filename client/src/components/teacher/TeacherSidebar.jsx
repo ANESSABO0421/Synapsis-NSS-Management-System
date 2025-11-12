@@ -7,6 +7,7 @@ import {
   FaAward,
   FaClipboardList,
   FaComment,
+  FaUser,
 } from "react-icons/fa";
 import { MdEvent, MdLogout } from "react-icons/md";
 
@@ -48,6 +49,11 @@ const TeacherSidebar = ({ setIsOpen }) => {
       path: "/teacherLayout/teacherchat",
       label: "Chat",
       icon: <FaComment />,
+    },
+    {
+      path: "/teacherLayout/teacherprofile",
+      label: "Profile",
+      icon: <FaUser />,
     },
   ];
 
