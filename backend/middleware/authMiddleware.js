@@ -227,3 +227,13 @@ export const coordinatorOnly = (req, res, next) => {
   }
   next();
 };
+
+// Alumni only
+export const alumniOnly = (req, res, next) => {
+  if (!req.alumni) {
+    return res
+      .status(403)
+      .json({ message: "Access denied, Alumni only" });
+  }
+  next();
+};
