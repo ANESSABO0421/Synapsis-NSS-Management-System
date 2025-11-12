@@ -9,6 +9,8 @@ import {
   updateAdmin,
   deleteAdmin,
   getDashboardStat,
+  getAdminProfile,
+  updateAdminProfile,
 } from "../controllers/adminController.js";
 import {
   adminOnly,
@@ -46,5 +48,7 @@ router.get("/dashboardata", protect, adminOnly, getDashboardStat);
 // );
 // Superadmin only
 router.post("/create-admin", protect, superAdminOnly, createAdminBySuperadmin);
+router.get("/profile", protect, getAdminProfile);
+router.put("/profile", protect, updateAdminProfile);
 
 export default router;

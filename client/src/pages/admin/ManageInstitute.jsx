@@ -183,7 +183,7 @@ const ManageInstitute = () => {
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className="bg-[#111111] border border-green-800 p-6 rounded-2xl w-[400px] shadow-2xl"
+                className="bg-white border border-green-800 p-6 rounded-2xl w-[400px] shadow-2xl"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
@@ -200,7 +200,7 @@ const ManageInstitute = () => {
                     placeholder="Institution Name"
                     value={form.name}
                     onChange={handleChange}
-                    className="p-3 rounded-lg bg-[#1a1a1a] text-white outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
+                    className="p-3 rounded-lg bg-white text-black outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
                     required
                   />
                   <input
@@ -209,7 +209,7 @@ const ManageInstitute = () => {
                     placeholder="Address"
                     value={form.address}
                     onChange={handleChange}
-                    className="p-3 rounded-lg bg-[#1a1a1a] text-white outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
+                    className="p-3 rounded-lg bg-white text-black outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
                   />
                   <input
                     type="email"
@@ -217,7 +217,7 @@ const ManageInstitute = () => {
                     placeholder="Contact Email"
                     value={form.contactEmail}
                     onChange={handleChange}
-                    className="p-3 rounded-lg bg-[#1a1a1a] text-white outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
+                    className="p-3 rounded-lg bg-white text-black outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
                     required
                   />
                   <input
@@ -226,7 +226,7 @@ const ManageInstitute = () => {
                     placeholder="Phone Number"
                     value={form.phoneNumber}
                     onChange={handleChange}
-                    className="p-3 rounded-lg bg-[#1a1a1a] text-white outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
+                    className="p-3 rounded-lg bg-white text-black outline-none border border-green-800 focus:ring-2 focus:ring-green-500"
                   />
 
                   <div className="flex justify-end gap-3 mt-4">

@@ -471,3 +471,56 @@ export const getDashboardStat = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+// profile
+// Get Logged-in Admin Profile
+export const getAdminProfile = async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.admin._id).select("-password");
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+    res.json({ success: true, admin });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Update Logged-in Admin Profile
+export const updateAdminProfile = async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.admin._id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+
+    const { name, email, phoneNumber, department, password } = req.body;
+
+    if (name) admin.name = name;
+    if (email) admin.email = email;
+    if (phoneNumber) admin.phoneNumber = phoneNumber;
+    if (department) admin.department = department;
+    if (password) {
+      admin.password = await bcrypt.hash(password, 10);
+    }
+
+    const updatedAdmin = await admin.save();
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      admin: {
+        _id: updatedAdmin._id,
+        name: updatedAdmin.name,
+        email: updatedAdmin.email,
+        phoneNumber: updatedAdmin.phoneNumber,
+        department: updatedAdmin.department,
+        role: updatedAdmin.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

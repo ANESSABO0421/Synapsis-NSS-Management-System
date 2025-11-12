@@ -47,6 +47,7 @@ import MyProfile from "./pages/student/MyProfile";
 import StudentChatPage from "./pages/student/Chat/StudentChatPage";
 import StudentCertificate from "./pages/student/StudentCertificate";
 import StudentAttendance from "./pages/student/StudentAttendance";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 const App = () => {
   return (
@@ -82,6 +83,7 @@ const App = () => {
             <Route path="allcoordinators" element={<AllCoordinators />} />
             <Route path="createinstitution" element={<CreateInstitution />} />
             <Route path="manageinstitute" element={<ManageInstitute />} />
+            <Route path="adminprofile" element={<AdminProfile />} />
           </Route>
 
           {/* coordinator dashboard */}
