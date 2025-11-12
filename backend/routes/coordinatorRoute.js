@@ -25,6 +25,7 @@ import {
   studentToVolunteer,
   unassignTeacherFromEvent,
   unassignVolunteerFromEvent,
+  updateCoordinatorProfile,
   updateEventStatus,
   updateStudentByCoordinator,
   verifyOtp,
@@ -49,12 +50,6 @@ coordinatorRoute.post(
 );
 coordinatorRoute.post("/verifyotp", verifyOtp);
 coordinatorRoute.post("/approvecoordinator", approveCoordinator);
-coordinatorRoute.get(
-  "/profile",
-  protect,
-  coordinatorOnly,
-  getCoordinatorProfile
-);
 coordinatorRoute.post("/logincoordinator", Login);
 coordinatorRoute.post(
   "/createevents",
@@ -208,6 +203,16 @@ coordinatorRoute.post(
 );
 
 // Get all volunteers of institution
-coordinatorRoute.get("/volunteers", protect,coordinatorOnly, getAllVolunteers);
+coordinatorRoute.get("/volunteers", protect, coordinatorOnly, getAllVolunteers);
 
+coordinatorRoute.get("/profile", protect, coordinatorOnly, getCoordinatorProfile);
+
+// ✅ Update profile (with optional file upload)
+coordinatorRoute.put(
+  "/updateProfile",
+  protect,
+  coordinatorOnly,
+  upload.single("profileImage"),
+  updateCoordinatorProfile
+);
 export default coordinatorRoute;

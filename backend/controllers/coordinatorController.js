@@ -62,8 +62,8 @@ export const coordinatorSignup = async (req, res) => {
     let profileImage = { url: "", public_id: "" };
     let verificationDocument = { url: "", public_id: "" };
 
-    if (req.file) {
-      const uploaded = await cloudinary.uploader.upload(req.file.path, {
+    if (req.files?.profileImage?.[0]) {
+      const uploaded = await cloudinary.uploader.upload(req.files.profileImage[0].path, {
         folder: "coordinator_profiles",
       });
       profileImage = {
@@ -1456,36 +1456,45 @@ export const getCoordinatorDashboard = async (req, res) => {
 };
 
 // coordinator profile
-export const getCoordinatorProfile = async (req, res) => {
-  try {
-    const coordinator = await Coordinator.findById(req.user._id)
-      .populate("institution", "name _id") // populate institution details
-      .select("-password"); // exclude password for safety
+// export const getCoordinatorProfile = async (req, res) => {
+//   try {
+//     const coordinatorId = req.user._id; // ✅ From auth middleware
 
-    if (!coordinator) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Coordinator not found" });
-    }
+//     const coordinator = await Coordinator.findById(coordinatorId)
+//       .populate("institution", "name _id") // ✅ Populate institution name and _id
+//       .select("-password"); // ✅ Exclude password field
 
-    res.json({
-      success: true,
-      coordinator: {
-        _id: coordinator._id,
-        name: coordinator.name,
-        email: coordinator.email,
-        institutionId: coordinator.institution?._id,
-        institutionName: coordinator.institution?.name,
-        role: coordinator.role,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch coordinator profile",
-    });
-  }
-};
+//     if (!coordinator) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Coordinator not found" });
+//     }
+
+//     // ✅ Clean structured response
+//     res.status(200).json({
+//       success: true,
+//       message: "Profile fetched successfully",
+//       data: {
+//         _id: coordinator._id,
+//         name: coordinator.name,
+//         email: coordinator.email,
+//         phone: coordinator.phone,
+//         department: coordinator.department,
+//         institutionId: coordinator.institution?._id || null,
+//         institutionName: coordinator.institution?.name || null,
+//         role: coordinator.role,
+//         profileImage: coordinator.profileImage || null,
+//         verificationDocument: coordinator.verificationDocument || null,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("❌ Error fetching coordinator profile:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: error.message || "Server error while fetching profile",
+//     });
+//   }
+// };
 
 // manage student (get students from the institute)
 export const getAllStudentsByCoordinator = async (req, res) => {
@@ -1924,5 +1933,123 @@ export const getAllVolunteers = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+// coordinator profile section
+
+
+// ===============================
+// 📄 GET Coordinator Profile
+// ===============================
+export const getCoordinatorProfile = async (req, res) => {
+  try {
+    const coordinatorId = req.user._id; // ✅ From auth middleware
+
+    const coordinator = await Coordinator.findById(coordinatorId)
+      .select("-password")
+      .populate("institution", "name _id");
+
+    if (!coordinator) {
+      return res.status(404).json({
+        success: false,
+        message: "Coordinator not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile fetched successfully",
+      data: {
+        _id: coordinator._id,
+        name: coordinator.name,
+        email: coordinator.email,
+        phone: coordinator.phoneNumber,
+        department: coordinator.department,
+        institution: coordinator.institution?._id || null,
+        institutionName: coordinator.institution?.name || null,
+        profileImage: coordinator.profileImage?.url || null,
+        role: coordinator.role,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error fetching coordinator profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching profile",
+    });
+  }
+};
+
+// ==========================
+// UPDATE COORDINATOR PROFILE
+// ==========================
+export const updateCoordinatorProfile = async (req, res) => {
+  try {
+    const coordinatorId = req.user._id;
+    const { name, phone, department, institution, password } = req.body;
+    let profileImage = null;
+
+    // ✅ Find existing record
+    const coordinator = await Coordinator.findById(coordinatorId);
+    if (!coordinator) {
+      return res.status(404).json({
+        success: false,
+        message: "Coordinator not found",
+      });
+    }
+
+    // ✅ Handle image upload if provided (Base64 or file)
+    if (req.file) {
+      const uploaded = await cloudinary.uploader.upload(req.file.path, {
+        folder: "coordinators",
+      });
+      profileImage = uploaded.secure_url;
+    } else if (req.body.profileImage && req.body.profileImage.startsWith("data:image")) {
+      // If image is base64
+      const uploaded = await cloudinary.uploader.upload(req.body.profileImage, {
+        folder: "coordinators",
+      });
+      profileImage = uploaded.secure_url;
+    }
+
+    // ✅ Handle optional password change
+    let hashedPassword = coordinator.password;
+    if (password && password.trim() !== "") {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    // ✅ Update allowed fields
+    coordinator.name = name || coordinator.name;
+    coordinator.phone = phone || coordinator.phone;
+    coordinator.department = department || coordinator.department;
+    coordinator.institution = institution || coordinator.institution;
+    coordinator.password = hashedPassword;
+    coordinator.profileImage = profileImage || coordinator.profileImage;
+
+    await coordinator.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: {
+        _id: coordinator._id,
+        name: coordinator.name,
+        email: coordinator.email,
+        phone: coordinator.phone,
+        department: coordinator.department,
+        institution: coordinator.institution,
+        profileImage: coordinator.profileImage,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error updating coordinator profile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating profile",
+    });
   }
 };

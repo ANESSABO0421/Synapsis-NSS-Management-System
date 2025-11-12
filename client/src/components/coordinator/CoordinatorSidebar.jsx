@@ -7,6 +7,7 @@ import {
   FaCalendarAlt,
   FaRegComment,
   FaRegCommentDots,
+  FaUser,
 } from "react-icons/fa";
 import { BsFillCalendar2EventFill } from "react-icons/bs";
 import { RiUserStarFill } from "react-icons/ri";
@@ -62,6 +63,11 @@ const CoordinatorSidebar = () => {
       name: "Chat",
       path: "/coordinatorlayout/chat",
       icon: <FaRegComment size={18} />,
+    },
+    {
+      name: "Profile",
+      path: "/coordinatorlayout/coordinatormyprofile",
+      icon: <FaUser size={18} />,
     },
     // { name: "Profile", path: "/coordinatorlayout/profile", icon: <RiUserStarFill size={18} /> },
   ];
