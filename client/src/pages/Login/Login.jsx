@@ -266,6 +266,7 @@ const Login = () => {
       { role: "coordinator", url: "http://localhost:3000/api/coordinator/logincoordinator" },
       { role: "student", url: "http://localhost:3000/api/students/studentlogin" },
       { role: "teacher", url: "http://localhost:3000/api/teacher/login" },
+      { role: "alumni", url: "http://localhost:3000/api/alumni/login" },
     ];
 
     let loggedIn = false;
@@ -286,6 +287,7 @@ const Login = () => {
             res.data?.teacher?.email ||
             res.data?.student?.email ||
             res.data?.coordinator?.email ||
+            res.data?.alumni?.email ||
             res.data?.admin?.email ||
             form.email;
 
@@ -302,7 +304,10 @@ const Login = () => {
               window.location.href = "/coordinatorlayout";
             else if (role === "teacher")
               window.location.href = "/teacherLayout";
-            else window.location.href = "/studentlayout";
+            else if (role === "student")
+               window.location.href = "/studentlayout";
+            else if(role==="alumni")
+              window.location.href="/alumnilayout"  
           }, 1000);
 
           break;

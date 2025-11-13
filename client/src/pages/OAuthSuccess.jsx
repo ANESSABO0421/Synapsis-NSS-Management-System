@@ -23,8 +23,10 @@ const OAuthSuccess = () => {
           navigate("/coordinatorlayout");
         } else if (role === "teacher") {
           navigate("/teacherlayout");
-        } else if ( role === "volunteer") {
+        } else if (role === "volunteer") {
           navigate("/studentlayout");
+        } else if (role === "alumni") {
+          navigate("/alumnilayout");
         } else {
           navigate("/login?error=invalidrole");
         }
