@@ -50,6 +50,9 @@ import StudentAttendance from "./pages/student/StudentAttendance";
 import AdminProfile from "./pages/admin/AdminProfile";
 import CoordinatorMyProfile from "./pages/coordinator/CoordinatorMyProfile";
 import TeacherProfile from "./pages/teacher/TeacherProfile";
+import GetAllPendingAlumni from "./pages/admin/GetAllPendingAlumni";
+import AlumniLayout from "./pages/Alumni/AlumniLayout";
+import AllAlumni from "./pages/admin/AllAlumni";
 
 const App = () => {
   return (
@@ -76,11 +79,13 @@ const App = () => {
             <Route index element={<AdminDashboard />} />
             <Route path="pendingstudent" element={<GetAllPendingStudent />} />
             <Route path="pendingteacher" element={<GetAllPendingTeacher />} />
+            <Route path="pendingalumni" element={<GetAllPendingAlumni />} />
             <Route
               path="pendingcoordinator"
               element={<GetAllPendingCoordinator />}
             />
             <Route path="allstudent" element={<AllStudent />} />
+            <Route path="allalumni" element={<AllAlumni />} />
             <Route path="allteachers" element={<AllTeacher />} />
             <Route path="allcoordinators" element={<AllCoordinators />} />
             <Route path="createinstitution" element={<CreateInstitution />} />
@@ -127,6 +132,7 @@ const App = () => {
             <Route path="chatstudent" element={<StudentChatPage />} />
             <Route path="studentattendance" element={<StudentAttendance />} />
           </Route>
+          <Route path="/alumnilayout" element={<AlumniLayout />}/>
         </Routes>
       </SocketProvider>
     </>

@@ -1,10 +1,10 @@
 import React from "react";
 import { BiLayout, BiTask, BiUser } from "react-icons/bi";
 import { NavLink } from "react-router-dom";
-import { PiChalkboardTeacher, PiChalkboardTeacherBold, PiChalkboardTeacherDuotone, PiStudent, PiStudentDuotone,PiUserBold } from "react-icons/pi";
+import { PiChalkboardTeacher, PiChalkboardTeacherBold, PiChalkboardTeacherDuotone, PiGraduationCap, PiStudent, PiStudentDuotone,PiUserBold } from "react-icons/pi";
 import { FaSchool } from 'react-icons/fa';
 import { RiUser2Fill } from "react-icons/ri";
-import { FaSchoolCircleExclamation } from 'react-icons/fa6';
+import { FaGoogleScholar, FaSchoolCircleExclamation } from 'react-icons/fa6';
 const Sidebar = () => {
   const navLinks = [
     { name: "Dashboard", path: "/adminpanel", icon: <BiLayout size={18} /> },
@@ -24,6 +24,11 @@ const Sidebar = () => {
       icon: <RiUser2Fill size={18} />,
     },
     {
+      name: "Pending Alumni",
+      path: "/adminpanel/pendingalumni",
+      icon: <FaGoogleScholar size={18} />,
+    },
+    {
       name: "All Student",
       path: "/adminpanel/allstudent",
       icon: <PiStudentDuotone size={18} />,
@@ -37,6 +42,11 @@ const Sidebar = () => {
       name: "All Coordinators",
       path: "/adminpanel/allcoordinators",
       icon: <PiUserBold size={18} />,
+    },
+    {
+      name: "All Alumni",
+      path: "/adminpanel/allalumni",
+      icon: <PiGraduationCap size={18} />,
     },
     {
       name: "Create Institution",

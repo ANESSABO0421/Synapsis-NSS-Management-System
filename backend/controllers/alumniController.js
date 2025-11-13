@@ -502,3 +502,133 @@ export const getTopTestimonials = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+
+// alumni (approve and reject)
+export const getAllPendingAlumni = async (req, res) => {
+  try {
+    const pendingAlumni = await Alumni.find({ status: "pending" }).select(
+      "-password -otp -otpExpiry"
+    );
+
+    res.json({
+      success: true,
+      count: pendingAlumni.length,
+      alumni: pendingAlumni,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 🟢 Approve alumni
+export const approveAlumni = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const alumni = await Alumni.findById(id);
+
+    if (!alumni) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni Not Found" });
+    }
+
+    if (alumni.status === "active") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Alumni Already Active" });
+    }
+
+    alumni.status = "active";
+    await alumni.save();
+
+    res.json({
+      success: true,
+      message: `${alumni.name} has been approved successfully`,
+      alumni: await alumni.populate("institution", "name address"),
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 🔴 Reject alumni (admin panel)
+export const rejectAlumni = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const alumni = await Alumni.findById(id);
+
+    if (!alumni) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni Not Found" });
+    }
+
+    if (alumni.status === "active") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Alumni Already Active" });
+    }
+
+    alumni.status = "rejected";
+
+    // Delete profile image if exists
+    if (alumni.profileImage?.public_id) {
+      await cloudinary.uploader.destroy(alumni.profileImage.public_id);
+    }
+
+    await alumni.save();
+
+    res.json({
+      success: true,
+      message: `${alumni.name} has been rejected successfully`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 🟣 Get all alumni (active + rejected + pending)
+export const getAllAlumnis = async (req, res) => {
+  try {
+    const alumnis = await Alumni.find()
+      .populate("institution", "name address contactEmail")
+      .select("-password -otp -otpExpiry")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: alumnis.length,
+      alumnis,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 🔵 Reject alumni directly from dashboard (simplified)
+export const rejectInDashboardAlumni = async (req, res) => {
+  try {
+    const alumni = await Alumni.findByIdAndUpdate(
+      req.params.id,
+      { status: "rejected" },
+      { new: true }
+    );
+
+    if (!alumni)
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni not found" });
+
+    res.json({
+      success: true,
+      message: "Alumni rejected successfully",
+      alumni,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
