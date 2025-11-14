@@ -18,11 +18,6 @@ const AlumniSidebar = ({ setIsOpen }) => {
     if (setIsOpen) setIsOpen(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/login");
-  };
 
   const navItems = [
     { to: "/alumnilayout/dashboard", icon: <FaHome />, label: "Dashboard" },
@@ -79,15 +74,6 @@ const AlumniSidebar = ({ setIsOpen }) => {
         ))}
       </nav>
 
-      {/* Logout Button */}
-      <div className="p-5">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 transition text-white font-semibold p-3 rounded-xl shadow-md"
-        >
-          <FaSignOutAlt /> Logout
-        </button>
-      </div>
     </motion.aside>
   );
 };
