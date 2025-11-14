@@ -66,8 +66,9 @@ import {
   approveAlumni,
   rejectAlumni,
   rejectInDashboardAlumni,
+  getAlumniDashboard,
 } from "../controllers/alumniController.js";
-import { adminOnly, protect, superAdminOnly } from "../middleware/authMiddleware.js";
+import { adminOnly, alumniOnly, protect, superAdminOnly } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 
 const alumniRouter = express.Router();
@@ -121,5 +122,8 @@ alumniRouter.get("/pending", protect, adminOnly, getAllPendingAlumni);
 alumniRouter.put("/approve/:id", protect, adminOnly, approveAlumni);
 alumniRouter.put("/reject/:id", protect, adminOnly, rejectAlumni);
 alumniRouter.put("/reject-dashboard/:id", protect, adminOnly, rejectInDashboardAlumni);
+
+
+alumniRouter.get("/dashboard",protect,alumniOnly,getAlumniDashboard)
 
 export default alumniRouter;

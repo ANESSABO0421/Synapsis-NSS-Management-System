@@ -632,3 +632,58 @@ export const rejectInDashboardAlumni = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+// dashboard
+export const getAlumniDashboard = async (req, res) => {
+  try {
+    const alumniId = req.user.id; // Comes from middleware (token)
+
+    const alumni = await Alumni.findById(alumniId)
+      .select(
+        "name email department graduationYear institution profileImage achievements testimonials mentorshipStats createdAt"
+      )
+      .populate("institution", "name address contactEmail");
+
+    if (!alumni) {
+      return res.status(404).json({
+        success: false,
+        message: "Alumni not found",
+      });
+    }
+
+    // 📌 Prepare Dashboard Data
+    const dashboardData = {
+      profile: {
+        name: alumni.name,
+        email: alumni.email,
+        department: alumni.department,
+        graduationYear: alumni.graduationYear,
+        institution: alumni.institution,
+        profileImage: alumni.profileImage?.url,
+      },
+
+      mentorshipStats: alumni.mentorshipStats,
+
+      achievements: {
+        total: alumni.achievements.length,
+        recent: alumni.achievements.slice(-3).reverse(),
+      },
+
+      testimonials: {
+        total: alumni.testimonials.length,
+        recent: alumni.testimonials.slice(-3).reverse(),
+      },
+
+      joinedAt: alumni.createdAt,
+    };
+
+    res.json({
+      success: true,
+      dashboard: dashboardData,
+    });
+  } catch (error) {
+    console.error("Dashboard Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
