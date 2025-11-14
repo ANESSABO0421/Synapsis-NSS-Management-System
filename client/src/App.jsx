@@ -53,6 +53,7 @@ import TeacherProfile from "./pages/teacher/TeacherProfile";
 import GetAllPendingAlumni from "./pages/admin/GetAllPendingAlumni";
 import AlumniLayout from "./pages/Alumni/AlumniLayout";
 import AllAlumni from "./pages/admin/AllAlumni";
+import AlumniDashboard from "./pages/Alumni/AlumniDashboard";
 
 const App = () => {
   return (
@@ -104,7 +105,10 @@ const App = () => {
             <Route path="eventreport" element={<EventReportGenerator />} />
             <Route path="recommendgracemark" element={<RecommendGraceMark />} />
             <Route path="chat" element={<ChatPage />} />
-            <Route path="coordinatormyprofile" element={<CoordinatorMyProfile />} />
+            <Route
+              path="coordinatormyprofile"
+              element={<CoordinatorMyProfile />}
+            />
           </Route>
 
           <Route path="/teacherLayout" element={<TeacherLayout />}>
@@ -125,14 +129,20 @@ const App = () => {
           </Route>
           <Route path="/studentlayout" element={<StudentLayout />}>
             <Route index element={<StudentDashboard />} />
-            <Route path="/studentlayout/dashboard" element={<StudentDashboard />} />
+            <Route
+              path="/studentlayout/dashboard"
+              element={<StudentDashboard />}
+            />
             <Route path="studentevents" element={<StudentMyEvents />} />
             <Route path="studentprofile" element={<MyProfile />} />
             <Route path="certificates" element={<StudentCertificate />} />
             <Route path="chatstudent" element={<StudentChatPage />} />
             <Route path="studentattendance" element={<StudentAttendance />} />
           </Route>
-          <Route path="/alumnilayout" element={<AlumniLayout />}/>
+          <Route path="/alumnilayout" element={<AlumniLayout />}>
+            <Route index element={<AlumniDashboard />} />
+            <Route path="/alumnilayout/dashboard" element={<AlumniDashboard />} />
+          </Route>
         </Routes>
       </SocketProvider>
     </>
