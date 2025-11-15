@@ -80,6 +80,7 @@ import messagerouter from "./routes/messageRoutes.js";
 
 // Import passport config
 import "./configs/passport.js";
+import notificationRoute from "./routes/notificationRoutes.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -114,6 +115,7 @@ app.use("/api/coordinator", coordinatorRoute);
 app.use("/api/institution", instituteRouter);
 app.use("/api/otp", otpRouter);
 app.use("/api/ai", airouter);
+app.use("/api/notification", notificationRoute);
 
 // Database connection
 ConnectDb()

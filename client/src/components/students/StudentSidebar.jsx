@@ -47,7 +47,7 @@ const StudentSidebar = ({ setIsOpen }) => {
     {
       to: "/studentlayout/announcement",
       icon: <BsMegaphoneFill />,
-      label: "View Attendance",
+      label: "Announcement",
     },
     { to: "/studentlayout/chatstudent", icon: <BiComment />, label: "Chat" },
     { to: "/studentlayout/studentprofile", icon: <FaUser />, label: "Profile" },
