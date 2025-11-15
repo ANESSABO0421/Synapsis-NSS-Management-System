@@ -56,6 +56,7 @@ import AllAlumni from "./pages/admin/AllAlumni";
 import AlumniDashboard from "./pages/Alumni/AlumniDashboard";
 import AlumniProfile from "./pages/Alumni/AlumniProfile";
 import TeacherAnnouncement from "./pages/teacher/TeacherAnnouncement";
+import StudentAnnouncement from "./pages/student/StudentAnnouncement";
 
 const App = () => {
   return (
@@ -141,6 +142,7 @@ const App = () => {
             <Route path="certificates" element={<StudentCertificate />} />
             <Route path="chatstudent" element={<StudentChatPage />} />
             <Route path="studentattendance" element={<StudentAttendance />} />
+            <Route path="announcement" element={<StudentAnnouncement />} />
           </Route>
           <Route path="/alumnilayout" element={<AlumniLayout />}>
             <Route index element={<AlumniDashboard />} />

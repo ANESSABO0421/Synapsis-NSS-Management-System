@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { BiComment } from "react-icons/bi";
+import { BsMegaphoneFill } from "react-icons/bs";
 
 const StudentSidebar = ({ setIsOpen }) => {
   const navigate = useNavigate();
@@ -41,6 +42,11 @@ const StudentSidebar = ({ setIsOpen }) => {
     {
       to: "/studentlayout/studentattendance",
       icon: <IoMdCheckmarkCircle />,
+      label: "View Attendance",
+    },
+    {
+      to: "/studentlayout/announcement",
+      icon: <BsMegaphoneFill />,
       label: "View Attendance",
     },
     { to: "/studentlayout/chatstudent", icon: <BiComment />, label: "Chat" },
