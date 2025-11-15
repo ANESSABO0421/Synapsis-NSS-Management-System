@@ -21,7 +21,7 @@ const AlumniSidebar = ({ setIsOpen }) => {
 
   const navItems = [
     { to: "/alumnilayout/dashboard", icon: <FaHome />, label: "Dashboard" },
-    { to: "/alumni/profile", icon: <FaUserGraduate />, label: "My Profile" },
+    { to: "/alumnilayout/alumniprofile", icon: <FaUserGraduate />, label: "My Profile" },
     {
       to: "/alumni/mentorship",
       icon: <FaChalkboardTeacher />,

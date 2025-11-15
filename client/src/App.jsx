@@ -54,6 +54,7 @@ import GetAllPendingAlumni from "./pages/admin/GetAllPendingAlumni";
 import AlumniLayout from "./pages/Alumni/AlumniLayout";
 import AllAlumni from "./pages/admin/AllAlumni";
 import AlumniDashboard from "./pages/Alumni/AlumniDashboard";
+import AlumniProfile from "./pages/Alumni/AlumniProfile";
 
 const App = () => {
   return (
@@ -142,6 +143,7 @@ const App = () => {
           <Route path="/alumnilayout" element={<AlumniLayout />}>
             <Route index element={<AlumniDashboard />} />
             <Route path="/alumnilayout/dashboard" element={<AlumniDashboard />} />
+            <Route path="/alumnilayout/alumniprofile" element={<AlumniProfile />} />
           </Route>
         </Routes>
       </SocketProvider>
