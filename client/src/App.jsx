@@ -55,6 +55,7 @@ import AlumniLayout from "./pages/Alumni/AlumniLayout";
 import AllAlumni from "./pages/admin/AllAlumni";
 import AlumniDashboard from "./pages/Alumni/AlumniDashboard";
 import AlumniProfile from "./pages/Alumni/AlumniProfile";
+import TeacherAnnouncement from "./pages/teacher/TeacherAnnouncement";
 
 const App = () => {
   return (
@@ -126,6 +127,7 @@ const App = () => {
               element={<ApproveGraceMark />}
             />
             <Route path="teacherchat" element={<TeacherChatPage />} />
+            <Route path="announcement" element={<TeacherAnnouncement />} />
             <Route path="teacherprofile" element={<TeacherProfile />} />
           </Route>
           <Route path="/studentlayout" element={<StudentLayout />}>

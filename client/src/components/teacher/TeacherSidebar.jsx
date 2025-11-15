@@ -10,6 +10,8 @@ import {
   FaUser,
 } from "react-icons/fa";
 import { MdEvent, MdLogout } from "react-icons/md";
+import { Megaphone } from "lucide-react";
+import { BsMegaphone, BsMegaphoneFill } from "react-icons/bs";
 
 const TeacherSidebar = ({ setIsOpen }) => {
   const location = useLocation();
@@ -39,6 +41,11 @@ const TeacherSidebar = ({ setIsOpen }) => {
       path: "/teacherLayout/assigngracemarks",
       label: "Assign Grace Marks",
       icon: <FaAward />,
+    },
+    {
+      path: "/teacherLayout/announcement",
+      label: "Announcement",
+      icon: <BsMegaphoneFill />,
     },
     {
       path: "/teacherLayout/approvegracebyteacher",
@@ -89,8 +96,6 @@ const TeacherSidebar = ({ setIsOpen }) => {
           </Link>
         ))}
       </nav>
-
-    
     </div>
   );
 };
