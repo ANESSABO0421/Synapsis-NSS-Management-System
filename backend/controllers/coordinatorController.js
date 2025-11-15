@@ -294,7 +294,6 @@ export const createEvent = async (req, res) => {
       message: "Event created successfully",
       event: newEvent,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: error.message });
@@ -574,6 +573,17 @@ export const assignVoulnteerToEvent = async (req, res) => {
       { _id: { $in: volunteerObjectIds } },
       { $addToSet: { assignedEvents: event._id } }
     );
+
+    for (const v of volunteer) {
+      await Notification.create({
+        user: v._id,
+        userModel: "Student",
+        institution: coordinator.institution,
+        title: "Assigned as Volunteer",
+        message: `You have been selected as a volunteer for the event "${event.title}".`,
+        event: event._id,
+      });
+    }
 
     const updatedEvent = await Event.findById(eventId).populate(
       "participants",
@@ -1909,6 +1919,15 @@ export const assignTeacherToEvent = async (req, res) => {
 
     await Teacher.findByIdAndUpdate(teacher._id, {
       $addToSet: { assignedEvents: event._id },
+    });
+
+    await Notification.create({
+      user: teacher._id,
+      userModel: "Teacher",
+      institution: coordinator.institution,
+      title: "Assigned to Event",
+      message: `You have been assigned as a teacher for the event "${event.title}".`,
+      event: event._id,
     });
 
     const updatedEvent = await Event.findById(eventId)
