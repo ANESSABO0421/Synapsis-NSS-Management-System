@@ -2028,6 +2028,15 @@ export const unassignTeacherFromEvent = async (req, res) => {
       $pull: { assignedEvents: eventId },
     });
 
+    await Notification.create({
+      user: teacherId,
+      userModel: "Teacher",
+      institution: coordinator.institution,
+      title: "Removed from Event",
+      message: `You have been unassigned from the event "${event.title}".`,
+      event: eventId,
+    });
+
     res.json({
       success: true,
       message: "Teacher unassigned successfully",
@@ -2097,6 +2106,17 @@ export const unassignVolunteerFromEvent = async (req, res) => {
       { _id: { $in: volunteerIds } },
       { $pull: { assignedEvents: eventId } }
     );
+
+    for (const student of volunteers) {
+      await Notification.create({
+        user: student._id,
+        userModel: "Student",
+        institution: coordinator.institution,
+        title: "Removed as Volunteer",
+        message: `You have been unassigned as a volunteer from the event "${event.title}".`,
+        event: eventId,
+      });
+    }
 
     const updatedEvent = await Event.findById(eventId).populate(
       "participants",
