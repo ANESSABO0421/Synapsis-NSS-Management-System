@@ -174,7 +174,9 @@ const CreateEvent = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setInstitutionId(res.data.coordinator.institutionId);
+        console.log(res.data.data.institution)
+        setInstitutionId(res.data.data.institution);
+        
       } catch (error) {
         toast.error("Failed to fetch coordinator details");
       } finally {

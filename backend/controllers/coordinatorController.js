@@ -11,6 +11,7 @@ import path from "path";
 import Teacher from "../models/Teacher.js";
 import Institution from "../models/Institution.js";
 import { HfInference } from "@huggingface/inference";
+import Notification from "../models/Notification.js";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -63,9 +64,12 @@ export const coordinatorSignup = async (req, res) => {
     let verificationDocument = { url: "", public_id: "" };
 
     if (req.files?.profileImage?.[0]) {
-      const uploaded = await cloudinary.uploader.upload(req.files.profileImage[0].path, {
-        folder: "coordinator_profiles",
-      });
+      const uploaded = await cloudinary.uploader.upload(
+        req.files.profileImage[0].path,
+        {
+          folder: "coordinator_profiles",
+        }
+      );
       profileImage = {
         url: uploaded.secure_url,
         public_id: uploaded.public_id,
@@ -240,6 +244,131 @@ export const createEvent = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// export const createEvent = async (req, res) => {
+//   try {
+//     const { title, description, location, date, hours } = req.body;
+
+//     if (!title || !description || !location || !date || !hours) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Missing Fields",
+//       });
+//     }
+
+//     // Fetch coordinator & institution
+//     const coordinator = await Coordinator.findById(req.user._id);
+//     if (!coordinator) {
+//       return res.status(403).json({ success: false, message: "Unauthorized" });
+//     }
+
+//     const institutionId = coordinator.institution;
+//     if (!institutionId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Coordinator not assigned to institution",
+//       });
+//     }
+
+//     // ============================
+//     // 📷 HANDLE IMAGE SAFELY
+//     // ============================
+//     let imageData = null;
+
+//     if (req.file) {
+//       try {
+//         // Upload to Cloudinary
+//         const uploaded = await cloudinary.uploader.upload(req.file.path, {
+//           folder: "event_images",
+//         });
+
+//         imageData = {
+//           url: uploaded.secure_url,
+//           public_id: uploaded.public_id,
+//           caption: req.body.caption || "",
+//         };
+//       } catch (uploadErr) {
+//         console.error("Image upload failed:", uploadErr);
+//         // Continue event creation WITHOUT image
+//         imageData = null;
+//       }
+//     }
+
+//     // Create event
+//     const newEvent = await Event.create({
+//       title,
+//       description,
+//       location,
+//       date,
+//       hours,
+//       assignedCoordinators: req.user._id,
+//       institution: institutionId,
+//       createdBy: req.user._id,
+//       images: imageData ? [imageData] : [],
+//       status: "Upcoming",
+//     });
+
+//     // Add event to institution
+//     await Institution.findByIdAndUpdate(institutionId, {
+//       $push: { Events: newEvent._id },
+//     });
+
+//     // Add event to coordinator
+//     await Coordinator.findByIdAndUpdate(req.user._id, {
+//       $push: { managedEvents: newEvent._id },
+//     });
+
+//     // ============================
+//     // 🔔 SEND NOTIFICATIONS
+//     // ============================
+
+//     // Notify ALL teachers
+//     const teachers = await Teacher.find({ institution: institutionId });
+
+//     // Notify ONLY volunteer students (role = "volunteer")
+//     const volunteerStudents = await Student.find({
+//       institution: institutionId,
+//       role: "volunteer",
+//     });
+
+//     const notiTitle = "New Event Created";
+//     const notiMessage = `A new event "${title}" has been created at your institution.`;
+
+//     // 👉 Teachers notification
+//     for (const teach of teachers) {
+//       await Notification.create({
+//         user: teach._id,
+//         userModel: "Teacher",
+//         institution: institutionId,
+//         title: notiTitle,
+//         message: notiMessage,
+//         event: newEvent._id,
+//       });
+//     }
+
+//     // 👉 Volunteer Student Notification
+//     for (const stud of volunteerStudents) {
+//       await Notification.create({
+//         user: stud._id,
+//         userModel: "Student",
+//         institution: institutionId,
+//         title: notiTitle,
+//         message: notiMessage,
+//         event: newEvent._id,
+//       });
+//     }
+
+//     res.json({
+//       success: true,
+//       message: "Event created successfully & notifications sent",
+//       event: newEvent,
+//     });
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 
 // get student by their skill
 export const getStudentBySkill = async (req, res) => {
@@ -755,7 +884,9 @@ export const recommendedGraceMark = async (req, res) => {
     const assignedTeacherIds = new Set();
     for (const event of completedEvents) {
       if (Array.isArray(event.assignedTeacher)) {
-        event.assignedTeacher.forEach((t) => assignedTeacherIds.add(t.toString()));
+        event.assignedTeacher.forEach((t) =>
+          assignedTeacherIds.add(t.toString())
+        );
       } else if (event.assignedTeacher) {
         assignedTeacherIds.add(event.assignedTeacher.toString());
       }
@@ -807,11 +938,6 @@ export const recommendedGraceMark = async (req, res) => {
     });
   }
 };
-
-
-
-
-
 
 // pdf genrateion for the coordinator
 // export const generateEventReport = async (req, res) => {
@@ -1936,11 +2062,7 @@ export const getAllVolunteers = async (req, res) => {
   }
 };
 
-
-
-
 // coordinator profile section
-
 
 // ===============================
 // 📄 GET Coordinator Profile
@@ -2008,7 +2130,10 @@ export const updateCoordinatorProfile = async (req, res) => {
         folder: "coordinators",
       });
       profileImage = uploaded.secure_url;
-    } else if (req.body.profileImage && req.body.profileImage.startsWith("data:image")) {
+    } else if (
+      req.body.profileImage &&
+      req.body.profileImage.startsWith("data:image")
+    ) {
       // If image is base64
       const uploaded = await cloudinary.uploader.upload(req.body.profileImage, {
         folder: "coordinators",
