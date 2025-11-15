@@ -309,6 +309,7 @@ import bcrypt from "bcrypt";
 import Alumni from "../models/Alumni.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import cloudinary from "../utils/cloudinary.js";
+import Mentorship from "../models/Mentorship.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex =
@@ -324,23 +325,36 @@ const otpGeneration = () => Math.floor(100000 + Math.random() * 900000);
 //
 export const signupAlumni = async (req, res) => {
   try {
-    const { name, email, password, phoneNumber, graduationYear, department, institution } = req.body;
+    const {
+      name,
+      email,
+      password,
+      phoneNumber,
+      graduationYear,
+      department,
+      institution,
+    } = req.body;
 
     // ✅ Validate email format
     if (!emailRegex.test(email))
-      return res.status(400).json({ success: false, message: "Invalid email format" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format" });
 
     // ✅ Validate password
     if (!passwordRegex.test(password))
       return res.status(400).json({
         success: false,
-        message: "Password must include upper, lower, number & special character (8+ chars).",
+        message:
+          "Password must include upper, lower, number & special character (8+ chars).",
       });
 
     // ✅ Check if alumni already exists
     const exists = await Alumni.findOne({ email });
     if (exists)
-      return res.status(400).json({ success: false, message: "Alumni already registered." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Alumni already registered." });
 
     // ✅ Handle profile image upload to Cloudinary
     let profileImage = {};
@@ -373,8 +387,16 @@ export const signupAlumni = async (req, res) => {
       otpExpiry,
       status: "pending",
       mentorships: [],
-      mentorshipStats: { totalMentees: 0, activeSessions: 0, completedSessions: 0 },
-      mentorshipAvailability: { isAvailable: true, preferredTopics: [], availableSlots: [] },
+      mentorshipStats: {
+        totalMentees: 0,
+        activeSessions: 0,
+        completedSessions: 0,
+      },
+      mentorshipAvailability: {
+        isAvailable: true,
+        preferredTopics: [],
+        availableSlots: [],
+      },
     });
 
     // ✅ Send verification email
@@ -401,17 +423,22 @@ export const loginAlumni = async (req, res) => {
     const alumni = await Alumni.findOne({ email });
 
     if (!alumni)
-      return res.status(404).json({ success: false, message: "Alumni not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni not found." });
 
     if (alumni.status !== "active")
       return res.status(403).json({
         success: false,
-        message: "Your account is not active yet. Please wait for admin approval.",
+        message:
+          "Your account is not active yet. Please wait for admin approval.",
       });
 
     const match = await bcrypt.compare(password, alumni.password);
     if (!match)
-      return res.status(403).json({ success: false, message: "Invalid credentials." });
+      return res
+        .status(403)
+        .json({ success: false, message: "Invalid credentials." });
 
     const token = generateToken(alumni._id);
 
@@ -433,7 +460,9 @@ export const addTestimonial = async (req, res) => {
   try {
     const alumni = await Alumni.findById(req.params.id);
     if (!alumni)
-      return res.status(404).json({ success: false, message: "Alumni not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni not found." });
 
     alumni.testimonials.push({ message: req.body.message });
     await alumni.save();
@@ -454,11 +483,15 @@ export const updateTestimonialVisibility = async (req, res) => {
 
     const alumni = await Alumni.findById(id);
     if (!alumni)
-      return res.status(404).json({ success: false, message: "Alumni not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni not found." });
 
     const testimonial = alumni.testimonials.id(testimonialId);
     if (!testimonial)
-      return res.status(404).json({ success: false, message: "Testimonial not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Testimonial not found." });
 
     testimonial.visibility = visibility;
     await alumni.save();
@@ -502,10 +535,6 @@ export const getTopTestimonials = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
-
-
 
 // alumni (approve and reject)
 export const getAllPendingAlumni = async (req, res) => {
@@ -633,57 +662,26 @@ export const rejectInDashboardAlumni = async (req, res) => {
   }
 };
 
-
 // dashboard
 export const getAlumniDashboard = async (req, res) => {
   try {
-    const alumniId = req.user.id; // Comes from middleware (token)
+    const alumniId = req.user.id;
 
     const alumni = await Alumni.findById(alumniId)
-      .select(
-        "name email department graduationYear institution profileImage achievements testimonials mentorshipStats createdAt"
-      )
-      .populate("institution", "name address contactEmail");
-
-    if (!alumni) {
-      return res.status(404).json({
-        success: false,
-        message: "Alumni not found",
+      .select("name email department graduationYear profileImage mentorships achievements testimonials institution")
+      .populate("institution", "name address contactEmail")
+      .populate({
+        path: "mentorships",
+        model: "Mentorship", // <-- Ensure model is known
       });
-    }
 
-    // 📌 Prepare Dashboard Data
-    const dashboardData = {
-      profile: {
-        name: alumni.name,
-        email: alumni.email,
-        department: alumni.department,
-        graduationYear: alumni.graduationYear,
-        institution: alumni.institution,
-        profileImage: alumni.profileImage?.url,
-      },
-
-      mentorshipStats: alumni.mentorshipStats,
-
-      achievements: {
-        total: alumni.achievements.length,
-        recent: alumni.achievements.slice(-3).reverse(),
-      },
-
-      testimonials: {
-        total: alumni.testimonials.length,
-        recent: alumni.testimonials.slice(-3).reverse(),
-      },
-
-      joinedAt: alumni.createdAt,
-    };
-
-    res.json({
+    return res.json({
       success: true,
-      dashboard: dashboardData,
+      data: alumni
     });
+
   } catch (error) {
-    console.error("Dashboard Error:", error);
-    res.status(500).json({ success: false, message: error.message });
+    console.log("Dashboard Error:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

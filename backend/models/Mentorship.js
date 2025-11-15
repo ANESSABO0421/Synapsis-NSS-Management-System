@@ -7,6 +7,7 @@ const mentorshipSchema = new mongoose.Schema(
       ref: "Alumni",
       required: true,
     },
+
     mentee: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
@@ -23,39 +24,20 @@ const mentorshipSchema = new mongoose.Schema(
     },
 
     requestDate: { type: Date, default: Date.now },
-    startDate: { type: Date },
-    endDate: { type: Date },
+    startDate: Date,
+    endDate: Date,
 
-    // ✅ Add Meet/Zoom Link
-    meetingLink: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          return !v || /^https?:\/\/.+/.test(v); // ensure it's a valid URL
-        },
-        message: (props) => `${props.value} is not a valid meeting link!`,
-      },
+    meetingLink: String,
+
+    mentorFeedback: {
+      rating: Number,
+      comment: String,
     },
 
-    // Optional session logs
-    sessions: [
-      {
-        sessionDate: { type: Date, default: Date.now },
-        notes: { type: String },
-        meetingLink: { type: String }, // optional per-session
-        feedbackFromMentor: { type: String },
-        feedbackFromMentee: { type: String },
-      },
-    ],
-
-    feedback: {
-      mentorRating: { type: Number, min: 1, max: 5 },
-      mentorComment: { type: String },
-      menteeRating: { type: Number, min: 1, max: 5 },
-      menteeComment: { type: String },
+    menteeFeedback: {
+      rating: Number,
+      comment: String,
     },
-
-    autoComplete: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
