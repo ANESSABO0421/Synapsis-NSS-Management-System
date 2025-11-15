@@ -67,8 +67,15 @@ import {
   rejectAlumni,
   rejectInDashboardAlumni,
   getAlumniDashboard,
+  getAlumniProfile,
+  updateAlumniProfile,
 } from "../controllers/alumniController.js";
-import { adminOnly, alumniOnly, protect, superAdminOnly } from "../middleware/authMiddleware.js";
+import {
+  adminOnly,
+  alumniOnly,
+  protect,
+  superAdminOnly,
+} from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 
 const alumniRouter = express.Router();
@@ -114,16 +121,28 @@ alumniRouter.get("/testimonials/top", getTopTestimonials);
    =========================== */
 // alumniRouter.post("/:id/achievement", protect, addAchievement);
 
-
-
 // admin action
 alumniRouter.get("/", protect, adminOnly, getAllAlumnis);
 alumniRouter.get("/pending", protect, adminOnly, getAllPendingAlumni);
 alumniRouter.put("/approve/:id", protect, adminOnly, approveAlumni);
 alumniRouter.put("/reject/:id", protect, adminOnly, rejectAlumni);
-alumniRouter.put("/reject-dashboard/:id", protect, adminOnly, rejectInDashboardAlumni);
+alumniRouter.put(
+  "/reject-dashboard/:id",
+  protect,
+  adminOnly,
+  rejectInDashboardAlumni
+);
 
+alumniRouter.get("/dashboard", protect, alumniOnly, getAlumniDashboard);
 
-alumniRouter.get("/dashboard",protect,alumniOnly,getAlumniDashboard)
+// Alumni Profile
+alumniRouter.get("/profile", protect, alumniOnly, getAlumniProfile);
+alumniRouter.put(
+  "/profile",
+  protect,
+  alumniOnly,
+  upload.single("profileImage"),
+  updateAlumniProfile
+);
 
 export default alumniRouter;

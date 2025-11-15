@@ -685,3 +685,66 @@ export const getAlumniDashboard = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+
+
+export const getAlumniProfile = async (req, res) => {
+  try {
+    const alumniId = req.user.id;
+
+    const alumni = await Alumni.findById(alumniId)
+      .select("name email department graduationYear profileImage institution")
+      .populate("institution", "name address contactEmail");
+
+    if (!alumni) {
+      return res.status(404).json({ success: false, message: "Alumni not found" });
+    }
+
+    return res.json({ success: true, data: alumni });
+  } catch (error) {
+    console.log("Profile Fetch Error:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+// 📌 UPDATE PROFILE
+export const updateAlumniProfile = async (req, res) => {
+  try {
+    const alumniId = req.user.id;
+    const { name, email, department, graduationYear } = req.body;
+
+    let profileImage = {};
+
+    if (req.file) {
+      const uploaded = await cloudinary.uploader.upload(req.file.path, {
+        folder: "alumni_profiles",
+      });
+
+      profileImage = {
+        url: uploaded.secure_url,
+        public_id: uploaded.public_id,
+      };
+    }
+
+    const updated = await Alumni.findByIdAndUpdate(
+      alumniId,
+      {
+        name,
+        email,
+        department,
+        graduationYear,
+        ...(req.file && { profileImage }),
+      },
+      { new: true }
+    ).populate("institution", "name");
+
+    return res.json({
+      success: true,
+      message: "Profile updated successfully",
+      updated,
+    });
+  } catch (error) {
+    console.log("Profile Update Error:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
