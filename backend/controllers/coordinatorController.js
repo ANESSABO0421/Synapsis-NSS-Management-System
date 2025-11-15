@@ -182,7 +182,6 @@ export const Login = async (req, res) => {
 // create event
 export const createEvent = async (req, res) => {
   try {
-    // Removed institutionId from required fields — will use coordinator's institution
     const { title, description, location, date, hours } = req.body;
     if (!title || !description || !location || !date || !hours) {
       return res
@@ -190,11 +189,12 @@ export const createEvent = async (req, res) => {
         .json({ success: false, message: "Missing Fields" });
     }
 
-    // fetch coordinator to get institution
+    // fetch coordinator
     const coordinator = await Coordinator.findById(req.user._id);
     if (!coordinator) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
+
     const institutionId = coordinator.institution;
     if (!institutionId) {
       return res.status(400).json({
@@ -203,17 +203,31 @@ export const createEvent = async (req, res) => {
       });
     }
 
+    // ---------------------------
+    // 📌 SAFE IMAGE UPLOAD
+    // ---------------------------
     let imageData = null;
+
     if (req.file) {
-      const uploaded = await cloudinary.uploader.upload(req.file.path, {
-        folder: "event_images",
-      });
-      imageData = {
-        url: uploaded.secure_url,
-        public_id: uploaded.public_id,
-        caption: req.body.caption || "",
-      };
+      try {
+        const uploaded = await cloudinary.uploader.upload(req.file.path, {
+          folder: "event_images",
+        });
+
+        imageData = {
+          url: uploaded.secure_url,
+          public_id: uploaded.public_id,
+          caption: req.body.caption || "",
+        };
+      } catch (err) {
+        console.error("Cloudinary Upload Failed:", err.message);
+        imageData = null; // continue without image
+      }
     }
+
+    // ---------------------------
+    // 📌 CREATE EVENT
+    // ---------------------------
     const newEvent = await Event.create({
       title,
       description,
@@ -231,16 +245,58 @@ export const createEvent = async (req, res) => {
       $push: { Events: newEvent._id },
     });
 
-    // update as well on the coordinator events manging array
     await Coordinator.findByIdAndUpdate(req.user._id, {
       $push: { managedEvents: newEvent._id },
     });
+
+    // ---------------------------
+    // 🔔 SEND NOTIFICATIONS
+    // ---------------------------
+
+    // fetch ALL teachers
+    const teachers = await Teacher.find({ institution: institutionId });
+
+    // fetch ONLY volunteer students
+    const volunteerStudents = await Student.find({
+      institution: institutionId,
+      role: "volunteer", // 👈 only volunteers
+    });
+
+    const notiTitle = "New Event Created";
+    const notiMessage = `A new event "${title}" has been created at your institution.`;
+
+    // notify teachers
+    for (const teach of teachers) {
+      await Notification.create({
+        user: teach._id,
+        userModel: "Teacher",
+        institution: institutionId,
+        title: notiTitle,
+        message: notiMessage,
+        event: newEvent._id,
+      });
+    }
+
+    // notify volunteer students ONLY
+    for (const stud of volunteerStudents) {
+      await Notification.create({
+        user: stud._id,
+        userModel: "Student",
+        institution: institutionId,
+        title: notiTitle,
+        message: notiMessage,
+        event: newEvent._id,
+      });
+    }
+
     res.json({
       success: true,
-      message: "new Event created successfully",
+      message: "Event created successfully",
       event: newEvent,
     });
+
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
