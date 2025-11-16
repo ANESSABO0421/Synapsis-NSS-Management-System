@@ -23,6 +23,7 @@ import {
   rejectCoordinator,
   rejectInDashboardCoordinator,
   studentToVolunteer,
+  toggleDonation,
   unassignTeacherFromEvent,
   unassignVolunteerFromEvent,
   updateCoordinatorProfile,
@@ -205,7 +206,15 @@ coordinatorRoute.post(
 // Get all volunteers of institution
 coordinatorRoute.get("/volunteers", protect, coordinatorOnly, getAllVolunteers);
 
-coordinatorRoute.get("/profile", protect, coordinatorOnly, getCoordinatorProfile);
+coordinatorRoute.get(
+  "/profile",
+  protect,
+  coordinatorOnly,
+  getCoordinatorProfile
+);
+
+// toggle donation
+coordinatorRoute.put("/toggle-donation/:eventId", protect, coordinatorOnly, toggleDonation);
 
 // ✅ Update profile (with optional file upload)
 coordinatorRoute.put(

@@ -14,6 +14,16 @@ const eventSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Coordinator",
     },
+    totalCollected: {
+      type: Number,
+      default: 0,
+    },
+
+    donationOpen: {
+      type: Boolean,
+      default: true,
+    },
+
     institution: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institution",

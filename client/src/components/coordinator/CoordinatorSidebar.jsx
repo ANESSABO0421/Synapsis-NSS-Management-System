@@ -8,6 +8,7 @@ import {
   FaRegComment,
   FaRegCommentDots,
   FaUser,
+  FaDonate,
 } from "react-icons/fa";
 import { BsFillCalendar2EventFill } from "react-icons/bs";
 import { RiUserStarFill } from "react-icons/ri";
@@ -53,6 +54,11 @@ const CoordinatorSidebar = () => {
       name: "Event Report",
       path: "/coordinatorlayout/eventreport",
       icon: <File size={18} />,
+    },
+    {
+      name: "Manage Donation",
+      path: "/coordinatorlayout/ManageDonation",
+      icon: <FaDonate size={18} />,
     },
     {
       name: "Recommend Grace Mark",

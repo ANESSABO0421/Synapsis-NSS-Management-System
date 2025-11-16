@@ -61,6 +61,7 @@ import Testimonials from "./pages/Alumni/AlumniTestimonials";
 import AlumniTestimonials from "./pages/Alumni/AlumniTestimonials";
 import ManageTestimonials from "./pages/admin/ManageTestimonials";
 import Donation from "./pages/Alumni/Donation";
+import ManageDonation from "./pages/coordinator/ManageDonation";
 
 const App = () => {
   return (
@@ -113,6 +114,7 @@ const App = () => {
             <Route path="eventreport" element={<EventReportGenerator />} />
             <Route path="recommendgracemark" element={<RecommendGraceMark />} />
             <Route path="chat" element={<ChatPage />} />
+            <Route path="ManageDonation" element={<ManageDonation />} />
             <Route
               path="coordinatormyprofile"
               element={<CoordinatorMyProfile />}

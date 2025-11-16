@@ -2273,3 +2273,31 @@ export const updateCoordinatorProfile = async (req, res) => {
     });
   }
 };
+
+export const toggleDonation = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Toggle donationOpen
+    event.donationOpen = !event.donationOpen;
+
+    await event.save();
+
+    return res.json({
+      success: true,
+      message: `Donation is now ${event.donationOpen ? "OPEN" : "CLOSED"}`,
+      donationOpen: event.donationOpen,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
