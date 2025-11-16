@@ -57,6 +57,9 @@ import AlumniDashboard from "./pages/Alumni/AlumniDashboard";
 import AlumniProfile from "./pages/Alumni/AlumniProfile";
 import TeacherAnnouncement from "./pages/teacher/TeacherAnnouncement";
 import StudentAnnouncement from "./pages/student/StudentAnnouncement";
+import Testimonials from "./pages/Alumni/AlumniTestimonials";
+import AlumniTestimonials from "./pages/Alumni/AlumniTestimonials";
+import ManageTestimonials from "./pages/admin/ManageTestimonials";
 
 const App = () => {
   return (
@@ -91,6 +94,7 @@ const App = () => {
             <Route path="allstudent" element={<AllStudent />} />
             <Route path="allalumni" element={<AllAlumni />} />
             <Route path="allteachers" element={<AllTeacher />} />
+            <Route path="testimonials" element={<ManageTestimonials />} />
             <Route path="allcoordinators" element={<AllCoordinators />} />
             <Route path="createinstitution" element={<CreateInstitution />} />
             <Route path="manageinstitute" element={<ManageInstitute />} />
@@ -148,6 +152,7 @@ const App = () => {
             <Route index element={<AlumniDashboard />} />
             <Route path="/alumnilayout/dashboard" element={<AlumniDashboard />} />
             <Route path="/alumnilayout/alumniprofile" element={<AlumniProfile />} />
+            <Route path="/alumnilayout/testimonials" element={<AlumniTestimonials />} />
           </Route>
         </Routes>
       </SocketProvider>

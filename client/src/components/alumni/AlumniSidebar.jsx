@@ -29,7 +29,7 @@ const AlumniSidebar = ({ setIsOpen }) => {
     },
     { to: "/alumni/achievements", icon: <FaAward />, label: "Achievements" },
     {
-      to: "/alumni/testimonials",
+      to: "/alumnilayout/testimonials",
       icon: <FaRegCommentDots />,
       label: "Testimonials",
     },

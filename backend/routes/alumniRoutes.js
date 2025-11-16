@@ -69,6 +69,7 @@ import {
   getAlumniDashboard,
   getAlumniProfile,
   updateAlumniProfile,
+  getAllTestimonials,
 } from "../controllers/alumniController.js";
 import {
   adminOnly,
@@ -103,7 +104,7 @@ alumniRouter.post("/login", loginAlumni);
         TESTIMONIALS
    =========================== */
 // Alumni adds testimonial
-alumniRouter.post("/:id/testimonial", protect, addTestimonial);
+alumniRouter.post("/testimonial", protect, alumniOnly, addTestimonial);
 
 // Admin updates visibility (approve/reject)
 alumniRouter.put(
@@ -144,5 +145,7 @@ alumniRouter.put(
   upload.single("profileImage"),
   updateAlumniProfile
 );
+
+alumniRouter.get("/testimonials", protect, superAdminOnly, getAllTestimonials);
 
 export default alumniRouter;

@@ -130,7 +130,7 @@ const Hero = () => {
             Get Started
           </button>
 
-          <button className="px-8 py-4 border-2 border-green-400/70 rounded-full font-semibold text-green-300 hover:bg-gradient-to-r hover:from-green-500 hover:to-teal-500 hover:text-white transition-all duration-300 shadow-md">
+          <button className="px-8 py-4 border-2 border-green-400/70 rounded-full font-semibold text-green-300 hover:bg-gradient-to-r hover:from-green-500 hover:to-teal-500 hover:text-white transition-all duration-300 shadow-md" onClick={()=>window.scrollTo("smooth",500,500)}>
             Explore Features
           </button>
         </div>

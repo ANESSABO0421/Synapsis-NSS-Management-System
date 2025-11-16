@@ -1,5 +1,5 @@
 import React from "react";
-import { BiLayout, BiTask, BiUser } from "react-icons/bi";
+import { BiComment, BiCommentAdd, BiCommentDots, BiLayout, BiTask, BiUser } from "react-icons/bi";
 import { NavLink } from "react-router-dom";
 import { PiChalkboardTeacher, PiChalkboardTeacherBold, PiChalkboardTeacherDuotone, PiGraduationCap, PiStudent, PiStudentDuotone,PiUserBold } from "react-icons/pi";
 import { FaSchool } from 'react-icons/fa';
@@ -47,6 +47,11 @@ const Sidebar = () => {
       name: "All Alumni",
       path: "/adminpanel/allalumni",
       icon: <PiGraduationCap size={18} />,
+    },
+    {
+      name: "Manage Testimonials",
+      path: "/adminpanel/testimonials",
+      icon: <BiCommentAdd size={18} />,
     },
     {
       name: "Create Institution",

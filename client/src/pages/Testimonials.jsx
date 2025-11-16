@@ -13,8 +13,9 @@ const Testimonials = () => {
 
   const getAllTestimonial = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/alumni/top/all");
+      const res = await axios.get("http://localhost:3000/api/alumni/testimonials/top");
       setData(res.data.testimonials);
+      console.log(res.data)
     } catch (error) {
       console.log("error fetching data:", error);
     }

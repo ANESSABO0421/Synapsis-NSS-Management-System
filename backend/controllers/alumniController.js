@@ -458,7 +458,7 @@ export const loginAlumni = async (req, res) => {
 //
 export const addTestimonial = async (req, res) => {
   try {
-    const alumni = await Alumni.findById(req.params.id);
+    const alumni = await Alumni.findById(req.user.id);
     if (!alumni)
       return res
         .status(404)
@@ -478,31 +478,45 @@ export const addTestimonial = async (req, res) => {
 //
 export const updateTestimonialVisibility = async (req, res) => {
   try {
-    const { id, testimonialId } = req.params;
-    const { visibility } = req.body; // "approved" | "rejected"
+    // ⭐ Admin info from middleware
+    const adminId = req.user.id;  
+
+    // ⭐ Alumni + testimonial from params
+    const { id, testimonialId } = req.params; 
+    const { visibility } = req.body;
+
+    // Optional: log who approved
+    console.log("Approved by admin:", adminId);
 
     const alumni = await Alumni.findById(id);
-    if (!alumni)
+    if (!alumni) {
       return res
         .status(404)
         .json({ success: false, message: "Alumni not found." });
+    }
 
     const testimonial = alumni.testimonials.id(testimonialId);
-    if (!testimonial)
+    if (!testimonial) {
       return res
         .status(404)
         .json({ success: false, message: "Testimonial not found." });
+    }
 
     testimonial.visibility = visibility;
+
+    // Optional: store approval details
+    testimonial.reviewedBy = adminId;
+    testimonial.reviewedAt = new Date();
+
     await alumni.save();
 
-    res.json({
+    return res.json({
       success: true,
-      message: `Testimonial marked as ${visibility}.`,
+      message: `Testimonial marked as ${visibility}`,
       testimonial,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -746,5 +760,37 @@ export const updateAlumniProfile = async (req, res) => {
   } catch (error) {
     console.log("Profile Update Error:", error);
     return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+
+// get all testimonials
+export const getAllTestimonials = async (req, res) => {
+  try {
+    const alumnis = await Alumni.find()
+      .select("name department graduationYear profileImage testimonials");
+
+    // Flatten testimonials into one clean array
+    const result = alumnis.flatMap((alumni) =>
+      alumni.testimonials.map((t) => ({
+        alumniId: alumni._id,
+        testimonialId: t._id,
+        name: alumni.name,
+        department: alumni.department,
+        graduationYear: alumni.graduationYear,
+        profileImage: alumni.profileImage?.url,
+        message: t.message,
+        visibility: t.visibility,
+        createdAt: t.createdAt,
+      }))
+    );
+
+    return res.json({
+      success: true,
+      testimonials: result,
+    });
+  } catch (error) {
+    console.error("Fetch testimonials error:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
