@@ -33,7 +33,7 @@ const AlumniSidebar = ({ setIsOpen }) => {
       icon: <FaRegCommentDots />,
       label: "Testimonials",
     },
-    { to: "/alumni/events", icon: <FaCalendarCheck />, label: "Events" },
+    { to: "/alumnilayout/donations", icon: <FaCalendarCheck />, label: "Donations" },
   ];
 
   return (

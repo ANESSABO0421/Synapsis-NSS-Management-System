@@ -60,6 +60,7 @@ import StudentAnnouncement from "./pages/student/StudentAnnouncement";
 import Testimonials from "./pages/Alumni/AlumniTestimonials";
 import AlumniTestimonials from "./pages/Alumni/AlumniTestimonials";
 import ManageTestimonials from "./pages/admin/ManageTestimonials";
+import Donation from "./pages/Alumni/Donation";
 
 const App = () => {
   return (
@@ -153,6 +154,7 @@ const App = () => {
             <Route path="/alumnilayout/dashboard" element={<AlumniDashboard />} />
             <Route path="/alumnilayout/alumniprofile" element={<AlumniProfile />} />
             <Route path="/alumnilayout/testimonials" element={<AlumniTestimonials />} />
+            <Route path="/alumnilayout/donations" element={<Donation />} />
           </Route>
         </Routes>
       </SocketProvider>
