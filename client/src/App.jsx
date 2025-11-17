@@ -62,6 +62,7 @@ import AlumniTestimonials from "./pages/Alumni/AlumniTestimonials";
 import ManageTestimonials from "./pages/admin/ManageTestimonials";
 import Donation from "./pages/Alumni/Donation";
 import ManageDonation from "./pages/coordinator/ManageDonation";
+import SuccessDonation from "./pages/Alumni/SuccessDonation";
 
 const App = () => {
   return (
@@ -157,6 +158,7 @@ const App = () => {
             <Route path="/alumnilayout/alumniprofile" element={<AlumniProfile />} />
             <Route path="/alumnilayout/testimonials" element={<AlumniTestimonials />} />
             <Route path="/alumnilayout/donations" element={<Donation />} />
+            <Route path="/alumnilayout/success-donation" element={<SuccessDonation />} />
           </Route>
         </Routes>
       </SocketProvider>

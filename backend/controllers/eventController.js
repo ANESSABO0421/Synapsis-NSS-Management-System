@@ -1,3 +1,5 @@
+// import Alumni from "../models/Alumni.js";
+import Alumni from "../models/Alumni.js";
 import Event from "../models/Event.js";
 import Student from "../models/Student.js";
 import cloudinary from "../utils/cloudinary.js";
@@ -40,6 +42,23 @@ export const getAllevents = async (req, res) => {
         .json({ success: false, message: "no events are found" });
     }
     res.status(200).json({ success: true, events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getAllEventsAlumniInstituition = async (req, res) => {
+  try {
+    const AlumniId = req.user.id;
+    const Alum = await Alumni.findById(AlumniId);
+    if (!Alum) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni Not found" });
+    }
+    const instituitionId = Alum.institution;
+    const InstitutionEvent = await Event.find({ institution: instituitionId });
+    res.json({ success: true, events: InstitutionEvent });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -269,9 +288,6 @@ export const getAllEventImages = async (req, res) => {
   }
 };
 
-
-
-
 // Complete Event and update students' volunteer hours & awards
 // Start Event
 export const startEvent = async (req, res) => {
@@ -279,13 +295,16 @@ export const startEvent = async (req, res) => {
     const eventId = req.params.id;
     const event = await Event.findById(eventId);
     if (!event) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     if (event.status !== "Upcoming") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Only upcoming events can be started" });
+      return res.status(400).json({
+        success: false,
+        message: "Only upcoming events can be started",
+      });
     }
 
     // Mark event as ongoing and set startTime
@@ -304,22 +323,22 @@ export const startEvent = async (req, res) => {
   }
 };
 
-
-
-
 // Complete Event
 export const completeEvent = async (req, res) => {
   try {
     const eventId = req.params.id;
     const event = await Event.findById(eventId).populate("attendance.student");
     if (!event) {
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     if (event.status !== "Ongoing") {
-      return res
-        .status(400)
-        .json({ success: false, message: "Only ongoing events can be completed" });
+      return res.status(400).json({
+        success: false,
+        message: "Only ongoing events can be completed",
+      });
     }
 
     // Mark event as completed
@@ -328,7 +347,10 @@ export const completeEvent = async (req, res) => {
 
     // Calculate event hours (in hours)
     const start = event.startTime || event.date;
-    event.calculatedHours = ((event.endTime - start) / (1000 * 60 * 60)).toFixed(2);
+    event.calculatedHours = (
+      (event.endTime - start) /
+      (1000 * 60 * 60)
+    ).toFixed(2);
 
     // Update volunteer students
     for (const att of event.attendance) {
@@ -341,16 +363,28 @@ export const completeEvent = async (req, res) => {
           const hours = student.totalVolunteerHours;
           if (hours >= 50) {
             student.level = "Platinum";
-            student.awards.push({ title: "Platinum Volunteer", description: "Completed 50 hours" });
+            student.awards.push({
+              title: "Platinum Volunteer",
+              description: "Completed 50 hours",
+            });
           } else if (hours >= 26) {
             student.level = "Gold";
-            student.awards.push({ title: "Gold Volunteer", description: "Completed 26 hours" });
+            student.awards.push({
+              title: "Gold Volunteer",
+              description: "Completed 26 hours",
+            });
           } else if (hours >= 11) {
             student.level = "Silver";
-            student.awards.push({ title: "Silver Volunteer", description: "Completed 11 hours" });
+            student.awards.push({
+              title: "Silver Volunteer",
+              description: "Completed 11 hours",
+            });
           } else if (hours > 0) {
             student.level = "Bronze";
-            student.awards.push({ title: "Bronze Volunteer", description: "Started volunteering" });
+            student.awards.push({
+              title: "Bronze Volunteer",
+              description: "Started volunteering",
+            });
           }
 
           await student.save();

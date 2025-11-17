@@ -5,9 +5,9 @@ import Donation from "../models/Donation.js";
 // 1️⃣ Create Stripe Payment Intent
 export const createPaymentIntent = async (req, res) => {
   try {
-    console.log("🔵 BODY:", req.body);
-    console.log("🔵 USER:", req.user);
-    console.log("🔵 STRIPE:", process.env.STRIPE_SECRET_KEY ? "LOADED" : "MISSING");
+    // console.log("🔵 BODY:", req.body);
+    // console.log("🔵 USER:", req.user);
+    // console.log("🔵 STRIPE:", process.env.STRIPE_SECRET_KEY ? "LOADED" : "MISSING");
 
     const { amount, eventId } = req.body;
 

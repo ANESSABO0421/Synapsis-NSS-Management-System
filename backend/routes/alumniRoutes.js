@@ -78,6 +78,7 @@ import {
   superAdminOnly,
 } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
+import { getAllEventsAlumniInstituition } from "../controllers/eventController.js";
 
 const alumniRouter = express.Router();
 
@@ -135,6 +136,8 @@ alumniRouter.put(
 );
 
 alumniRouter.get("/dashboard", protect, alumniOnly, getAlumniDashboard);
+
+alumniRouter.get("/getalleventsalumniinstituition", protect, alumniOnly,getAllEventsAlumniInstituition );
 
 // Alumni Profile
 alumniRouter.get("/profile", protect, alumniOnly, getAlumniProfile);

@@ -1,8 +1,10 @@
+// src/pages/Donation.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FiCalendar, FiMapPin, FiClock, FiRefreshCcw, FiX } from "react-icons/fi";
+import { FiCalendar, FiMapPin, FiClock, FiRefreshCcw } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 import {
   Elements,
@@ -10,44 +12,42 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+
 import { loadStripe } from "@stripe/stripe-js";
 
-// Stripe public key
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-
-
-// ======================================================
-// ⭐ Payment Modal Component (Stripe)
-// ======================================================
-const PaymentModal = ({ eventId, onClose }) => {
+/* ===========================================
+    PAYMENT MODAL (REAL STRIPE FEEL)
+=========================================== */
+const PaymentModal = ({ event, onClose }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
 
   const [amount, setAmount] = useState("");
+  const [message, setMessage] = useState("");
   const [processing, setProcessing] = useState(false);
 
   const token = localStorage.getItem("token");
 
   const handlePay = async () => {
-    if (!amount || amount <= 0) {
-      toast.error("Enter a valid amount");
+    if (!amount || Number(amount) < 50) {
+      toast.error("Minimum donation amount is ₹50");
       return;
     }
 
     try {
       setProcessing(true);
 
-      // 1️⃣ Create payment intent (YOUR BACKEND URL)
       const res = await axios.post(
         "http://localhost:3000/api/donations/create-intent",
-        { amount, eventId },
+        { amount, eventId: event._id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       const clientSecret = res.data.clientSecret;
 
-      // 2️⃣ Confirm with Stripe
       const result = await stripe.confirmCardPayment(clientSecret, {
         payment_method: { card: elements.getElement(CardElement) },
       });
@@ -59,90 +59,117 @@ const PaymentModal = ({ eventId, onClose }) => {
       }
 
       if (result.paymentIntent.status === "succeeded") {
-        // 3️⃣ Save donation (YOUR BACKEND URL)
         await axios.post(
           "http://localhost:3000/api/donations/save",
           {
-            eventId,
+            eventId: event._id,
             amount,
             paymentId: result.paymentIntent.id,
+            message,
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        toast.success("🎉 Donation Successful!");
+        navigate("/alumnilayout/success-donation", {
+          state: { amount, eventName: event.title },
+        });
+
         onClose();
       }
     } catch (err) {
-      toast.error("Payment failed!");
-      console.log(err);
+      toast.error("Payment failed. Try again.");
+    } finally {
+      setProcessing(false);
     }
-
-    setProcessing(false);
   };
 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/40 flex justify-center items-center z-[999]"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       >
         <motion.div
-          initial={{ scale: 0.6, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.6, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 120 }}
-          className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-md relative"
+          initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-white w-[95%] max-w-md rounded-xl p-8 shadow-xl relative border border-gray-200"
         >
-          {/* Close Button */}
+          {/* CLOSE */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            className="absolute right-4 top-4 text-gray-600 hover:text-red-500 text-xl"
           >
-            <FiX size={22} />
+            ×
           </button>
 
-          <h2 className="text-2xl font-bold text-blue-700 mb-4">
-            Donate to Event
+          {/* STRIPE LOGO */}
+          <div className="flex justify-center mb-4">
+            <img
+              src="https://cdn.worldvectorlogo.com/logos/stripe-4.svg"
+              alt="Stripe"
+              className="h-6 opacity-90"
+            />
+          </div>
+
+          <h2 className="text-xl font-bold text-gray-800 text-center mb-3">
+            Secure Donation
           </h2>
 
-          {/* Amount Field */}
-          <label className="font-medium">Amount (₹)</label>
+          <p className="text-center text-gray-600 text-sm mb-4">
+            Event: <span className="font-semibold">{event.title}</span>
+          </p>
+
+          {/* AMOUNT */}
+          <label className="block text-sm font-medium text-gray-700">
+            Amount (₹)
+          </label>
           <input
             type="number"
-            placeholder="Enter amount"
             value={amount}
+            placeholder="Min ₹50"
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full p-3 border rounded-lg mb-4 mt-1"
+            className="w-full mt-1 mb-4 p-3 rounded-md border border-gray-300"
           />
 
-          {/* Card Input */}
-          <label className="font-medium">Card Details</label>
-          <div className="border p-3 rounded-lg mb-4">
+          {/* MESSAGE */}
+          <label className="block text-sm font-medium text-gray-700">
+            Message (optional)
+          </label>
+          <textarea
+            className="w-full p-3 mt-1 mb-4 rounded-md border border-gray-300"
+            placeholder="Write a short note..."
+            onChange={(e) => setMessage(e.target.value)}
+          />
+
+          {/* CARD FIELD */}
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Card Details
+          </label>
+          <div className="border border-gray-300 rounded-md p-3 mb-5 shadow-sm">
             <CardElement />
           </div>
 
-          {/* Pay Button */}
+          {/* PAY BUTTON */}
           <button
             onClick={handlePay}
             disabled={!stripe || processing}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-md font-semibold"
           >
-            {processing ? "Processing..." : "Pay & Donate"}
+            {processing ? "Processing..." : `Pay ₹${amount || ""}`}
           </button>
+
+          {/* STRIPE SECURE FOOTER */}
+          <p className="text-center mt-4 text-gray-500 text-xs">
+            🔒 Payments securely processed by Stripe
+          </p>
         </motion.div>
       </motion.div>
     </AnimatePresence>
   );
 };
 
-
-
-// ======================================================
-// ⭐ Main Donation Component
-// ======================================================
+/* ===========================================
+   MAIN DONATION PAGE (WHITE + GREEN CARDS)
+=========================================== */
 const Donation = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,16 +180,13 @@ const Donation = () => {
   const fetchEvents = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/events/getallevent",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        "http://localhost:3000/api/alumni/getalleventsalumniinstituition",
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setEvents(res.data.events);
-      setLoading(false);
-    } catch (err) {
-      toast.error("Failed to load events");
+      setEvents(res.data.events || []);
+    } catch {
+      toast.error("Failed loading events");
+    } finally {
       setLoading(false);
     }
   };
@@ -175,63 +199,53 @@ const Donation = () => {
 
   return (
     <Elements stripe={stripePromise}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-8">
+      {/* CLEAN WHITE PAGE */}
+      <div className="min-h-screen bg-white p-10">
+
         <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-extrabold text-blue-700">
-              🎓 Support Events with Donations
+
+          {/* HEADER */}
+          <div className="flex justify-between items-center mb-10">
+            <h2 className="text-3xl font-bold text-green-800">
+               Support Your Institution’s Events
             </h2>
 
             <button
               onClick={fetchEvents}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
             >
               <FiRefreshCcw /> Refresh
             </button>
           </div>
 
-          {/* Event Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* EVENT CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {events.map((e) => (
               <motion.div
                 key={e._id}
                 whileHover={{ scale: 1.02 }}
-                className="bg-white/70 shadow-lg rounded-2xl p-5 border"
+                className="bg-white border border-green-500 rounded-xl p-6 shadow-md"
               >
-                <h3 className="text-xl font-bold text-blue-700 mb-1">
-                  {e.title}
-                </h3>
-
+                <h3 className="text-xl font-bold text-green-800">{e.title}</h3>
                 <p className="text-gray-600 text-sm mb-3">{e.description}</p>
 
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
-                  <FiCalendar className="text-blue-600" />
-                  <span>{new Date(e.date).toLocaleDateString()}</span>
+                <div className="space-y-1 text-gray-700 text-sm">
+                  <p className="flex items-center gap-2"><FiCalendar /> {new Date(e.date).toLocaleDateString()}</p>
+                  <p className="flex items-center gap-2"><FiMapPin /> {e.location}</p>
+                  <p className="flex items-center gap-2"><FiClock /> {e.hours} hrs</p>
                 </div>
 
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
-                  <FiMapPin className="text-blue-600" />
-                  <span>{e.location}</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-gray-700 mb-2">
-                  <FiClock className="text-blue-600" />
-                  <span>{e.hours} hrs</span>
-                </div>
-
-                <div className="mt-3 px-3 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold">
+                <div className="mt-4 text-sm font-semibold text-green-700">
                   Donation: {e.donationOpen ? "OPEN" : "CLOSED"}
                 </div>
-
-                <div className="mt-2 px-3 py-2 rounded-lg bg-blue-50 text-blue-700 font-semibold">
+                <div className="text-sm font-semibold text-gray-700">
                   Total Collected: ₹{e.totalCollected}
                 </div>
 
                 {e.donationOpen && (
                   <button
-                    onClick={() => setSelectedEvent(e._id)}
-                    className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                    onClick={() => setSelectedEvent(e)}
+                    className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-semibold"
                   >
                     Donate Now
                   </button>
@@ -241,12 +255,9 @@ const Donation = () => {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* MODAL */}
         {selectedEvent && (
-          <PaymentModal
-            eventId={selectedEvent}
-            onClose={() => setSelectedEvent(null)}
-          />
+          <PaymentModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
         )}
       </div>
     </Elements>
