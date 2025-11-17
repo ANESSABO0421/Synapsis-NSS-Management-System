@@ -12,6 +12,7 @@ import {
 import { motion } from "framer-motion";
 import { BiComment } from "react-icons/bi";
 import { BsMegaphoneFill } from "react-icons/bs";
+import { MdRecentActors } from "react-icons/md";
 
 const StudentSidebar = ({ setIsOpen }) => {
   const navigate = useNavigate();
@@ -50,6 +51,7 @@ const StudentSidebar = ({ setIsOpen }) => {
       label: "Announcement",
     },
     { to: "/studentlayout/chatstudent", icon: <BiComment />, label: "Chat" },
+    { to: "/studentlayout/mentorshiprequestbyvolunteer", icon: <MdRecentActors />, label: "Mentorship Request" },
     { to: "/studentlayout/studentprofile", icon: <FaUser />, label: "Profile" },
   ];
 

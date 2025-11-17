@@ -26,7 +26,6 @@
 // app.use(express.json());
 // app.use(cors());
 
-
 // // For Google OAuth with Passport
 // app.use(
 //   session({ secret: "your_secret_key", resave: false, saveUninitialized: true })
@@ -82,6 +81,8 @@ import messagerouter from "./routes/messageRoutes.js";
 import "./configs/passport.js";
 import notificationRoute from "./routes/notificationRoutes.js";
 import donationRouter from "./routes/donationRoutes.js";
+import { socketAuth } from "./sockets/socketAuth.js";
+import mentorshipRouter from "./routes/mentorshipRoutes.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -118,6 +119,7 @@ app.use("/api/otp", otpRouter);
 app.use("/api/ai", airouter);
 app.use("/api/notification", notificationRoute);
 app.use("/api/donations", donationRouter);
+app.use("/api/mentorship", mentorshipRouter);
 
 // Database connection
 ConnectDb()
@@ -161,30 +163,74 @@ ConnectDb()
         });
 
         // Handle message send
-        socket.on("send_message", async ({ eventId, institutionId, content }) => {
-          if (!eventId || !institutionId || !content) return;
+        socket.on(
+          "send_message",
+          async ({ eventId, institutionId, content }) => {
+            if (!eventId || !institutionId || !content) return;
 
-          const { default: Message } = await import("./models/Message.js");
+            const { default: Message } = await import("./models/Message.js");
 
-          const message = await Message.create({
-            eventId,
-            institutionId,
-            sender: {
-              id: socket.user.id,
-              name: socket.user.name,
-              role: socket.user.role,
-            },
-            content,
-          });
+            const message = await Message.create({
+              eventId,
+              institutionId,
+              sender: {
+                id: socket.user.id,
+                name: socket.user.name,
+                role: socket.user.role,
+              },
+              content,
+            });
 
-          const room = `institution:${institutionId}:event:${eventId}`;
-          io.to(room).emit("new_message", message);
-        });
+            const room = `institution:${institutionId}:event:${eventId}`;
+            io.to(room).emit("new_message", message);
+          }
+        );
 
         // Disconnect
         socket.on("disconnect", () => {
           console.log("🔴 Socket disconnected:", socket.id);
         });
+      });
+    });
+
+    // ===============================
+    // 🟦 MENTORSHIP PRIVATE CHAT NAMESPACE
+    // ===============================
+    const mentorshipIO = io.of("/mentorship-chat");
+
+    mentorshipIO.use(socketAuth);
+
+    mentorshipIO.on("connection", (socket) => {
+      console.log(
+        "🟢 Mentorship Chat Connected:",
+        socket.id,
+        socket.user?.name
+      );
+
+      // Join mentorship 1-on-1 room
+      socket.on("joinMentorship", ({ mentorshipId }) => {
+        if (!mentorshipId) return;
+        socket.join(mentorshipId);
+        console.log(
+          `User ${socket.user.name} joined mentorship room ${mentorshipId}`
+        );
+      });
+
+      // Send private mentorship message (NO DB SAVE YET)
+      socket.on("sendMentorMessage", ({ mentorshipId, message }) => {
+        if (!mentorshipId || !message) return;
+
+        mentorshipIO.to(mentorshipId).emit("newMentorMessage", {
+          mentorshipId,
+          senderId: socket.user.id,
+          senderRole: socket.user.role,
+          message,
+          createdAt: new Date(),
+        });
+      });
+
+      socket.on("disconnect", () => {
+        console.log("🔴 Mentorship Chat Disconnected:", socket.id);
       });
     });
 
