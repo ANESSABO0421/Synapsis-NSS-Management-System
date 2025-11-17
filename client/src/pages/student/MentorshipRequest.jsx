@@ -11,24 +11,17 @@ const MentorshipRequest = () => {
 
   const token = localStorage.getItem("token");
 
-  // ===============================
-  // 🔹 FETCH MENTORS FROM INSTITUTION
-  // ===============================
+  // ===========================================
+  // 🔹 Fetch mentors of student's institution
+  // ===========================================
   const fetchMentors = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:3000/api/mentorship/mentors",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const res = await axios.get("http://localhost:3000/api/mentorship/mentors", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setMentors(res.data.mentors || []);
       setLoading(false);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to load mentors");
       setLoading(false);
     }
@@ -38,15 +31,15 @@ const MentorshipRequest = () => {
     fetchMentors();
   }, []);
 
-  // ===============================
-  // 🔹 SEND MENTORSHIP REQUEST
-  // ===============================
+  // ===========================================
+  // 🔹 Send Mentorship Request
+  // ===========================================
   const sendRequest = async () => {
     if (!selectedMentor) return toast.error("Please select a mentor");
     if (!topic.trim()) return toast.error("Topic is required");
 
     try {
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:3000/api/mentorship/request",
         {
           mentorId: selectedMentor._id,
@@ -63,72 +56,98 @@ const MentorshipRequest = () => {
       setTopic("");
       setDescription("");
     } catch (err) {
-      console.error(err);
       toast.error(err.response?.data?.message || "Failed to send request");
     }
   };
 
   return (
-    <div className="w-full p-6">
-      <h1 className="text-2xl font-bold mb-4">Request a Mentorship</h1>
+    <div className="w-full px-6 py-8 bg-gray-50 min-h-screen">
 
-      {/* ====================== Mentor List ====================== */}
-      <h2 className="font-semibold mb-2">Choose a Mentor</h2>
+      {/* PAGE HEADER */}
+      <h1 className="text-3xl font-bold text-gray-800 mb-2">Request a Mentorship</h1>
+      <p className="text-gray-600 mb-10">
+        Select an alumni mentor and tell them what you'd like to discuss.
+      </p>
+
+      {/* ================== Mentor Selection ================== */}
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">Choose a Mentor</h2>
 
       {loading ? (
         <p>Loading mentors...</p>
       ) : mentors.length === 0 ? (
-        <p className="text-gray-600">No mentors available at the moment.</p>
+        <p className="text-gray-600">No mentors available right now.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
           {mentors.map((mentor) => (
             <div
               key={mentor._id}
               onClick={() => setSelectedMentor(mentor)}
-              className={`border p-4 rounded-lg cursor-pointer transition shadow-sm ${
-                selectedMentor?._id === mentor._id
-                  ? "bg-green-100 border-green-500"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`flex items-center gap-4 p-5 rounded-xl border shadow-sm cursor-pointer transition-all 
+                ${
+                  selectedMentor?._id === mentor._id
+                    ? "border-2 border-green-500 bg-green-50"
+                    : "hover:bg-gray-100"
+                }`}
             >
-              <h3 className="text-lg font-bold">{mentor.name}</h3>
-              <p className="text-gray-700">{mentor.department}</p>
-              <p className="text-gray-500">{mentor.email}</p>
+              {/* Profile Image */}
+              <img
+                src={mentor.profileImage?.url || "https://via.placeholder.com/60"}
+                alt="mentor"
+                className="w-14 h-14 rounded-full object-cover"
+              />
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">{mentor.name}</h3>
+                <p className="text-gray-600 text-sm">{mentor.department}</p>
+                <p className="text-gray-500 text-sm">{mentor.email}</p>
+              </div>
+
+              {/* Selection dot */}
+              <div
+                className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center
+                  ${
+                    selectedMentor?._id === mentor._id
+                      ? "border-green-600 bg-green-600"
+                      : "border-gray-400"
+                  }
+                `}
+              ></div>
             </div>
           ))}
         </div>
       )}
 
-      {/* ====================== Form Inputs ====================== */}
-      <div className="mb-4">
-        <label className="font-semibold">Topic *</label>
+      {/* ================== Form Section ================== */}
+      <div className="bg-white rounded-xl p-6 shadow">
+        
+        {/* Topic */}
+        <label className="font-semibold text-gray-700">Topic *</label>
         <input
           type="text"
-          className="w-full border p-2 rounded mt-1"
+          className="w-full border p-3 rounded-lg mt-1 mb-6 focus:outline-none focus:ring-2 focus:ring-green-400"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Example: MERN Stack, Web Development"
         />
-      </div>
 
-      <div className="mb-4">
-        <label className="font-semibold">Description (Optional)</label>
+        {/* Description */}
+        <label className="font-semibold text-gray-700">Description (Optional)</label>
         <textarea
-          className="w-full border p-2 rounded mt-1"
-          rows="3"
+          className="w-full border p-3 rounded-lg mt-1 mb-6 focus:outline-none focus:ring-2 focus:ring-green-400"
+          rows="4"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Explain what guidance you need..."
         ></textarea>
-      </div>
 
-      {/* ====================== Send Button ====================== */}
-      <button
-        onClick={sendRequest}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        Send Mentorship Request
-      </button>
+        {/* Send Button */}
+        <button
+          onClick={sendRequest}
+          className="w-full md:w-auto px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition"
+        >
+          Send Mentorship Request
+        </button>
+      </div>
     </div>
   );
 };

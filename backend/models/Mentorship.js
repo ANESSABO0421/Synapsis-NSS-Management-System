@@ -27,7 +27,7 @@ const mentorshipSchema = new mongoose.Schema(
     startDate: Date,
     endDate: Date,
 
-    meetingLink: String,
+    meetingLink: { type: String, default: "" },
 
     mentorFeedback: {
       rating: Number,
