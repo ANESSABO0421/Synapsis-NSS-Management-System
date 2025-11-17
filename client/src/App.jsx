@@ -64,6 +64,7 @@ import Donation from "./pages/Alumni/Donation";
 import ManageDonation from "./pages/coordinator/ManageDonation";
 import SuccessDonation from "./pages/Alumni/SuccessDonation";
 import MentorshipRequest from "./pages/student/MentorshipRequest";
+import MentorshipAlumni from "./pages/Alumni/ManageMentorshipAlumni";
 
 const App = () => {
   return (
@@ -160,6 +161,7 @@ const App = () => {
             <Route path="/alumnilayout/alumniprofile" element={<AlumniProfile />} />
             <Route path="/alumnilayout/testimonials" element={<AlumniTestimonials />} />
             <Route path="/alumnilayout/donations" element={<Donation />} />
+            <Route path="/alumnilayout/managementorship" element={<MentorshipAlumni />} />
             <Route path="/alumnilayout/success-donation" element={<SuccessDonation />} />
           </Route>
         </Routes>

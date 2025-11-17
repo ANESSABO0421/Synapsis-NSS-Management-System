@@ -10,7 +10,7 @@ const mentorshipSchema = new mongoose.Schema(
 
     mentee: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
+      ref: "student",
       required: true,
     },
 

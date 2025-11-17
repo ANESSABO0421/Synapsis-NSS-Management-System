@@ -83,6 +83,7 @@ import notificationRoute from "./routes/notificationRoutes.js";
 import donationRouter from "./routes/donationRoutes.js";
 import { socketAuth } from "./sockets/socketAuth.js";
 import mentorshipRouter from "./routes/mentorshipRoutes.js";
+import mentorshipMessage from "./routes/mentorshipMessageRoutes.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -120,6 +121,7 @@ app.use("/api/ai", airouter);
 app.use("/api/notification", notificationRoute);
 app.use("/api/donations", donationRouter);
 app.use("/api/mentorship", mentorshipRouter);
+app.use("/api/mentorshipmessage", mentorshipMessage);
 
 // Database connection
 ConnectDb()

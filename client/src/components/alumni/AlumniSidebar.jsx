@@ -21,19 +21,19 @@ const AlumniSidebar = ({ setIsOpen }) => {
 
   const navItems = [
     { to: "/alumnilayout/dashboard", icon: <FaHome />, label: "Dashboard" },
-    { to: "/alumnilayout/alumniprofile", icon: <FaUserGraduate />, label: "My Profile" },
     {
-      to: "/alumni/mentorship",
+      to: "/alumnilayout/managementorship",
       icon: <FaChalkboardTeacher />,
-      label: "Mentorship",
+      label: "Manage Mentorship",
     },
-    { to: "/alumni/achievements", icon: <FaAward />, label: "Achievements" },
+    // { to: "/alumni/achievements", icon: <FaAward />, label: "Achievements" },
     {
       to: "/alumnilayout/testimonials",
       icon: <FaRegCommentDots />,
       label: "Testimonials",
     },
     { to: "/alumnilayout/donations", icon: <FaCalendarCheck />, label: "Donations" },
+    { to: "/alumnilayout/alumniprofile", icon: <FaUserGraduate />, label: "My Profile" },
   ];
 
   return (
