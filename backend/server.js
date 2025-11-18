@@ -84,6 +84,7 @@ import donationRouter from "./routes/donationRoutes.js";
 import { socketAuth } from "./sockets/socketAuth.js";
 import mentorshipRouter from "./routes/mentorshipRoutes.js";
 import mentorshipMessage from "./routes/mentorshipMessageRoutes.js";
+import MentorshipMessage from "./models/MentorshipMessage.js";
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -219,18 +220,20 @@ ConnectDb()
       });
 
       // Send private mentorship message (NO DB SAVE YET)
-      socket.on("sendMentorMessage", ({ mentorshipId, message }) => {
+      socket.on("sendMentorMessage", async ({ mentorshipId, message }) => {
         if (!mentorshipId || !message) return;
 
-        mentorshipIO.to(mentorshipId).emit("newMentorMessage", {
-          mentorshipId,
+        // Save message to DB
+        const savedMessage = await MentorshipMessage.create({
+          mentorship: mentorshipId,
           senderId: socket.user.id,
           senderRole: socket.user.role,
           message,
-          createdAt: new Date(),
         });
-      });
 
+        // Emit saved message
+        mentorshipIO.to(mentorshipId).emit("newMentorMessage", savedMessage);
+      });
       socket.on("disconnect", () => {
         console.log("🔴 Mentorship Chat Disconnected:", socket.id);
       });

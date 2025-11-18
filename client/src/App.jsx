@@ -66,6 +66,8 @@ import SuccessDonation from "./pages/Alumni/SuccessDonation";
 import MentorshipRequest from "./pages/student/MentorshipRequest";
 import MentorshipAlumni from "./pages/Alumni/ManageMentorshipAlumni";
 import MyMentorship from "./pages/student/MyMentorship";
+import StudentMentorshipChat from "./pages/student/StudentMentorshipChat";
+import AlumniMentorshipChat from "./pages/Alumni/AlumniMentorshipChat";
 
 const App = () => {
   return (
@@ -164,6 +166,7 @@ const App = () => {
             <Route path="/alumnilayout/testimonials" element={<AlumniTestimonials />} />
             <Route path="/alumnilayout/donations" element={<Donation />} />
             <Route path="/alumnilayout/managementorship" element={<MentorshipAlumni />} />
+            <Route path="/alumnilayout/mentorshipchat" element={<AlumniMentorshipChat />} />
             <Route path="/alumnilayout/success-donation" element={<SuccessDonation />} />
           </Route>
         </Routes>

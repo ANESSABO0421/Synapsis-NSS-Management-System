@@ -10,6 +10,7 @@ import {
   FaHome,
   FaSignOutAlt,
 } from "react-icons/fa";
+import { BiComment } from "react-icons/bi";
 
 const AlumniSidebar = ({ setIsOpen }) => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const AlumniSidebar = ({ setIsOpen }) => {
       label: "Testimonials",
     },
     { to: "/alumnilayout/donations", icon: <FaCalendarCheck />, label: "Donations" },
+    { to: "/alumnilayout/mentorshipchat", icon: <BiComment />, label: "Mentorship Chat" },
     { to: "/alumnilayout/alumniprofile", icon: <FaUserGraduate />, label: "My Profile" },
   ];
 
