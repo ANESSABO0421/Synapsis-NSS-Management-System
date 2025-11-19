@@ -22,9 +22,6 @@ const AlumniMentorshipChat = () => {
   const emojiPickerRef = useRef(null);
   const typingTimeout = useRef(null);
 
-  /* =======================================================
-      LOAD PREVIOUS MESSAGES
-  ======================================================== */
   const loadMessages = async () => {
     try {
       const res = await axios.get(
@@ -42,9 +39,6 @@ const AlumniMentorshipChat = () => {
     }
   };
 
-  /* =======================================================
-      SOCKET SEND
-  ======================================================== */
   const sendMessage = () => {
     if (!input.trim()) return;
 
@@ -57,9 +51,6 @@ const AlumniMentorshipChat = () => {
     setShowEmoji(false);
   };
 
-  /* =======================================================
-      TYPING INDICATOR
-  ======================================================== */
   const handleTyping = (e) => {
     setInput(e.target.value);
 
@@ -72,9 +63,6 @@ const AlumniMentorshipChat = () => {
     }, 1500);
   };
 
-  /* =======================================================
-      SOCKET LISTENERS
-  ======================================================== */
   useEffect(() => {
     loadMessages();
     socket.emit("joinMentorship", { mentorshipId });
@@ -96,9 +84,6 @@ const AlumniMentorshipChat = () => {
     };
   }, [mentorshipId]);
 
-  /* =======================================================
-      CLOSE EMOJI PICKER ON OUTSIDE CLICK
-  ======================================================== */
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target)) {
@@ -110,22 +95,28 @@ const AlumniMentorshipChat = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* =======================================================
-      UI
-  ======================================================== */
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-gradient-to-br from-gray-100 to-white">
 
       {/* HEADER */}
-      <div className="p-4 bg-green-700 text-white font-bold flex items-center justify-between shadow">
+      <div className="
+        p-4 
+        bg-white/70 
+        backdrop-blur-md 
+        border-b 
+        border-green-200 
+        font-semibold 
+        shadow-lg 
+        flex items-center justify-between
+      ">
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 bg-green-300 rounded-full animate-pulse" />
-          <span>Student (Online)</span>
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-green-800 tracking-wide font-bold">Student (Online)</span>
         </div>
       </div>
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-5">
 
         {messages.map((msg) => (
           <div
@@ -135,14 +126,15 @@ const AlumniMentorshipChat = () => {
             }`}
           >
             <div
-              className={`max-w-[75%] px-4 py-2 rounded-2xl shadow-md ${
+              className={`max-w-[70%] px-4 py-3 rounded-2xl shadow-lg animate-[fadeIn_0.25s_ease-out] 
+              ${
                 msg.senderRole === "alumni"
-                  ? "bg-green-600 text-white rounded-br-none"
-                  : "bg-white border border-gray-300 rounded-bl-none"
+                  ? "bg-gradient-to-br from-green-600 to-green-500 text-white rounded-br-none shadow-green-300/30"
+                  : "bg-white/90 border border-gray-200 rounded-bl-none backdrop-blur-md"
               }`}
             >
-              <p className="text-sm">{msg.message}</p>
-              <div className="text-[10px] mt-1 opacity-70 flex justify-end">
+              <p className="text-[15px] leading-snug">{msg.message}</p>
+              <div className="text-[10px] mt-1 opacity-60 flex justify-end">
                 {new Date(msg.createdAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -153,26 +145,29 @@ const AlumniMentorshipChat = () => {
         ))}
 
         {isTyping && (
-          <div className="text-xs text-gray-500 italic ml-2">typing…</div>
+          <div className="text-xs text-gray-500 italic ml-2 animate-pulse">typing…</div>
         )}
 
         <div ref={bottomRef} />
       </div>
 
       {/* INPUT AREA */}
-      <div className="p-3 bg-white border-t flex items-center gap-3 shadow-inner relative">
+      <div className="
+        p-3 bg-white/80 backdrop-blur-md border-t border-green-100 
+        flex items-center gap-3 shadow-2xl relative
+      ">
 
         {/* EMOJI BUTTON */}
         <div className="relative" ref={emojiPickerRef}>
           <button
             onClick={() => setShowEmoji((prev) => !prev)}
-            className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-all"
+            className="p-2 text-green-700 hover:bg-green-100 rounded-full transition-all shadow-sm"
           >
-            <Smile size={20} />
+            <Smile size={22} />
           </button>
 
           {showEmoji && (
-            <div className="absolute bottom-12 left-0 z-20 shadow-lg">
+            <div className="absolute bottom-12 left-0 z-40 shadow-2xl">
               <EmojiPicker
                 theme="light"
                 height={350}
@@ -188,14 +183,22 @@ const AlumniMentorshipChat = () => {
           value={input}
           onChange={handleTyping}
           placeholder="Type a message..."
-          className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:ring-2 focus:ring-green-500 outline-none text-sm"
+          className="
+            flex-1 border border-gray-300 rounded-full px-4 py-2 
+            focus:ring-2 focus:ring-green-500 outline-none text-sm
+            shadow-sm bg-white/90 backdrop-blur-md
+          "
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
 
         {/* SEND BTN */}
         <button
           onClick={sendMessage}
-          className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-full shadow-md flex items-center justify-center transition-all"
+          className="
+            bg-green-600 hover:bg-green-700 text-white 
+            p-3 rounded-full shadow-lg 
+            transition-all active:scale-95
+          "
         >
           <Send size={18} />
         </button>

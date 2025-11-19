@@ -12,6 +12,10 @@ import Teacher from "../models/Teacher.js";
 import Institution from "../models/Institution.js";
 import { HfInference } from "@huggingface/inference";
 import Notification from "../models/Notification.js";
+import OpenAI from "openai";
+const openai = new OpenAI({
+  apiKey: process.env.OPEN_AI_KEY,
+});
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -1172,37 +1176,244 @@ export const recommendedGraceMark = async (req, res) => {
 //   }
 // };
 
+// export const generateEventReport = async (req, res) => {
+//   try {
+//     const { eventId } = req.params;
+
+//     // 🔐 Auth check
+//     const coordinator = await Coordinator.findById(req.user._id);
+//     if (!coordinator) {
+//       return res.status(403).json({ success: false, message: "Unauthorized" });
+//     }
+
+//     // 📦 Fetch event
+//     const event = await Event.findById(eventId)
+//       .populate("assignedTeacher", "name")
+//       .populate("assignedCoordinators", "name")
+//       .populate("participants", "name department");
+
+//     if (!event) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Event not found" });
+//     }
+
+//     // 🏫 Ensure event belongs to coordinator's institution
+//     if (String(event.institution) !== String(coordinator.institution)) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Cannot generate report for an event outside your institution",
+//       });
+//     }
+
+//     // 🧩 Normalize data arrays
+//     const assignedCoordinators = Array.isArray(event.assignedCoordinators)
+//       ? event.assignedCoordinators
+//       : event.assignedCoordinators
+//       ? [event.assignedCoordinators]
+//       : [];
+
+//     const assignedTeachers = Array.isArray(event.assignedTeacher)
+//       ? event.assignedTeacher
+//       : event.assignedTeacher
+//       ? [event.assignedTeacher]
+//       : [];
+
+//     const participants = Array.isArray(event.participants)
+//       ? event.participants
+//       : event.participants
+//       ? [event.participants]
+//       : [];
+
+//     // 🧠 Generate AI summary
+//     let aiSummary = "";
+//     try {
+//       const input = `
+//         Event Title: ${event.title}
+//         Description: ${event.description || "No description provided."}
+//         Location: ${event.location}
+//         Duration: ${event.hours} hours
+//         Coordinators: ${
+//           assignedCoordinators.map((c) => c.name).join(", ") ||
+//           "NSS Coordinators"
+//         }
+//         Teachers: ${
+//           assignedTeachers.map((t) => t.name).join(", ") || "Teachers"
+//         }
+//         Participants: ${
+//           participants.map((p) => p.name).join(", ") || "Volunteers"
+//         }
+//         Generate a short, professional summary for this NSS event.
+//       `;
+
+//       const summaryRes = await hf.summarization({
+//         model: "facebook/bart-large-cnn",
+//         inputs: input,
+//         parameters: { max_length: 200, min_length: 60 },
+//       });
+
+//       aiSummary =
+//         summaryRes?.summary_text ||
+//         summaryRes?.[0]?.summary_text ||
+//         "Summary could not be generated.";
+//     } catch (aiErr) {
+//       console.error("AI Summary Generation Error:", aiErr);
+//       aiSummary = "AI summary unavailable due to inference issue.";
+//     }
+
+//     // 📁 Ensure folder exists
+//     const uploadsDir = path.join("uploads");
+//     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+//     // 🧾 PDF setup
+//     const fileName = `event_report_${event._id}.pdf`;
+//     const filePath = path.join(uploadsDir, fileName);
+
+//     const doc = new PDFDocument({ margin: 40 });
+//     const stream = fs.createWriteStream(filePath);
+//     doc.pipe(stream);
+
+//     // -----------------------------
+//     // 🏷️ HEADER
+//     // -----------------------------
+//     doc.fontSize(20).text("Event Report", { align: "center", underline: true });
+//     doc.moveDown(1.5);
+
+//     // 📄 EVENT DETAILS
+//     doc.fontSize(12).text("Event Details", { underline: true });
+//     doc.moveDown(0.5);
+
+//     const tableLeftX = 60;
+//     const valueLeftX = 200;
+//     const rowHeight = 20;
+//     const drawRow = (label, value, yOffset) => {
+//       doc.font("Helvetica-Bold").text(`${label}:`, tableLeftX, yOffset);
+//       doc.font("Helvetica").text(value || "N/A", valueLeftX, yOffset);
+//     };
+
+//     let currentY = doc.y;
+//     drawRow("Title", event.title, currentY);
+//     drawRow(
+//       "Date",
+//       new Date(event.date).toLocaleDateString(),
+//       currentY + rowHeight
+//     );
+//     drawRow("Location", event.location, currentY + 2 * rowHeight);
+//     drawRow(
+//       "Hours",
+//       event.hours?.toString() || "N/A",
+//       currentY + 3 * rowHeight
+//     );
+//     drawRow("Status", event.status || "Upcoming", currentY + 4 * rowHeight);
+
+//     currentY += 5 * rowHeight + 10;
+//     doc.moveDown();
+
+//     // 👥 TEAM DETAILS
+//     doc.fontSize(12).text("Team Details", { underline: true });
+//     currentY = doc.y + 5;
+
+//     const coordinators =
+//       assignedCoordinators.map((c) => c.name).join(", ") || "N/A";
+//     const teachers = assignedTeachers.map((t) => t.name).join(", ") || "N/A";
+
+//     drawRow("Coordinators", coordinators, currentY);
+//     drawRow("Teachers", teachers, currentY + rowHeight);
+//     doc.moveDown(2);
+
+//     // 🧠 AI SUMMARY
+//     doc.fontSize(12).text("AI Generated Summary", { underline: true });
+//     doc.moveDown(0.5);
+//     doc.font("Helvetica").text(aiSummary, { align: "justify" });
+//     doc.moveDown(1.5);
+
+//     // 🧑‍🤝‍🧑 VOLUNTEERS TABLE
+//     doc.fontSize(12).text("Volunteers", { underline: true });
+//     doc.moveDown(0.5);
+
+//     const startY = doc.y + 5;
+//     const col1 = 60,
+//       col2 = 100,
+//       col3 = 300;
+
+//     doc
+//       .font("Helvetica-Bold")
+//       .text("No.", col1, startY)
+//       .text("Name", col2, startY)
+//       .text("Department", col3, startY);
+//     doc
+//       .moveTo(60, startY + 15)
+//       .lineTo(500, startY + 15)
+//       .stroke();
+
+//     doc.font("Helvetica");
+//     let y = startY + 25;
+
+//     if (participants.length > 0) {
+//       participants.forEach((p, i) => {
+//         doc
+//           .text(i + 1, col1, y)
+//           .text(p.name || "N/A", col2, y)
+//           .text(p.department || "N/A", col3, y);
+//         y += 20;
+//       });
+//     } else {
+//       doc.text("No participants recorded.", col2, y);
+//       y += 20;
+//     }
+
+//     // ➕ TOTAL VOLUNTEERS
+//     doc.moveDown(1.5);
+//     doc
+//       .font("Helvetica-Bold")
+//       .text(`Total Volunteers: ${participants.length}`, { align: "right" });
+
+//     // 🏁 END PDF
+//     doc.end();
+
+//     stream.on("finish", () => {
+//       res.download(filePath, fileName, (err) => {
+//         if (err) console.error("File download error:", err);
+//         fs.unlink(filePath, () => {}); // cleanup
+//       });
+//     });
+//   } catch (err) {
+//     console.error("PDF Generation Error:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: err.message || "Internal Server Error during PDF generation",
+//     });
+//   }
+// };
+
 export const generateEventReport = async (req, res) => {
   try {
     const { eventId } = req.params;
 
-    // 🔐 Auth check
+    // AUTH CHECK
     const coordinator = await Coordinator.findById(req.user._id);
-    if (!coordinator) {
+    if (!coordinator)
       return res.status(403).json({ success: false, message: "Unauthorized" });
-    }
 
-    // 📦 Fetch event
+    // GET EVENT DATA
     const event = await Event.findById(eventId)
       .populate("assignedTeacher", "name")
       .populate("assignedCoordinators", "name")
-      .populate("participants", "name department");
+      .populate("participants", "name department status");
 
-    if (!event) {
+    if (!event)
       return res
         .status(404)
         .json({ success: false, message: "Event not found" });
-    }
 
-    // 🏫 Ensure event belongs to coordinator's institution
     if (String(event.institution) !== String(coordinator.institution)) {
       return res.status(403).json({
         success: false,
-        message: "Cannot generate report for an event outside your institution",
+        message: "Event does not belong to your institution",
       });
     }
 
-    // 🧩 Normalize data arrays
+    // NORMALIZE ARRAYS
     const assignedCoordinators = Array.isArray(event.assignedCoordinators)
       ? event.assignedCoordinators
       : event.assignedCoordinators
@@ -1221,166 +1432,251 @@ export const generateEventReport = async (req, res) => {
       ? [event.participants]
       : [];
 
-    // 🧠 Generate AI summary
-    let aiSummary = "";
-    try {
-      const input = `
-        Event Title: ${event.title}
-        Description: ${event.description || "No description provided."}
-        Location: ${event.location}
-        Duration: ${event.hours} hours
-        Coordinators: ${
-          assignedCoordinators.map((c) => c.name).join(", ") ||
-          "NSS Coordinators"
-        }
-        Teachers: ${
-          assignedTeachers.map((t) => t.name).join(", ") || "Teachers"
-        }
-        Participants: ${
-          participants.map((p) => p.name).join(", ") || "Volunteers"
-        }
-        Generate a short, professional summary for this NSS event.
-      `;
+    /* --------------------------------------------------------
+        ⭐ AI SUMMARY
+    ---------------------------------------------------------*/
+    let aiSummary = "Summary unavailable.";
 
-      const summaryRes = await hf.summarization({
-        model: "facebook/bart-large-cnn",
-        inputs: input,
-        parameters: { max_length: 200, min_length: 60 },
+    try {
+      const prompt = `
+You are generating an official NSS (National Service Scheme) event report.
+
+Event Title: ${event.title}
+Description: ${event.description || "No description provided"}
+Date: ${new Date(event.date).toDateString()}
+Location: ${event.location}
+Duration: ${event.hours} hours
+Coordinators: ${assignedCoordinators.map((c) => c.name).join(", ")}
+Teachers: ${assignedTeachers.map((t) => t.name).join(", ")}
+Participants Count: ${participants.length}
+
+Write a rich, detailed, professional 120–180 word summary highlighting objectives, activities, participation, outcomes, and impact.
+`;
+
+      const aiRes = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.5,
       });
 
-      aiSummary =
-        summaryRes?.summary_text ||
-        summaryRes?.[0]?.summary_text ||
-        "Summary could not be generated.";
-    } catch (aiErr) {
-      console.error("AI Summary Generation Error:", aiErr);
-      aiSummary = "AI summary unavailable due to inference issue.";
+      aiSummary = aiRes.choices[0]?.message?.content || aiSummary;
+
+      // Remove markdown bold (**like this**) to clean text
+      aiSummary = aiSummary.replace(/\*\*/g, "");
+    } catch (err) {
+      console.error("AI ERROR:", err);
     }
 
-    // 📁 Ensure folder exists
-    const uploadsDir = path.join("uploads");
+    /* --------------------------------------------------------
+        📄 PDF GENERATION (PREMIUM)
+    ---------------------------------------------------------*/
+    const uploadsDir = "uploads";
     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-    // 🧾 PDF setup
     const fileName = `event_report_${event._id}.pdf`;
     const filePath = path.join(uploadsDir, fileName);
 
-    const doc = new PDFDocument({ margin: 40 });
+    const doc = new PDFDocument({
+      margin: 50,
+      size: "A4",
+      bufferPages: true,
+      autoFirstPage: true,
+    });
+
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    // -----------------------------
-    // 🏷️ HEADER
-    // -----------------------------
-    doc.fontSize(20).text("Event Report", { align: "center", underline: true });
-    doc.moveDown(1.5);
+    /* --------------------------------------------------------
+       🌿 HEADER
+    ---------------------------------------------------------*/
+    doc.rect(0, 0, doc.page.width, 65).fill("#0E6B45");
+    doc
+      .fill("#ffffff")
+      .fontSize(22)
+      .font("Helvetica-Bold")
+      .text("NSS EVENT REPORT", 0, 22, { align: "center" });
 
-    // 📄 EVENT DETAILS
-    doc.fontSize(12).text("Event Details", { underline: true });
-    doc.moveDown(0.5);
-
-    const tableLeftX = 60;
-    const valueLeftX = 200;
-    const rowHeight = 20;
-    const drawRow = (label, value, yOffset) => {
-      doc.font("Helvetica-Bold").text(`${label}:`, tableLeftX, yOffset);
-      doc.font("Helvetica").text(value || "N/A", valueLeftX, yOffset);
-    };
-
-    let currentY = doc.y;
-    drawRow("Title", event.title, currentY);
-    drawRow(
-      "Date",
-      new Date(event.date).toLocaleDateString(),
-      currentY + rowHeight
-    );
-    drawRow("Location", event.location, currentY + 2 * rowHeight);
-    drawRow(
-      "Hours",
-      event.hours?.toString() || "N/A",
-      currentY + 3 * rowHeight
-    );
-    drawRow("Status", event.status || "Upcoming", currentY + 4 * rowHeight);
-
-    currentY += 5 * rowHeight + 10;
-    doc.moveDown();
-
-    // 👥 TEAM DETAILS
-    doc.fontSize(12).text("Team Details", { underline: true });
-    currentY = doc.y + 5;
-
-    const coordinators =
-      assignedCoordinators.map((c) => c.name).join(", ") || "N/A";
-    const teachers = assignedTeachers.map((t) => t.name).join(", ") || "N/A";
-
-    drawRow("Coordinators", coordinators, currentY);
-    drawRow("Teachers", teachers, currentY + rowHeight);
     doc.moveDown(2);
 
-    // 🧠 AI SUMMARY
-    doc.fontSize(12).text("AI Generated Summary", { underline: true });
-    doc.moveDown(0.5);
-    doc.font("Helvetica").text(aiSummary, { align: "justify" });
-    doc.moveDown(1.5);
+    /* --------------------------------------------------------
+       SECTION TITLE FUNCTION
+    ---------------------------------------------------------*/
+    const sectionTitle = (title) => {
+      doc.fillColor("#0E6B45").fontSize(15).font("Helvetica-Bold").text(title);
 
-    // 🧑‍🤝‍🧑 VOLUNTEERS TABLE
-    doc.fontSize(12).text("Volunteers", { underline: true });
-    doc.moveDown(0.5);
+      doc
+        .moveTo(50, doc.y + 3)
+        .lineTo(550, doc.y + 3)
+        .strokeColor("#0E6B45")
+        .stroke();
 
-    const startY = doc.y + 5;
-    const col1 = 60,
-      col2 = 100,
-      col3 = 300;
+      doc.moveDown(0.8);
+    };
+
+    const detailRow = (label, value) => {
+      doc
+        .font("Helvetica-Bold")
+        .fillColor("#222")
+        .fontSize(11)
+        .text(label, { continued: true });
+
+      doc
+        .font("Helvetica")
+        .fillColor("#444")
+        .text(` : ${value || "N/A"}`);
+
+      doc.moveDown(0.4);
+    };
+
+    /* --------------------------------------------------------
+       📌 EVENT DETAILS
+    ---------------------------------------------------------*/
+    sectionTitle("Event Details");
+
+    detailRow("Event Title", event.title);
+    detailRow("Date", new Date(event.date).toDateString());
+    detailRow("Location", event.location);
+    detailRow("Duration", `${event.hours} hours`);
+    detailRow("Status", event.status);
+
+    /* --------------------------------------------------------
+       TEAM INFORMATION
+    ---------------------------------------------------------*/
+    doc.moveDown(1.3);
+    sectionTitle("Team Information");
+
+    detailRow(
+      "Coordinators",
+      assignedCoordinators.map((c) => c.name).join(", ")
+    );
+
+    detailRow("Teachers", assignedTeachers.map((t) => t.name).join(", "));
+
+    /* --------------------------------------------------------
+       ⭐ AI SUMMARY BOX (AUTO HEIGHT)
+    ---------------------------------------------------------*/
+    doc.moveDown(1.3);
+    sectionTitle("AI Generated Event Summary");
+
+    const startY = doc.y;
+
+    const summaryWidth = 500;
+    const summaryX = 50;
 
     doc
-      .font("Helvetica-Bold")
-      .text("No.", col1, startY)
-      .text("Name", col2, startY)
-      .text("Department", col3, startY);
+      .roundedRect(summaryX, startY, summaryWidth, 0, 8)
+      .fillAndStroke("#EAF7EF", "#0E6B45");
+
     doc
-      .moveTo(60, startY + 15)
-      .lineTo(500, startY + 15)
+      .fillColor("#000")
+      .font("Helvetica")
+      .fontSize(11)
+      .text(aiSummary, summaryX + 12, startY + 10, {
+        width: summaryWidth - 24,
+        align: "justify",
+      });
+
+    const endY = doc.y + 10;
+
+    doc
+      .roundedRect(summaryX, startY, summaryWidth, endY - startY, 8)
+      .strokeColor("#0E6B45")
       .stroke();
 
-    doc.font("Helvetica");
-    let y = startY + 25;
+    /* --------------------------------------------------------
+      NEW PAGE CHECK
+    ---------------------------------------------------------*/
+    if (doc.y > 650) doc.addPage();
 
-    if (participants.length > 0) {
-      participants.forEach((p, i) => {
-        doc
-          .text(i + 1, col1, y)
-          .text(p.name || "N/A", col2, y)
-          .text(p.department || "N/A", col3, y);
-        y += 20;
-      });
-    } else {
-      doc.text("No participants recorded.", col2, y);
-      y += 20;
-    }
+    /* --------------------------------------------------------
+      VOLUNTEER TABLE
+    ---------------------------------------------------------*/
+    doc.moveDown(2);
+    sectionTitle("Volunteer Attendance");
 
-    // ➕ TOTAL VOLUNTEERS
-    doc.moveDown(1.5);
+    let tableY = doc.y;
+
+    // Table Header
+    doc.rect(45, tableY, 510, 25).fill("#DFF3E7");
+
+    doc
+      .fillColor("#000")
+      .font("Helvetica-Bold")
+      .fontSize(11)
+      .text("No.", 55, tableY + 7)
+      .text("Name", 110, tableY + 7)
+      .text("Department", 300, tableY + 7)
+      .text("Status", 470, tableY + 7);
+
+    let rowY = tableY + 25;
+
+    participants.forEach((p, i) => {
+      if (rowY > 760) {
+        doc.addPage();
+        rowY = 70;
+      }
+
+      doc.rect(45, rowY, 510, 22).strokeColor("#DDD").stroke();
+
+      doc
+        .font("Helvetica")
+        .fillColor("#000")
+        .fontSize(10)
+        .text(i + 1, 55, rowY + 6)
+        .text(p.name, 110, rowY + 6)
+        .text(p.department || "N/A", 300, rowY + 6);
+
+      const color = p.status === "present" ? "#0E8F37" : "#B41F1F";
+      doc.fillColor(color).text(p.status.toUpperCase(), 470, rowY + 6);
+
+      doc.fillColor("#000");
+      rowY += 22;
+    });
+
+    doc.moveDown(1);
     doc
       .font("Helvetica-Bold")
       .text(`Total Volunteers: ${participants.length}`, { align: "right" });
 
-    // 🏁 END PDF
+    /* --------------------------------------------------------
+       FOOTERS ON EVERY PAGE
+    ---------------------------------------------------------*/
+    doc.flushPages();
+    const totalPages = doc.bufferedPageRange().count;
+
+    for (let i = 0; i < totalPages; i++) {
+      doc.switchToPage(i);
+
+      doc
+        .fontSize(9)
+        .fillColor("#777")
+        .text(
+          `Page ${i + 1} of ${totalPages} | NSS Report Generated`,
+          50,
+          doc.page.height - 40,
+          { align: "center" }
+        );
+    }
+
+    /* --------------------------------------------------------
+      FINALIZE
+    ---------------------------------------------------------*/
     doc.end();
 
     stream.on("finish", () => {
-      res.download(filePath, fileName, (err) => {
-        if (err) console.error("File download error:", err);
-        fs.unlink(filePath, () => {}); // cleanup
+      res.download(filePath, fileName, () => {
+        fs.unlink(filePath, () => {});
       });
     });
   } catch (err) {
-    console.error("PDF Generation Error:", err);
+    console.error(err);
     res.status(500).json({
       success: false,
-      message: err.message || "Internal Server Error during PDF generation",
+      message: "Error generating report",
     });
   }
 };
+
 // update event status (simple version)
 export const updateEventStatus = async (req, res) => {
   try {

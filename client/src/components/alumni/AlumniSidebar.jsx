@@ -32,17 +32,12 @@ const AlumniSidebar = ({ setIsOpen }) => {
     {
       to: "/alumnilayout/testimonials",
       icon: <FaRegCommentDots />,
-      label: "Testaimonials",
+      label: "Testimonials",
     },
     {
       to: "/alumnilayout/donations",
       icon: <FaCalendarCheck />,
       label: "Donations",
-    },
-    {
-      to: "/alumnilayout/alumniprofile",
-      icon: <FaUserGraduate />,
-      label: "My Profile",
     },
     {
       to: "/alumnilayout/feedback",
@@ -53,6 +48,11 @@ const AlumniSidebar = ({ setIsOpen }) => {
       to: "/alumnilayout/mentorshipchatlayout",
       icon: <BiCommentDetail />,
       label: "Mentorship Chat",
+    },
+    {
+      to: "/alumnilayout/alumniprofile",
+      icon: <FaUserGraduate />,
+      label: "My Profile",
     },
   ];
 
