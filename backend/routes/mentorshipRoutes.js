@@ -9,6 +9,7 @@ import {
   addMenteeFeedback,
   updateMeetingLink,
   getAvailableMentors,
+  getAllMenteeFeedback,
 } from "../controllers/mentorshipController.js";
 import {
   alumniOnly,
@@ -23,10 +24,14 @@ mentorshipRouter.post("/request", protect, volunteerOnly, requestMentorship);
 mentorshipRouter.get("/student", protect, volunteerOnly, getStudentMentorships);
 mentorshipRouter.get("/mentors", protect, volunteerOnly, getAvailableMentors);
 
-
 // -------- MENTOR --------
 mentorshipRouter.get("/mentor", protect, alumniOnly, getMentorRequests);
-mentorshipRouter.put("/:mentorshipId/respond", protect, alumniOnly, respondToRequest);
+mentorshipRouter.put(
+  "/:mentorshipId/respond",
+  protect,
+  alumniOnly,
+  respondToRequest
+);
 mentorshipRouter.put("/:mentorshipId/start", protect, alumniOnly, startSession);
 mentorshipRouter.put("/:mentorshipId/end", protect, alumniOnly, endSession);
 mentorshipRouter.put(
@@ -42,6 +47,13 @@ mentorshipRouter.put(
   protect,
   volunteerOnly,
   addMenteeFeedback
+);
+
+mentorshipRouter.get(
+  "/mentee-feedback/all",
+  protect,
+  alumniOnly,
+  getAllMenteeFeedback
 );
 
 export default mentorshipRouter;

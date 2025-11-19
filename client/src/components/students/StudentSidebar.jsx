@@ -11,7 +11,9 @@ import {
 import { motion } from "framer-motion";
 import { BiComment } from "react-icons/bi";
 import { BsMegaphoneFill } from "react-icons/bs";
-import { MdRecentActors } from "react-icons/md";
+import { MdFeedback, MdRecentActors } from "react-icons/md";
+import { BsWechat } from "react-icons/bs";
+import { Menu } from "lucide-react";
 
 const StudentSidebar = ({ setIsOpen }) => {
   const navigate = useNavigate();
@@ -28,13 +30,42 @@ const StudentSidebar = ({ setIsOpen }) => {
 
   const navItems = [
     { to: "/studentlayout/dashboard", icon: <FaHome />, label: "Dashboard" },
-    { to: "/studentlayout/studentevents", icon: <FaCalendarCheck />, label: "My Events" },
-    { to: "/studentlayout/certificates", icon: <FaAward />, label: "Certificates" },
-    { to: "/studentlayout/studentattendance", icon: <IoMdCheckmarkCircle />, label: "View Attendance" },
-    { to: "/studentlayout/announcement", icon: <BsMegaphoneFill />, label: "Announcement" },
+    {
+      to: "/studentlayout/studentevents",
+      icon: <FaCalendarCheck />,
+      label: "My Events",
+    },
+    {
+      to: "/studentlayout/certificates",
+      icon: <FaAward />,
+      label: "Certificates",
+    },
+    {
+      to: "/studentlayout/studentattendance",
+      icon: <IoMdCheckmarkCircle />,
+      label: "View Attendance",
+    },
+    {
+      to: "/studentlayout/announcement",
+      icon: <BsMegaphoneFill />,
+      label: "Announcement",
+    },
     { to: "/studentlayout/chatstudent", icon: <BiComment />, label: "Chat" },
-    { to: "/studentlayout/mentorshiprequestbyvolunteer", icon: <MdRecentActors />, label: "Mentorship Request" },
-    { to: "/studentlayout/mymentors", icon: <MdRecentActors />, label: "My Mentorship" },
+    {
+      to: "/studentlayout/mentorshiprequestbyvolunteer",
+      icon: <MdRecentActors />,
+      label: "Mentorship Request",
+    },
+    {
+      to: "/studentlayout/mymentors",
+      icon: <MdFeedback />,
+      label: "My Mentorship",
+    },
+    {
+      to: "/studentlayout/mentorshipchatlayout",
+      icon: <BsWechat />,
+      label: "Mentorship Chat",
+    },
     { to: "/studentlayout/studentprofile", icon: <FaUser />, label: "Profile" },
   ];
 
@@ -62,9 +93,10 @@ const StudentSidebar = ({ setIsOpen }) => {
             onClick={handleClose}
             className={({ isActive }) =>
               `group flex items-center gap-3 p-2.5 rounded-lg text-sm transition-all
-              ${isActive
-                ? "bg-green-500/30 text-white shadow-inner border border-green-400"
-                : "hover:bg-green-700/40 text-gray-100"
+              ${
+                isActive
+                  ? "bg-green-500/30 text-white shadow-inner border border-green-400"
+                  : "hover:bg-green-700/40 text-gray-100"
               }`
             }
           >

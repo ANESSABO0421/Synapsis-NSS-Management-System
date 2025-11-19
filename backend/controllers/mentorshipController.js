@@ -230,3 +230,38 @@ export const getAvailableMentors = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+
+export const getAllMenteeFeedback = async (req, res) => {
+  try {
+    const mentorId = req.user.id; // logged-in alumni user
+
+    // Find all completed mentorships belonging to this mentor,
+    // where mentee feedback exists
+    const mentorships = await Mentorship.find({
+      mentor: mentorId,
+      status: "completed",
+      "menteeFeedback.rating": { $exists: true }
+    })
+      .populate("mentee", "name email")
+      .populate("mentor", "name email")
+      .sort({ updatedAt: -1 });
+
+    return res.json({
+      success: true,
+      count: mentorships.length,
+      feedbacks: mentorships.map((m) => ({
+        mentorshipId: m._id,
+        topic: m.topic,
+        description: m.description,
+        mentee: m.mentee,
+        feedback: m.menteeFeedback,
+        completedAt: m.endDate,
+      })),
+    });
+
+  } catch (err) {
+    console.error("Error fetching mentee feedback:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

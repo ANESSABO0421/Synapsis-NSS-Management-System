@@ -69,6 +69,8 @@ import MyMentorship from "./pages/student/MyMentorship";
 import StudentMentorshipChat from "./pages/student/StudentMentorshipChat";
 import AlumniMentorshipChat from "./pages/Alumni/AlumniMentorshipChat";
 import AlumniMentorshipLayout from "./pages/Alumni/AlumniMentorshipLayout";
+import StudentMentorshipLayout from "./pages/student/StudentMentorshipLayout";
+import AlumniFeedback from "./pages/Alumni/AlumniFeedback";
 
 const App = () => {
   return (
@@ -161,6 +163,15 @@ const App = () => {
               element={<MentorshipRequest />}
             />
             <Route path="mymentors" element={<MyMentorship />} />
+            <Route
+              path="/studentlayout/mentorshipchatlayout"
+              element={<StudentMentorshipLayout />}
+            >
+              <Route
+                path="chat/:mentorshipId"
+                element={<StudentMentorshipChat />}
+              />
+            </Route>
             <Route path="announcement" element={<StudentAnnouncement />} />
           </Route>
           <Route path="/alumnilayout" element={<AlumniLayout />}>
@@ -172,6 +183,10 @@ const App = () => {
             <Route
               path="/alumnilayout/alumniprofile"
               element={<AlumniProfile />}
+            />
+            <Route
+              path="/alumnilayout/feedback"
+              element={<AlumniFeedback />}
             />
             <Route
               path="/alumnilayout/testimonials"

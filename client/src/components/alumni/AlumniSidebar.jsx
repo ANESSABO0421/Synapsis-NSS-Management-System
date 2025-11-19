@@ -10,9 +10,10 @@ import {
   FaCalendarCheck,
   FaHome,
 } from "react-icons/fa";
-import { BiComment } from "react-icons/bi";
+import { BiComment, BiCommentDetail } from "react-icons/bi";
 
 import ChatSelectModal from "./ChatSelectModal";
+import { MdFeedback } from "react-icons/md";
 
 const AlumniSidebar = ({ setIsOpen }) => {
   const [showChatModal, setShowChatModal] = useState(false);
@@ -44,8 +45,13 @@ const AlumniSidebar = ({ setIsOpen }) => {
       label: "My Profile",
     },
     {
+      to: "/alumnilayout/feedback",
+      icon: <MdFeedback />,
+      label: "Feedback",
+    },
+    {
       to: "/alumnilayout/mentorshipchatlayout",
-      icon: <FaUserGraduate />,
+      icon: <BiCommentDetail />,
       label: "Mentorship Chat",
     },
   ];

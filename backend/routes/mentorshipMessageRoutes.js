@@ -50,5 +50,6 @@ mentorshipMessage.post(
 );
 
 mentorshipMessage.get("/allalumni",protect,alumniOnly,getAllMentorships)
+mentorshipMessage.get("/allstudent",protect,volunteerOnly,getAllMentorships)
 
 export default mentorshipMessage;
