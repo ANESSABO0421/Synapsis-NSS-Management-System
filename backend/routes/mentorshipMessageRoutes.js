@@ -1,36 +1,54 @@
 import express from "express";
 import {
-  alumniOnly,
   protect,
   volunteerOnly,
+  alumniOnly,
 } from "../middleware/authMiddleware.js";
+
 import {
-  getMessages,
-  sendMessage,
+  getStudentMessages,
+  sendStudentMessage,
+  getAlumniMessages,
+  sendAlumniMessage,
+  getAllMentorships,
 } from "../controllers/mentorshipMessageController.js";
 
 const mentorshipMessage = express.Router();
 
-// GET all messages for a mentorship
-mentorshipMessage.get("/:mentorshipId", protect, getMessages);
+/* =====================================================
+   STUDENT / VOLUNTEER CHAT (PRIVATE)
+===================================================== */
+mentorshipMessage.get(
+  "/studentchat/:mentorshipId",
+  protect,
+  volunteerOnly,
+  getStudentMessages
+);
 
-
-
-mentorshipMessage.get("/studentchat/:mentorshipId", protect, volunteerOnly, getMessages);
-mentorshipMessage.get("/alumnichat/:mentorshipId", protect, alumniOnly, getMessages);
-
-// SEND new message
 mentorshipMessage.post(
   "/studentchat/:mentorshipId",
   protect,
   volunteerOnly,
-  sendMessage
+  sendStudentMessage
 );
+
+/* =====================================================
+   ALUMNI CHAT (PRIVATE)
+===================================================== */
+mentorshipMessage.get(
+  "/alumnichat/:mentorshipId",
+  protect,
+  alumniOnly,
+  getAlumniMessages
+);
+
 mentorshipMessage.post(
   "/alumnichat/:mentorshipId",
   protect,
   alumniOnly,
-  sendMessage
+  sendAlumniMessage
 );
+
+mentorshipMessage.get("/allalumni",protect,alumniOnly,getAllMentorships)
 
 export default mentorshipMessage;

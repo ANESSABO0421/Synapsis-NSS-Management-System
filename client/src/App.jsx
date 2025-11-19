@@ -68,6 +68,7 @@ import MentorshipAlumni from "./pages/Alumni/ManageMentorshipAlumni";
 import MyMentorship from "./pages/student/MyMentorship";
 import StudentMentorshipChat from "./pages/student/StudentMentorshipChat";
 import AlumniMentorshipChat from "./pages/Alumni/AlumniMentorshipChat";
+import AlumniMentorshipLayout from "./pages/Alumni/AlumniMentorshipLayout";
 
 const App = () => {
   return (
@@ -155,19 +156,45 @@ const App = () => {
             <Route path="certificates" element={<StudentCertificate />} />
             <Route path="chatstudent" element={<StudentChatPage />} />
             <Route path="studentattendance" element={<StudentAttendance />} />
-            <Route path="mentorshiprequestbyvolunteer" element={<MentorshipRequest />} />
+            <Route
+              path="mentorshiprequestbyvolunteer"
+              element={<MentorshipRequest />}
+            />
             <Route path="mymentors" element={<MyMentorship />} />
             <Route path="announcement" element={<StudentAnnouncement />} />
           </Route>
           <Route path="/alumnilayout" element={<AlumniLayout />}>
             <Route index element={<AlumniDashboard />} />
-            <Route path="/alumnilayout/dashboard" element={<AlumniDashboard />} />
-            <Route path="/alumnilayout/alumniprofile" element={<AlumniProfile />} />
-            <Route path="/alumnilayout/testimonials" element={<AlumniTestimonials />} />
+            <Route
+              path="/alumnilayout/dashboard"
+              element={<AlumniDashboard />}
+            />
+            <Route
+              path="/alumnilayout/alumniprofile"
+              element={<AlumniProfile />}
+            />
+            <Route
+              path="/alumnilayout/testimonials"
+              element={<AlumniTestimonials />}
+            />
             <Route path="/alumnilayout/donations" element={<Donation />} />
-            <Route path="/alumnilayout/managementorship" element={<MentorshipAlumni />} />
-            <Route path="/alumnilayout/mentorshipchat" element={<AlumniMentorshipChat />} />
-            <Route path="/alumnilayout/success-donation" element={<SuccessDonation />} />
+            <Route
+              path="/alumnilayout/managementorship"
+              element={<MentorshipAlumni />}
+            />
+            <Route
+              path="/alumnilayout/mentorshipchatlayout"
+              element={<AlumniMentorshipLayout />}
+            >
+              <Route
+                path="mentorshipchat/:mentorshipId"
+                element={<AlumniMentorshipChat />}
+              />
+            </Route>
+            <Route
+              path="/alumnilayout/success-donation"
+              element={<SuccessDonation />}
+            />
           </Route>
         </Routes>
       </SocketProvider>
