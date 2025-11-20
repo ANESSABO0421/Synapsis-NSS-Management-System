@@ -22,6 +22,7 @@ import {
   studentLogin,
   studentSignUp,
   studentUpdate,
+  uploadEventImages,
   verifyOtp,
 } from "../controllers/studentController.js";
 import {
@@ -126,6 +127,14 @@ studentRouter.get(
   protect,
   volunteerOnly,
   getStudentAttendanceForEvent
+);
+
+studentRouter.post(
+  "/:id/uploadimagesbystudent",
+  upload.array("images", 10),
+  protect,
+  volunteerOnly,
+  uploadEventImages
 );
 
 export default studentRouter;

@@ -1413,3 +1413,79 @@ export const getStudentAttendanceForEvent = async (req, res) => {
     });
   }
 };
+
+
+// upload images
+export const uploadEventImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { captions } = req.body; // optional captions array (can be stringified)
+
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No images uploaded",
+      });
+    }
+
+    const uploadedImages = [];
+
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+      try {
+        // ✅ Upload to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(file.path, {
+          folder: "event_images",
+        });
+
+        // ✅ Push uploaded info
+        uploadedImages.push({
+          url: uploadResult.secure_url,
+          public_id: uploadResult.public_id,
+          caption:
+            Array.isArray(captions) && captions[i]
+              ? captions[i]
+              : typeof captions === "string"
+              ? captions
+              : "",
+          uploadAt: new Date(),
+        });
+      } catch (uploadErr) {
+        console.error("Cloudinary upload failed:", uploadErr.message);
+      } finally {
+        // ✅ Safely delete local temp file if it exists
+        try {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        } catch (unlinkErr) {
+          console.warn("Local file cleanup skipped:", unlinkErr.message);
+        }
+      }
+    }
+
+    // ✅ Append to existing images (instead of replacing)
+    event.images = [...(event.images || []), ...uploadedImages];
+    await event.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Images uploaded successfully",
+      images: uploadedImages,
+    });
+  } catch (error) {
+    console.error("❌ Error uploading event images:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    });
+  }
+};

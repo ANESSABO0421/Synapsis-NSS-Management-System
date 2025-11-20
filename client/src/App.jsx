@@ -71,6 +71,7 @@ import AlumniMentorshipChat from "./pages/Alumni/AlumniMentorshipChat";
 import AlumniMentorshipLayout from "./pages/Alumni/AlumniMentorshipLayout";
 import StudentMentorshipLayout from "./pages/student/StudentMentorshipLayout";
 import AlumniFeedback from "./pages/Alumni/AlumniFeedback";
+import AddMemory from "./pages/student/AddMemory";
 
 const App = () => {
   return (
@@ -158,6 +159,7 @@ const App = () => {
             <Route path="certificates" element={<StudentCertificate />} />
             <Route path="chatstudent" element={<StudentChatPage />} />
             <Route path="studentattendance" element={<StudentAttendance />} />
+            <Route path="studentupload" element={<AddMemory />} />
             <Route
               path="mentorshiprequestbyvolunteer"
               element={<MentorshipRequest />}

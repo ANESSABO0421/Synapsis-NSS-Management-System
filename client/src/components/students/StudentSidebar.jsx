@@ -13,7 +13,7 @@ import { BiComment } from "react-icons/bi";
 import { BsMegaphoneFill } from "react-icons/bs";
 import { MdFeedback, MdRecentActors } from "react-icons/md";
 import { BsWechat } from "react-icons/bs";
-import { Menu } from "lucide-react";
+import { Camera, Menu } from "lucide-react";
 
 const StudentSidebar = ({ setIsOpen }) => {
   const navigate = useNavigate();
@@ -65,6 +65,11 @@ const StudentSidebar = ({ setIsOpen }) => {
       to: "/studentlayout/mentorshipchatlayout",
       icon: <BsWechat />,
       label: "Mentorship Chat",
+    },
+    {
+      to: "/studentlayout/studentupload",
+      icon: <Camera />,
+      label: "Add memory",
     },
     { to: "/studentlayout/studentprofile", icon: <FaUser />, label: "Profile" },
   ];
