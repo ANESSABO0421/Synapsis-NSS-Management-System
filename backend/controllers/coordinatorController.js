@@ -1460,15 +1460,13 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
       });
 
       aiSummary = aiRes.choices[0]?.message?.content || aiSummary;
-
-      // Remove markdown bold (**like this**) to clean text
       aiSummary = aiSummary.replace(/\*\*/g, "");
     } catch (err) {
       console.error("AI ERROR:", err);
     }
 
     /* --------------------------------------------------------
-        📄 PDF GENERATION (PREMIUM)
+        📄 PDF GENERATION
     ---------------------------------------------------------*/
     const uploadsDir = "uploads";
     if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
@@ -1486,28 +1484,37 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
+    // SHIFT AMOUNT
+    const SHIFT_X = 50;
+
     /* --------------------------------------------------------
        🌿 HEADER
     ---------------------------------------------------------*/
-    doc.rect(0, 0, doc.page.width, 65).fill("#0E6B45");
+    doc.rect(0, 0, doc.page.width, 65).fill("#00A63E");
     doc
       .fill("#ffffff")
       .fontSize(22)
       .font("Helvetica-Bold")
-      .text("NSS EVENT REPORT", 0, 22, { align: "center" });
-
+      .text("NSS EVENT REPORT", 0, 20, {
+        align: "center",
+        width: doc.page.width,
+      });
     doc.moveDown(2);
 
     /* --------------------------------------------------------
        SECTION TITLE FUNCTION
     ---------------------------------------------------------*/
     const sectionTitle = (title) => {
-      doc.fillColor("#0E6B45").fontSize(15).font("Helvetica-Bold").text(title);
+      doc
+        .fillColor("#00A63E")
+        .fontSize(15)
+        .font("Helvetica-Bold")
+        .text(title, SHIFT_X);
 
       doc
-        .moveTo(50, doc.y + 3)
+        .moveTo(SHIFT_X, doc.y + 3)
         .lineTo(550, doc.y + 3)
-        .strokeColor("#0E6B45")
+        .strokeColor("#00A63E")
         .stroke();
 
       doc.moveDown(0.8);
@@ -1518,7 +1525,7 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
         .font("Helvetica-Bold")
         .fillColor("#222")
         .fontSize(11)
-        .text(label, { continued: true });
+        .text(label, SHIFT_X, doc.y, { continued: true });
 
       doc
         .font("Helvetica")
@@ -1529,7 +1536,7 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
     };
 
     /* --------------------------------------------------------
-       📌 EVENT DETAILS
+       📌 EVENT DETAILS (SHIFTED RIGHT)
     ---------------------------------------------------------*/
     sectionTitle("Event Details");
 
@@ -1540,7 +1547,7 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
     detailRow("Status", event.status);
 
     /* --------------------------------------------------------
-       TEAM INFORMATION
+       TEAM INFORMATION (SHIFTED RIGHT)
     ---------------------------------------------------------*/
     doc.moveDown(1.3);
     sectionTitle("Team Information");
@@ -1553,15 +1560,14 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
     detailRow("Teachers", assignedTeachers.map((t) => t.name).join(", "));
 
     /* --------------------------------------------------------
-       ⭐ AI SUMMARY BOX (AUTO HEIGHT)
+       ⭐ AI SUMMARY BOX (SHIFTED RIGHT)
     ---------------------------------------------------------*/
     doc.moveDown(1.3);
     sectionTitle("AI Generated Event Summary");
 
     const startY = doc.y;
-
-    const summaryWidth = 500;
-    const summaryX = 50;
+    const summaryWidth = 500 - SHIFT_X;
+    const summaryX = SHIFT_X;
 
     doc
       .roundedRect(summaryX, startY, summaryWidth, 0, 8)
@@ -1583,20 +1589,20 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
       .strokeColor("#0E6B45")
       .stroke();
 
-    /* --------------------------------------------------------
-      NEW PAGE CHECK
-    ---------------------------------------------------------*/
     if (doc.y > 650) doc.addPage();
 
     /* --------------------------------------------------------
-      VOLUNTEER TABLE
+      VOLUNTEER TABLE (LEFT ALIGN — NOT SHIFTED)
     ---------------------------------------------------------*/
     doc.moveDown(2);
-    sectionTitle("Volunteer Attendance");
+    doc
+      .fillColor("#0E6B45")
+      .fontSize(15)
+      .font("Helvetica-Bold")
+      .text("Volunteer Attendance");
 
     let tableY = doc.y;
 
-    // Table Header
     doc.rect(45, tableY, 510, 25).fill("#DFF3E7");
 
     doc
@@ -1639,14 +1645,13 @@ Write a rich, detailed, professional 120–180 word summary highlighting objecti
       .text(`Total Volunteers: ${participants.length}`, { align: "right" });
 
     /* --------------------------------------------------------
-       FOOTERS ON EVERY PAGE
+       FOOTER
     ---------------------------------------------------------*/
     doc.flushPages();
     const totalPages = doc.bufferedPageRange().count;
 
     for (let i = 0; i < totalPages; i++) {
       doc.switchToPage(i);
-
       doc
         .fontSize(9)
         .fillColor("#777")
