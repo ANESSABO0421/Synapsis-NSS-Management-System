@@ -265,7 +265,7 @@ export const deleteEventImage = async (req, res) => {
 // get all event images (show case on the main website)
 export const getAllEventImages = async (req, res) => {
   try {
-    const events = await Event.find().select("title images");
+    const events = await Event.find().select("title date images");
     if (!events || events.length === 0) {
       return res
         .status(404)
@@ -276,6 +276,7 @@ export const getAllEventImages = async (req, res) => {
       event.images.map((img) => ({
         ...img.toObject(),
         eventTitle: event.title,
+        eventDate: event.date,
         eventId: event._id,
       }))
     );

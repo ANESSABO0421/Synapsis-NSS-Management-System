@@ -2,16 +2,20 @@ import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
   const cardsRef = useRef([]);
+  const navigate = useNavigate();
 
   const getImages = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/events/getalleventimage");
+      const res = await axios.get(
+        "http://localhost:3000/api/events/getalleventimage"
+      );
       if (res.data.success) {
         // Limit to 4 images only
         setImages(res.data.images.slice(0, 4));
@@ -70,11 +74,9 @@ const Gallery = () => {
   return (
     <section
       id="gallery"
-      className="relative py-20 px-6 md:px-12 bg-gradient-to-br from-green-50 via-white to-cyan-50 overflow-hidden"
+      className="relative py-20 px-6 md:px-12 bg-white overflow-hidden"
     >
       {/* Background glow accents */}
-      <div className="absolute -top-20 -left-20 w-72 h-72 bg-green-300/20 rounded-full blur-[120px]"></div>
-      <div className="absolute bottom-[-6rem] right-[-6rem] w-[25rem] h-[25rem] bg-cyan-300/30 rounded-full blur-[150px]"></div>
 
       {/* Header */}
       <div className="relative z-10 max-w-5xl mx-auto text-center mb-16">
@@ -85,7 +87,8 @@ const Gallery = () => {
           </span>
         </h2>
         <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          Capturing moments of unity, compassion, and social impact through the NSS journey.
+          Capturing moments of unity, compassion, and social impact through the
+          NSS journey.
         </p>
       </div>
 
@@ -131,6 +134,11 @@ const Gallery = () => {
             </div>
           ))
         )}
+      </div>
+      <div className="flex items-center justify-center">
+        <button className="p-5 bg-[#008236] mt-[50px] rounded-2xl text-white hover:bg-green-600 transition-all ease-out duration-300 hover:-translate-y-2 shadow-2xl" onClick={()=>navigate("/eventalbum")}>
+          View All Images
+        </button>
       </div>
     </section>
   );

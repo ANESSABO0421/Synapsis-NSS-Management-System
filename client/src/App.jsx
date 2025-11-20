@@ -72,6 +72,7 @@ import AlumniMentorshipLayout from "./pages/Alumni/AlumniMentorshipLayout";
 import StudentMentorshipLayout from "./pages/student/StudentMentorshipLayout";
 import AlumniFeedback from "./pages/Alumni/AlumniFeedback";
 import AddMemory from "./pages/student/AddMemory";
+import EventAlbum from "./pages/EventAlbum";
 
 const App = () => {
   return (
@@ -80,6 +81,7 @@ const App = () => {
         <ToastContainer position="top-center" autoClose={3000} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/eventalbum" element={<EventAlbum />} />
           <Route path="/auth/success" element={<OAuthSuccess />} />
           <Route path="/verifyotp" element={<VerifyOTP />} />
           {/* <Route path="/testmessage" element={<SocketTest />} /> */}

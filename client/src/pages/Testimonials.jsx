@@ -106,11 +106,11 @@ const Testimonials = () => {
     <section
       ref={sectionRef}
       id="testimonials"
-      className="relative min-h-screen flex flex-col items-center justify-center py-24 px-8 bg-gradient-to-br from-green-50 via-white to-cyan-50 overflow-hidden"
+      className="relative min-h-screen flex flex-col items-center justify-center py-24 px-8 bg-white overflow-hidden"
     >
       {/* Glowing Background Orbs */}
-      <div className="absolute top-[-8rem] left-[-8rem] w-[22rem] h-[22rem] bg-green-300/30 rounded-full blur-[120px]"></div>
-      <div className="absolute bottom-[-8rem] right-[-8rem] w-[24rem] h-[24rem] bg-teal-300/25 rounded-full blur-[130px]"></div>
+      {/* <div className="absolute top-[-8rem] left-[-8rem] w-[22rem] h-[22rem] bg-green-300/30 rounded-full blur-[120px]"></div>
+      <div className="absolute bottom-[-8rem] right-[-8rem] w-[24rem] h-[24rem] bg-teal-300/25 rounded-full blur-[130px]"></div> */}
 
       {/* Header */}
       <div ref={titleRef} className="text-center mb-20 relative z-10">
