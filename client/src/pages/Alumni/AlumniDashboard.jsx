@@ -109,7 +109,7 @@ const AlumniDashboard = () => {
         </div>
 
         {/* Testimonials Count */}
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-xl flex items-center gap-4 hover:scale-[1.02] transition">
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-green-600 to-green-500 text-white shadow-xl flex items-center gap-4 hover:scale-[1.02] transition">
           <FaComments className="text-4xl opacity-90" />
           <div>
             <p className="text-3xl sm:text-4xl font-bold">{dashboard.testimonials.length}</p>
@@ -195,7 +195,7 @@ const AlumniDashboard = () => {
           🟦 TESTIMONIALS SECTION
       ======================================================== */}
       <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6 border border-green-100">
-        <h3 className="text-xl sm:text-2xl font-bold text-blue-700 flex items-center gap-2 mb-4">
+        <h3 className="text-xl sm:text-2xl font-bold text-green-700 flex items-center gap-2 mb-4">
           💬 Testimonials
         </h3>
 
@@ -206,7 +206,7 @@ const AlumniDashboard = () => {
             {dashboard.testimonials.map((t) => (
               <div
                 key={t._id}
-                className="p-4 sm:p-5 bg-blue-50 border border-blue-100 rounded-xl shadow hover:shadow-lg transition"
+                className="p-4 sm:p-5 bg-green-50 border border-green-100 rounded-xl shadow hover:shadow-lg transition"
               >
                 <p className="text-gray-800 font-medium mb-2 break-words">
                   “{t.message}”
@@ -214,7 +214,7 @@ const AlumniDashboard = () => {
 
                 <p className="text-xs text-gray-500 mb-1">
                   Visibility:{" "}
-                  <span className="font-semibold text-blue-600">
+                  <span className="font-semibold text-green-600">
                     {t.visibility}
                   </span>
                 </p>
