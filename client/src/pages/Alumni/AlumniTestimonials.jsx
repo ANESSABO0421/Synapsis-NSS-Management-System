@@ -36,14 +36,14 @@ const AlumniTestimonials = () => {
   };
 
   return (
-    <div className="p-6 sm:p-10">
-      <div className="max-w-3xl mx-auto bg-white shadow-xl rounded-3xl p-10 border border-gray-100">
+    <div className="p-4 sm:p-6 lg:p-10 min-h-screen bg-gray-50 flex justify-center">
+      <div className="w-full max-w-3xl bg-white shadow-xl rounded-3xl p-6 sm:p-10 border border-gray-100">
 
         {/* Title */}
-        <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
           Share Your Experience ✨
         </h2>
-        <p className="text-center text-gray-600 mb-8 text-sm">
+        <p className="text-center text-gray-600 mb-8 text-sm sm:text-base px-2">
           Your testimonial helps inspire future students and alumni.
         </p>
 
@@ -57,7 +57,7 @@ const AlumniTestimonials = () => {
             <textarea
               className="
                 w-full
-                h-40
+                h-32 sm:h-40
                 p-4
                 rounded-xl
                 bg-gray-50
@@ -68,6 +68,7 @@ const AlumniTestimonials = () => {
                 transition
                 text-gray-800
                 shadow-sm
+                text-sm sm:text-base
               "
               placeholder="Write about your experience, achievements or journey..."
               value={message}
@@ -75,7 +76,7 @@ const AlumniTestimonials = () => {
               maxLength={400}
             ></textarea>
 
-            <div className="text-right text-sm text-gray-500 mt-1">
+            <div className="text-right text-xs sm:text-sm text-gray-500 mt-1">
               {message.length}/400 characters
             </div>
           </div>
@@ -89,8 +90,8 @@ const AlumniTestimonials = () => {
               transition-transform transform hover:scale-[1.01]
               ${
                 loading
-                  ? "bg-blue-300"
-                  : "bg-gradient-to-r from-green-600 to-green-600 hover:opacity-90"
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-gradient-to-r from-green-600 to-green-500 hover:opacity-90"
               }
             `}
           >
@@ -98,8 +99,6 @@ const AlumniTestimonials = () => {
           </button>
         </form>
 
-        {/* Footer */}
-        
       </div>
     </div>
   );

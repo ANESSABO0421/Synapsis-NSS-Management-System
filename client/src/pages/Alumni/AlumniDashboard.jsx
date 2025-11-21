@@ -59,20 +59,20 @@ const AlumniDashboard = () => {
   const latestFeedback = feedbacks[feedbacks.length - 1];
 
   return (
-    <div className="space-y-10 p-6 bg-gradient-to-b from-green-50 to-white min-h-screen">
+    <div className="space-y-10 p-4 sm:p-6 bg-gradient-to-b from-green-50 to-white min-h-screen">
 
       {/* =======================================================
           PROFILE HEADER
       ======================================================== */}
-      <div className="bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl p-6 flex items-center gap-6 border border-green-100">
+      <div className="bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-6 border border-green-100">
         <img
           src={dashboard.profileImage?.url || "/default-user.png"}
-          className="w-28 h-28 rounded-full object-cover shadow-lg ring-4 ring-green-500/50"
+          className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-lg ring-4 ring-green-500/50 mx-auto sm:mx-0"
         />
 
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800">{dashboard.name}</h2>
-          <p className="text-gray-600">{dashboard.email}</p>
+        <div className="text-center sm:text-left">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">{dashboard.name}</h2>
+          <p className="text-gray-600 break-all">{dashboard.email}</p>
           <p className="text-gray-700">
             {dashboard.department} • {dashboard.graduationYear}
           </p>
@@ -88,13 +88,13 @@ const AlumniDashboard = () => {
       {/* =======================================================
           STATS GRID
       ======================================================== */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
         {/* Mentorship Count */}
         <div className="p-6 rounded-2xl bg-gradient-to-r from-green-600 to-green-500 text-white shadow-xl flex items-center gap-4 hover:scale-[1.02] transition">
           <FaUserGraduate className="text-4xl opacity-90" />
           <div>
-            <p className="text-4xl font-bold">{dashboard.mentorships.length}</p>
+            <p className="text-3xl sm:text-4xl font-bold">{dashboard.mentorships.length}</p>
             <p className="opacity-90">Total Mentorships</p>
           </div>
         </div>
@@ -103,7 +103,7 @@ const AlumniDashboard = () => {
         <div className="p-6 rounded-2xl bg-gradient-to-r from-yellow-400 to-yellow-500 text-white shadow-xl flex items-center gap-4 hover:scale-[1.02] transition">
           <FaComments className="text-4xl opacity-90" />
           <div>
-            <p className="text-4xl font-bold">{feedbacks.length}</p>
+            <p className="text-3xl sm:text-4xl font-bold">{feedbacks.length}</p>
             <p className="opacity-90">Feedback Received</p>
           </div>
         </div>
@@ -112,7 +112,7 @@ const AlumniDashboard = () => {
         <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-xl flex items-center gap-4 hover:scale-[1.02] transition">
           <FaComments className="text-4xl opacity-90" />
           <div>
-            <p className="text-4xl font-bold">{dashboard.testimonials.length}</p>
+            <p className="text-3xl sm:text-4xl font-bold">{dashboard.testimonials.length}</p>
             <p className="opacity-90">Testimonials</p>
           </div>
         </div>
@@ -121,23 +121,27 @@ const AlumniDashboard = () => {
       {/* =======================================================
           ⭐ LATEST FEEDBACK
       ======================================================== */}
-      <div className="bg-white shadow-xl rounded-2xl p-6 border border-green-100">
+      <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6 border border-green-100">
 
-        <h3 className="text-2xl font-bold text-green-800 flex items-center gap-2 mb-5">
+        <h3 className="text-xl sm:text-2xl font-bold text-green-800 flex items-center gap-2 mb-4">
           ⭐ Latest Student Feedback
         </h3>
 
         {!latestFeedback ? (
           <p className="text-gray-500 italic">No feedback received yet.</p>
         ) : (
-          <div className="p-6 rounded-xl border bg-gray-50 shadow-inner">
+          <div className="p-4 sm:p-6 rounded-xl border bg-gray-50 shadow-inner">
+
             <div className="flex items-center gap-4 mb-3">
               <div className="p-3 bg-green-100 rounded-full">
                 <FaUserGraduate className="text-green-700 text-xl" />
               </div>
+
               <div>
                 <p className="font-semibold text-green-700">{latestFeedback.mentee?.name}</p>
-                <p className="text-gray-500 text-sm">{latestFeedback.mentee?.email}</p>
+                <p className="text-gray-500 text-sm break-all">
+                  {latestFeedback.mentee?.email}
+                </p>
               </div>
             </div>
 
@@ -160,8 +164,8 @@ const AlumniDashboard = () => {
       {/* =======================================================
           MENTORSHIP LIST
       ======================================================== */}
-      <div className="bg-white shadow-xl rounded-2xl p-6 border border-green-100">
-        <h3 className="text-2xl font-bold text-green-800 flex items-center gap-2 mb-4">
+      <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6 border border-green-100">
+        <h3 className="text-xl sm:text-2xl font-bold text-green-800 flex items-center gap-2 mb-4">
           📘 Mentorship Sessions
         </h3>
 
@@ -174,7 +178,9 @@ const AlumniDashboard = () => {
                 key={m._id}
                 className="p-4 bg-gray-50 rounded-xl border hover:bg-gray-100 transition"
               >
-                <p className="font-semibold text-gray-800">Topic: {m.topic}</p>
+                <p className="font-semibold text-gray-800 break-words">
+                  Topic: {m.topic}
+                </p>
                 <p className="text-gray-600 text-sm">Status: {m.status}</p>
                 <p className="text-gray-500 text-xs">
                   Requested: {new Date(m.requestDate).toLocaleDateString()}
@@ -188,21 +194,21 @@ const AlumniDashboard = () => {
       {/* =======================================================
           🟦 TESTIMONIALS SECTION
       ======================================================== */}
-      <div className="bg-white shadow-xl rounded-2xl p-6 border border-green-100">
-        <h3 className="text-2xl font-bold text-blue-700 flex items-center gap-2 mb-5">
+      <div className="bg-white shadow-xl rounded-2xl p-4 sm:p-6 border border-green-100">
+        <h3 className="text-xl sm:text-2xl font-bold text-blue-700 flex items-center gap-2 mb-4">
           💬 Testimonials
         </h3>
 
         {dashboard.testimonials.length === 0 ? (
           <p className="text-gray-500">No testimonials yet.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {dashboard.testimonials.map((t) => (
               <div
                 key={t._id}
-                className="p-5 bg-blue-50 border border-blue-100 rounded-xl shadow hover:shadow-lg transition"
+                className="p-4 sm:p-5 bg-blue-50 border border-blue-100 rounded-xl shadow hover:shadow-lg transition"
               >
-                <p className="text-gray-800 font-medium mb-2">
+                <p className="text-gray-800 font-medium mb-2 break-words">
                   “{t.message}”
                 </p>
 

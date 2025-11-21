@@ -18,7 +18,7 @@ import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 /* ===========================================
-    PAYMENT MODAL (REAL STRIPE FEEL)
+    PAYMENT MODAL (Responsive)
 =========================================== */
 const PaymentModal = ({ event, onClose }) => {
   const stripe = useStripe();
@@ -86,12 +86,12 @@ const PaymentModal = ({ event, onClose }) => {
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-black/40 flex justify-center items-center z-[999]"
+        className="fixed inset-0 bg-black/40 flex justify-center items-center p-4 sm:p-6 z-[999]"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white w-[95%] max-w-md rounded-xl p-8 shadow-xl relative border border-gray-200"
+          className="bg-white w-full max-w-md rounded-xl p-6 sm:p-8 shadow-xl relative border border-gray-200"
         >
           {/* CLOSE */}
           <button
@@ -101,7 +101,7 @@ const PaymentModal = ({ event, onClose }) => {
             ×
           </button>
 
-          {/* STRIPE LOGO */}
+          {/* Stripe Branding */}
           <div className="flex justify-center mb-4">
             <img
               src="https://cdn.worldvectorlogo.com/logos/stripe-4.svg"
@@ -110,7 +110,7 @@ const PaymentModal = ({ event, onClose }) => {
             />
           </div>
 
-          <h2 className="text-xl font-bold text-gray-800 text-center mb-3">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-2">
             Secure Donation
           </h2>
 
@@ -144,7 +144,7 @@ const PaymentModal = ({ event, onClose }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Card Details
           </label>
-          <div className="border border-gray-300 rounded-md p-3 mb-5 shadow-sm">
+          <div className="border border-gray-300 rounded-md p-3 mb-5 shadow-sm bg-white">
             <CardElement />
           </div>
 
@@ -157,7 +157,6 @@ const PaymentModal = ({ event, onClose }) => {
             {processing ? "Processing..." : `Pay ₹${amount || ""}`}
           </button>
 
-          {/* STRIPE SECURE FOOTER */}
           <p className="text-center mt-4 text-gray-500 text-xs">
             🔒 Payments securely processed by Stripe
           </p>
@@ -168,7 +167,7 @@ const PaymentModal = ({ event, onClose }) => {
 };
 
 /* ===========================================
-   MAIN DONATION PAGE (WHITE + GREEN CARDS)
+    MAIN DONATION PAGE (Responsive)
 =========================================== */
 const Donation = () => {
   const [events, setEvents] = useState([]);
@@ -195,51 +194,51 @@ const Donation = () => {
     fetchEvents();
   }, []);
 
-  if (loading) return <p className="p-6">Loading events...</p>;
+  if (loading) return <p className="p-6 text-center">Loading events...</p>;
 
   return (
     <Elements stripe={stripePromise}>
-      {/* CLEAN WHITE PAGE */}
-      <div className="min-h-screen bg-white p-10">
-
+      <div className="min-h-screen bg-white p-4 sm:p-6 lg:p-10">
         <div className="max-w-6xl mx-auto">
 
           {/* HEADER */}
-          <div className="flex justify-between items-center mb-10">
-            <h2 className="text-3xl font-bold text-green-800">
-               Support Your Institution’s Events
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-green-800">
+              Support Your Institution’s Events
             </h2>
 
             <button
               onClick={fetchEvents}
-              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 w-full sm:w-auto"
             >
               <FiRefreshCcw /> Refresh
             </button>
           </div>
 
-          {/* EVENT CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* EVENT GRID */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((e) => (
               <motion.div
                 key={e._id}
                 whileHover={{ scale: 1.02 }}
-                className="bg-white border border-green-500 rounded-xl p-6 shadow-md"
+                className="bg-white border border-green-500 rounded-xl p-6 shadow-md flex flex-col justify-between"
               >
-                <h3 className="text-xl font-bold text-green-800">{e.title}</h3>
-                <p className="text-gray-600 text-sm mb-3">{e.description}</p>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-green-800">{e.title}</h3>
+                  <p className="text-gray-600 text-sm mb-3">{e.description}</p>
 
-                <div className="space-y-1 text-gray-700 text-sm">
-                  <p className="flex items-center gap-2"><FiCalendar /> {new Date(e.date).toLocaleDateString()}</p>
-                  <p className="flex items-center gap-2"><FiMapPin /> {e.location}</p>
-                  <p className="flex items-center gap-2"><FiClock /> {e.hours} hrs</p>
-                </div>
+                  <div className="space-y-1 text-gray-700 text-sm">
+                    <p className="flex items-center gap-2"><FiCalendar /> {new Date(e.date).toLocaleDateString()}</p>
+                    <p className="flex items-center gap-2"><FiMapPin /> {e.location}</p>
+                    <p className="flex items-center gap-2"><FiClock /> {e.hours} hrs</p>
+                  </div>
 
-                <div className="mt-4 text-sm font-semibold text-green-700">
-                  Donation: {e.donationOpen ? "OPEN" : "CLOSED"}
-                </div>
-                <div className="text-sm font-semibold text-gray-700">
-                  Total Collected: ₹{e.totalCollected}
+                  <div className="mt-4 text-sm font-semibold text-green-700">
+                    Donation: {e.donationOpen ? "OPEN" : "CLOSED"}
+                  </div>
+                  <div className="text-sm font-semibold text-gray-700">
+                    Total Collected: ₹{e.totalCollected}
+                  </div>
                 </div>
 
                 {e.donationOpen && (

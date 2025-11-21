@@ -34,16 +34,14 @@ const AlumniProfile = () => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  // 📌 Handle Image Change
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setNewImage(file);
-      setPreviewImg(URL.createObjectURL(file)); // Preview
+      setPreviewImg(URL.createObjectURL(file));
     }
   };
 
-  // 📌 UPDATE PROFILE WITH IMAGE
   const updateProfile = async () => {
     try {
       const formData = new FormData();
@@ -76,42 +74,46 @@ const AlumniProfile = () => {
     return <p className="text-center mt-10 text-red-500">Profile not found.</p>;
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <h1 className="text-3xl font-semibold mb-6">My Profile</h1>
+    <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-0">
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-800">
+        My Profile
+      </h1>
 
       <div className="bg-white shadow-lg rounded-xl p-6 border space-y-6">
 
         {/* Profile Image Section */}
-        <div className="flex items-center gap-6 relative">
-          <img
-            src={previewImg}
-            alt="Profile"
-            className="w-28 h-28 rounded-full object-cover border-2 border-green-600 shadow"
-          />
+        <div className="flex flex-col sm:flex-row items-center gap-6 relative">
+          <div className="relative">
+            <img
+              src={previewImg}
+              alt="Profile"
+              className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-2 border-green-600 shadow"
+            />
 
-          {editMode && (
-            <label className="absolute left-20 bottom-2 bg-white rounded-full p-2 cursor-pointer shadow-md">
-              <FaCamera className="text-green-700" />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          )}
+            {editMode && (
+              <label className="absolute right-0 bottom-0 bg-white rounded-full p-2 cursor-pointer shadow-md">
+                <FaCamera className="text-green-700" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
 
-          <div>
-            <h2 className="text-xl font-semibold">{profile.name}</h2>
-            <p className="text-gray-600">{profile.email}</p>
-            <p className="text-gray-600">
+          <div className="text-center sm:text-left">
+            <h2 className="text-xl sm:text-2xl font-semibold">{profile.name}</h2>
+            <p className="text-gray-600 text-sm sm:text-base">{profile.email}</p>
+            <p className="text-gray-600 text-sm sm:text-base">
               {profile.department} • {profile.graduationYear}
             </p>
           </div>
         </div>
 
         {/* Institution */}
-        <div className="flex items-center gap-3 text-gray-700">
+        <div className="flex items-center gap-3 text-gray-700 text-sm sm:text-base">
           <FaSchool className="text-xl text-green-700" />
           <span className="font-medium">
             Institution: {profile.institution?.name}
@@ -122,72 +124,37 @@ const AlumniProfile = () => {
 
         {/* Editable Form */}
         <div className="space-y-4">
-          <div>
-            <label className="font-medium">Name</label>
-            <input
-              name="name"
-              disabled={!editMode}
-              value={profile.name}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded-lg mt-1 ${
-                !editMode && "bg-gray-100"
-              }`}
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Email</label>
-            <input
-              name="email"
-              disabled={!editMode}
-              value={profile.email}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded-lg mt-1 ${
-                !editMode && "bg-gray-100"
-              }`}
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Department</label>
-            <input
-              name="department"
-              disabled={!editMode}
-              value={profile.department}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded-lg mt-1 ${
-                !editMode && "bg-gray-100"
-              }`}
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Graduation Year</label>
-            <input
-              name="graduationYear"
-              disabled={!editMode}
-              value={profile.graduationYear}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded-lg mt-1 ${
-                !editMode && "bg-gray-100"
-              }`}
-            />
-          </div>
+          {["name", "email", "department", "graduationYear"].map((field) => (
+            <div key={field}>
+              <label className="font-medium capitalize text-gray-700">
+                {field.replace(/([A-Z])/g, " $1")}
+              </label>
+              <input
+                name={field}
+                disabled={!editMode}
+                value={profile[field]}
+                onChange={handleChange}
+                className={`w-full p-2 border rounded-lg mt-1 text-sm sm:text-base ${
+                  !editMode && "bg-gray-100"
+                }`}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-4 pt-4">
           {!editMode ? (
             <button
               onClick={() => setEditMode(true)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700"
+              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 w-full sm:w-auto"
             >
               <FaEdit /> Edit Profile
             </button>
           ) : (
             <button
               onClick={updateProfile}
-              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700"
+              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 w-full sm:w-auto"
             >
               <FaSave /> Save Changes
             </button>
