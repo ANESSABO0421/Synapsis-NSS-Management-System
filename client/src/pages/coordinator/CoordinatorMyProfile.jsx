@@ -11,9 +11,9 @@ const CoordinatorMyProfile = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const API_BASE_URL = "http://localhost:3000/api/coordinator"; // ✅ Backend base URL
+  const API_BASE_URL = "http://localhost:3000/api/coordinator";
 
-  // 🟦 Fetch Profile on Mount
+  // Load profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -23,7 +23,6 @@ const CoordinatorMyProfile = () => {
         });
 
         const data = res.data.data;
-        console.log(data)
         setProfile(data);
         setFormData({
           name: data.name || "",
@@ -35,19 +34,19 @@ const CoordinatorMyProfile = () => {
         });
         setPreview(data.profileImage || "/default-avatar.png");
       } catch (err) {
-        console.error("❌ Error loading profile:", err);
+        console.error("Profile load error:", err);
         setMessage("Failed to load profile.");
       }
     };
     fetchProfile();
   }, []);
 
-  // 🟨 Handle input changes
+  // Handle input
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
   };
 
-  // 🖼️ Handle image change
+  // Image preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -56,7 +55,7 @@ const CoordinatorMyProfile = () => {
     }
   };
 
-  // 🟩 Handle Form Submit (PUT request)
+  // Update profile
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -66,7 +65,6 @@ const CoordinatorMyProfile = () => {
       const token = localStorage.getItem("token");
       const form = new FormData();
 
-      // append updated fields
       form.append("name", formData.name);
       form.append("phone", formData.phone);
       form.append("department", formData.department);
@@ -82,19 +80,13 @@ const CoordinatorMyProfile = () => {
 
       const updated = res.data.data;
       setProfile(updated);
-      setFormData({
-        name: updated.name || "",
-        email: updated.email || "",
-        phone: updated.phone || "",
-        department: updated.department || "",
-        institution: updated.institution || "",
-      });
-      setPreview(updated.profileImage || "/default-avatar.png");
+      setFormData(updated);
+      setPreview(updated.profileImage);
 
       setEditMode(false);
       setMessage("✅ Profile updated successfully!");
     } catch (err) {
-      console.error("❌ Update error:", err);
+      console.error("Update error:", err);
       setMessage("❌ Failed to update profile");
     } finally {
       setLoading(false);
@@ -103,125 +95,124 @@ const CoordinatorMyProfile = () => {
 
   if (!profile)
     return (
-      <div className="text-center text-gray-400 py-10 text-lg font-medium">
+      <div className="text-center text-gray-400 py-14 text-lg font-medium">
         Loading profile...
       </div>
     );
 
   return (
-    <section className="min-h-screen  text-gray-100 flex justify-center items-center px-4 py-12">
+    <section
+      className="
+        min-h-screen w-full 
+        flex justify-center items-center 
+        px-4 py-12 
+        
+      "
+    >
       <motion.div
-        className="relative w-full max-w-lg bg-[#111111]/90 border border-gray-700 rounded-2xl shadow-[0_0_25px_rgba(0,150,255,0.25)] p-8 backdrop-blur-md"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        className="
+          w-full max-w-lg 
+          bg-white/10 backdrop-blur-xl 
+          border border-white/20 
+          rounded-3xl shadow-2xl 
+          p-8 sm:p-10
+        "
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.45 }}
       >
-        <h2 className="text-3xl font-semibold mb-6 text-center text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-amber-300">
+        {/* Title */}
+        <h2 className="
+          text-3xl sm:text-4xl font-bold 
+          text-center mb-8
+          text-transparent bg-clip-text 
+          bg-gradient-to-r from-green-700 to-green-700
+        ">
           My Profile
         </h2>
 
-        {/* 🖼️ Profile Image */}
-        <div className="flex flex-col items-center mb-6">
+        {/* Image */}
+        <div className="flex flex-col items-center mb-8">
           <div className="relative group">
             <img
               src={preview}
               alt="Profile"
-              className="w-28 h-28 rounded-full object-cover border-2 border-sky-400 shadow-lg transition-all duration-300 group-hover:scale-105"
+              className="
+                w-28 h-28 sm:w-32 sm:h-32 
+                rounded-full object-cover 
+                border-2 border-green-400 
+                shadow-lg transition-all
+                group-hover:scale-105
+              "
             />
+
             {editMode && (
-              <label className="absolute bottom-1 right-1 bg-sky-500 hover:bg-sky-400 text-xs px-2 py-1 rounded-md cursor-pointer">
+              <label className="
+                absolute bottom-1 right-1 
+                bg-green-500 hover:bg-green-400
+                text-xs px-2 py-1 rounded-md cursor-pointer shadow-md
+              ">
                 Change
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
+                <input hidden type="file" accept="image/*" onChange={handleImageChange} />
               </label>
             )}
           </div>
         </div>
 
-        {/* 📝 Profile Form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              disabled={!editMode}
-              className={`w-full px-3 py-2 rounded-lg bg-[#1b1b1b] border ${
-                editMode ? "border-sky-400" : "border-gray-700"
-              } focus:outline-none focus:ring-1 focus:ring-sky-500 transition`}
-            />
-          </div>
+          <InputField
+            label="Name"
+            name="name"
+            value={formData.name}
+            editable={editMode}
+            onChange={handleChange}
+          />
 
           {/* Email */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              disabled
-              className="w-full px-3 py-2 rounded-lg bg-[#1b1b1b] border border-gray-700 text-gray-500"
-            />
-          </div>
+          <InputField
+            label="Email"
+            value={formData.email}
+            editable={false}
+          />
 
           {/* Phone */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">Phone</label>
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              disabled={!editMode}
-              className={`w-full px-3 py-2 rounded-lg bg-[#1b1b1b] border ${
-                editMode ? "border-sky-400" : "border-gray-700"
-              } focus:outline-none focus:ring-1 focus:ring-sky-500 transition`}
-            />
-          </div>
+          <InputField
+            label="Phone"
+            name="phone"
+            value={formData.phone}
+            editable={editMode}
+            onChange={handleChange}
+          />
 
           {/* Department */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              Department
-            </label>
-            <input
-              type="text"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              disabled={!editMode}
-              className={`w-full px-3 py-2 rounded-lg bg-[#1b1b1b] border ${
-                editMode ? "border-sky-400" : "border-gray-700"
-              } focus:outline-none focus:ring-1 focus:ring-sky-500 transition`}
-            />
-          </div>
+          <InputField
+            label="Department"
+            name="department"
+            value={formData.department}
+            editable={editMode}
+            onChange={handleChange}
+          />
 
           {/* Institution */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1">
-              Institution
-            </label>
-            <input
-              type="text"
-              value={formData.institutionName}
-              disabled
-              className="w-full px-3 py-2 rounded-lg bg-[#1b1b1b] border border-gray-700 text-gray-400"
-            />
-          </div>
+          <InputField
+            label="Institution"
+            value={formData.institutionName}
+            editable={false}
+          />
 
-          {/* 🔘 Buttons */}
-          <div className="text-center mt-6">
+          {/* Buttons */}
+          <div className="text-center pt-4">
             {!editMode ? (
               <button
-                type="button"
                 onClick={() => setEditMode(true)}
-                className="px-6 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 transition-all duration-200 font-medium shadow-md"
+                type="button"
+                className="
+                  px-7 py-2.5 rounded-lg 
+                  bg-green-600 hover:bg-green-500 
+                  transition shadow-md text-white font-semibold
+                "
               >
                 Edit Profile
               </button>
@@ -230,19 +221,29 @@ const CoordinatorMyProfile = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-500 transition-all font-medium shadow-md disabled:opacity-50"
+                  className="
+                    px-7 py-2.5 rounded-lg 
+                    bg-green-600 hover:bg-green-500 
+                    transition shadow-md text-white font-semibold
+                    disabled:opacity-50
+                  "
                 >
-                  {loading ? "Updating..." : "Save Changes"}
+                  {loading ? "Updating..." : "Save"}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => {
                     setEditMode(false);
                     setFormData(profile);
-                    setPreview(profile.profileImage || "/default-avatar.png");
+                    setPreview(profile.profileImage);
                     setImageFile(null);
                   }}
-                  className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 transition-all font-medium shadow-md"
+                  className="
+                    px-7 py-2.5 rounded-lg 
+                    bg-gray-600 hover:bg-gray-500 
+                    transition shadow-md text-white font-semibold
+                  "
                 >
                   Cancel
                 </button>
@@ -254,9 +255,10 @@ const CoordinatorMyProfile = () => {
         {/* Status Message */}
         {message && (
           <p
-            className={`text-center text-sm mt-4 ${
-              message.startsWith("✅") ? "text-green-400" : "text-red-400"
-            }`}
+            className={`
+              text-center text-sm mt-5 
+              ${message.startsWith("✅") ? "text-green-400" : "text-red-400"}
+            `}
           >
             {message}
           </p>
@@ -265,5 +267,26 @@ const CoordinatorMyProfile = () => {
     </section>
   );
 };
+
+/* Reusable Input Component */
+const InputField = ({ label, editable, name, value, onChange }) => (
+  <div>
+    <label className="block text-sm text-gray-300 mb-1">{label}</label>
+    <input
+      name={name}
+      value={value}
+      disabled={!editable}
+      onChange={onChange}
+      className={`
+        w-full px-3 py-2 rounded-lg 
+        bg-black/40 text-gray-200
+        border 
+        ${editable ? "border-green-400" : "border-green-700"}
+        focus:outline-none focus:ring-1 focus:ring-green-400
+        transition
+      `}
+    />
+  </div>
+);
 
 export default CoordinatorMyProfile;

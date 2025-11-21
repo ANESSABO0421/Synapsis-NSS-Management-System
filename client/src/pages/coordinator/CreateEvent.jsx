@@ -174,9 +174,8 @@ const CreateEvent = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log(res.data.data.institution)
+
         setInstitutionId(res.data.data.institution);
-        
       } catch (error) {
         toast.error("Failed to fetch coordinator details");
       } finally {
@@ -224,6 +223,7 @@ const CreateEvent = () => {
       );
 
       toast.success(res.data.message || "Event created successfully!");
+
       setFormData({
         title: "",
         description: "",
@@ -242,35 +242,43 @@ const CreateEvent = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-green-100 to-green-200">
+      <div className="flex justify-center items-center h-screen bg-gray-100">
         <CircularProgress color="success" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center  p-6">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-green-50 to-green-100">
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 40 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-lg backdrop-blur-xl bg-white/70 border border-white/20 shadow-2xl rounded-3xl p-10"
+        transition={{ duration: 0.5 }}
+        className="
+          w-full 
+          max-w-md 
+          sm:max-w-lg 
+          lg:max-w-xl 
+          bg-white/80 
+          backdrop-blur-xl 
+          shadow-xl 
+          border border-white/30
+          rounded-3xl 
+          p-6 
+          sm:p-10
+        "
       >
-        <h2 className="text-3xl font-bold mb-8 text-center text-emerald-700 drop-shadow-sm">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-emerald-700">
           🌿 Create New NSS Event
         </h2>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-6">
           {[
             { name: "title", type: "text", placeholder: "Event Title" },
             { name: "location", type: "text", placeholder: "Event Location" },
             { name: "date", type: "date", placeholder: "Event Date" },
             { name: "hours", type: "number", placeholder: "Duration (hours)" },
-            {
-              name: "caption",
-              type: "text",
-              placeholder: "Image Caption (optional)",
-            },
+            { name: "caption", type: "text", placeholder: "Image Caption (optional)" },
           ].map((input) => (
             <motion.input
               key={input.name}
@@ -280,7 +288,17 @@ const CreateEvent = () => {
               value={formData[input.name]}
               onChange={handleChange}
               whileFocus={{ scale: 1.02 }}
-              className="border border-emerald-300 bg-white/60 placeholder-gray-500 p-3 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:outline-none transition duration-200"
+              className="
+                w-full 
+                border border-emerald-300 
+                bg-white/70 
+                p-3 
+                rounded-xl 
+                text-sm sm:text-base
+                focus:ring-2 
+                focus:ring-emerald-400 
+                outline-none
+              "
               required={input.name !== "caption"}
             />
           ))}
@@ -292,12 +310,23 @@ const CreateEvent = () => {
             value={formData.description}
             onChange={handleChange}
             whileFocus={{ scale: 1.02 }}
-            className="border border-emerald-300 bg-white/60 placeholder-gray-500 p-3 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:outline-none transition duration-200 resize-none"
+            className="
+              w-full 
+              border border-emerald-300 
+              bg-white/70 
+              p-3 
+              rounded-xl 
+              text-sm sm:text-base
+              focus:ring-2 
+              focus:ring-emerald-400 
+              outline-none 
+              resize-none
+            "
             required
           />
 
-          <motion.div whileHover={{ scale: 1.02 }}>
-            <label className="block text-emerald-700 font-medium mb-2">
+          <motion.div whileHover={{ scale: 1.02 }} className="w-full">
+            <label className="block text-emerald-700 font-medium mb-1 sm:mb-2">
               Upload Event Image
             </label>
             <input
@@ -305,7 +334,23 @@ const CreateEvent = () => {
               name="images"
               accept="image/*"
               onChange={handleFileChange}
-              className="w-full border border-emerald-300 bg-white/60 p-2 rounded-xl file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-500 file:text-white hover:file:bg-emerald-600 transition-all duration-300"
+              className="
+                w-full 
+                border border-emerald-300 
+                bg-white/70 
+                p-2 
+                rounded-xl 
+                file:py-2 
+                file:px-4 
+                file:rounded-lg 
+                file:bg-emerald-500 
+                file:text-white 
+                file:border-none 
+                file:font-semibold
+                text-xs sm:text-sm
+                hover:file:bg-emerald-600 
+                transition
+              "
             />
           </motion.div>
 
@@ -314,14 +359,24 @@ const CreateEvent = () => {
             disabled={submitting}
             whileHover={{ scale: submitting ? 1 : 1.05 }}
             whileTap={{ scale: submitting ? 1 : 0.97 }}
-            className={`w-full py-3 rounded-xl text-lg font-semibold text-white shadow-lg transition-all duration-300 ${
-              submitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-            }`}
+            className={`
+              w-full 
+              py-3 
+              rounded-xl 
+              text-white 
+              text-sm sm:text-lg 
+              font-semibold 
+              shadow-md 
+              transition
+              ${
+                submitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+              }
+            `}
           >
             {submitting ? (
-              <CircularProgress size={26} color="inherit" />
+              <CircularProgress size={24} color="inherit" />
             ) : (
               "✨ Create Event"
             )}
