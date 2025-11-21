@@ -31,18 +31,22 @@ const MyProfile = () => {
         const res = await axios.get("http://localhost:3000/api/students/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setProfile(res.data.student);
+
         setFormData({
           name: res.data.student.name || "",
           phoneNumber: res.data.student.phoneNumber || "",
           department: res.data.student.department || "",
           talents: (res.data.student.talents || []).join(", "),
         });
+
         setImagePreview(res.data.student.profileImage.url || null);
       } catch (err) {
         toast.error("Failed to load profile");
       }
     };
+
     fetchProfile();
   }, [token]);
 
@@ -60,8 +64,10 @@ const MyProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       setLoading(true);
+
       const data = new FormData();
       data.append("name", formData.name);
       data.append("phoneNumber", formData.phoneNumber);
@@ -70,6 +76,7 @@ const MyProfile = () => {
         "talents",
         formData.talents.split(",").map((t) => t.trim())
       );
+
       if (imageFile) data.append("profileImage", imageFile);
 
       const res = await axios.put(
@@ -100,25 +107,28 @@ const MyProfile = () => {
     );
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-green-50 to-green-200 p-6">
-      <div className="w-full max-w-2xl bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl border border-green-300 p-8 transition-all duration-300 hover:shadow-green-300/40">
-        <h2 className="text-3xl font-extrabold text-center mb-8 text-green-700 flex items-center justify-center gap-2 drop-shadow-sm">
-          <FaLeaf className="text-green-600 text-3xl" />
+    <div className="min-h-screen flex justify-center items-center  sm:p-6">
+      <div className="w-full max-w-2xl bg-white/80 backdrop-blur-lg shadow-2xl rounded-3xl border border-green-300 p-6 sm:p-8 transition-all duration-300 hover:shadow-green-300/40">
+
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-6 sm:mb-8 text-green-700 flex items-center justify-center gap-2 drop-shadow-sm">
+          <FaLeaf className="text-green-600 text-2xl sm:text-3xl" />
           My Profile
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+
           {/* Profile Image */}
           <div className="flex flex-col items-center">
             <div className="relative group">
               <img
                 src={imagePreview || "/default-avatar.png"}
                 alt="Profile"
-                className="w-36 h-36 rounded-full object-cover border-4 border-green-500 shadow-md transition-all duration-300 group-hover:scale-105"
+                className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-green-500 shadow-md transition-all duration-300 group-hover:scale-105"
               />
-              <label className="absolute bottom-2 right-2 bg-green-600 text-white px-3 py-1 text-xs rounded-full cursor-pointer flex items-center gap-1 hover:bg-green-700 shadow-md transition">
+
+              <label className="absolute bottom-2 right-2 bg-green-600 text-white px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full cursor-pointer flex items-center gap-1 hover:bg-green-700 shadow-md transition">
                 <FiCamera />
-                <span>Change</span>
+                <span className="hidden sm:inline">Change</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -129,10 +139,11 @@ const MyProfile = () => {
             </div>
           </div>
 
-          {/* Inputs */}
-          <div className="grid grid-cols-1 gap-5">
+          {/* INPUTS */}
+          <div className="grid grid-cols-1 gap-4 sm:gap-5">
+
             <div>
-              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800">
+              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800 text-sm sm:text-base">
                 <FiUser /> Full Name
               </label>
               <input
@@ -140,12 +151,12 @@ const MyProfile = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition"
+                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition text-sm sm:text-base"
               />
             </div>
 
             <div>
-              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800">
+              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800 text-sm sm:text-base">
                 <FiPhone /> Phone Number
               </label>
               <input
@@ -153,12 +164,12 @@ const MyProfile = () => {
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition"
+                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition text-sm sm:text-base"
               />
             </div>
 
             <div>
-              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800">
+              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800 text-sm sm:text-base">
                 <FiBookOpen /> Department
               </label>
               <input
@@ -166,12 +177,12 @@ const MyProfile = () => {
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
-                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition"
+                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition text-sm sm:text-base"
               />
             </div>
 
             <div>
-              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800">
+              <label className="flex items-center gap-2 font-semibold mb-1 text-green-800 text-sm sm:text-base">
                 <FiStar /> Talents (comma separated)
               </label>
               <input
@@ -179,20 +190,22 @@ const MyProfile = () => {
                 name="talents"
                 value={formData.talents}
                 onChange={handleChange}
-                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition"
+                className="w-full p-3 border border-green-300 rounded-xl bg-green-50 focus:ring-2 focus:ring-green-400 outline-none transition text-sm sm:text-base"
               />
             </div>
+
           </div>
 
-          {/* Submit */}
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 py-3 text-lg font-semibold bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-md hover:shadow-green-400/50 hover:scale-[1.02] transition-all duration-300"
+            className="w-full flex justify-center items-center gap-2 py-3 text-base sm:text-lg font-semibold bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-md hover:shadow-green-400/50 hover:scale-[1.02] transition-all duration-300"
           >
-            <FiSave className="text-xl" />
+            <FiSave className="text-lg sm:text-xl" />
             {loading ? "Updating..." : "Save Changes"}
           </button>
+
         </form>
       </div>
     </div>

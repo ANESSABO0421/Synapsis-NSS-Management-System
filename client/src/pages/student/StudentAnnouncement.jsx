@@ -44,7 +44,7 @@ const StudentAnnouncement = () => {
     }
   };
 
-  // Mark all as read
+  // Mark all read
   const markAll = async () => {
     try {
       await axios.put(
@@ -93,24 +93,24 @@ const StudentAnnouncement = () => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
           Student Notifications
         </h1>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={markAll}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white shadow transition"
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white shadow transition text-sm sm:text-base"
           >
             Mark All Read
           </button>
 
           <button
             onClick={deleteAll}
-            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white shadow transition"
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white shadow transition text-sm sm:text-base"
           >
             Clear All
           </button>
@@ -119,7 +119,7 @@ const StudentAnnouncement = () => {
 
       {/* EMPTY STATE */}
       {notifications.length === 0 ? (
-        <div className="text-center text-gray-500 py-16 text-lg">
+        <div className="text-center text-gray-500 py-16 text-sm sm:text-lg">
           No notifications available.
         </div>
       ) : (
@@ -127,23 +127,28 @@ const StudentAnnouncement = () => {
           {notifications.map((note) => (
             <div
               key={note._id}
-              className={`p-5 rounded-xl shadow-md transition-all border backdrop-blur-md
+              className={`
+                p-4 sm:p-5 rounded-xl shadow-md border transition-all duration-300
                 ${
                   note.read
-                    ? "bg-white/60 border-gray-200"
+                    ? "bg-white border-gray-200"
                     : "bg-yellow-100/80 border-yellow-300"
                 }
               `}
             >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900">
+              <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-2">
+                {/* TEXT SECTION */}
+                <div className="flex-1">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
                     {note.title}
                   </h3>
-                  <p className="text-gray-700 mt-1">{note.message}</p>
+
+                  <p className="text-gray-700 mt-1 text-sm sm:text-base">
+                    {note.message}
+                  </p>
 
                   {note.event && (
-                    <p className="text-xs mt-2 text-gray-500">
+                    <p className="text-xs mt-2 text-gray-500 break-all">
                       Event ID: {note.event}
                     </p>
                   )}
@@ -153,11 +158,12 @@ const StudentAnnouncement = () => {
                   </p>
                 </div>
 
-                <div className="flex gap-2">
+                {/* BUTTONS */}
+                <div className="flex gap-2 self-start sm:self-center">
                   {!note.read && (
                     <button
                       onClick={() => markAsRead(note._id)}
-                      className="p-2 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow"
+                      className="p-2 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow transition"
                     >
                       <Check size={18} />
                     </button>
@@ -165,7 +171,7 @@ const StudentAnnouncement = () => {
 
                   <button
                     onClick={() => deleteOne(note._id)}
-                    className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow"
+                    className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow transition"
                   >
                     <Trash2 size={18} />
                   </button>

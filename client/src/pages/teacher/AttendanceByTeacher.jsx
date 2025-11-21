@@ -79,7 +79,7 @@ const AttendanceByTeacher = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-8">
       <h2 className="text-4xl font-bold text-center mb-10 text-green-800">
-        🎟️ Event Attendance Portal
+        Event Attendance Portal
       </h2>
 
       {/* 🎯 Step 1: Select Event */}

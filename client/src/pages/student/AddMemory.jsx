@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function AddMemoryPremium() {
+const AddMemoryPremium = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [images, setImages] = useState([]);
@@ -61,7 +61,8 @@ export default function AddMemoryPremium() {
           },
         }
       );
-      toast.success("Images uploaded");
+
+      toast.success("Images uploaded!");
       setImages([]);
       setPreviewImages([]);
       setOpenUploadModal(false);
@@ -92,40 +93,37 @@ export default function AddMemoryPremium() {
 
   const closeEvent = () => setOpenEventModal(false);
   const closeUpload = () => setOpenUploadModal(false);
+
   const openLightbox = (i) => setLightboxIndex(i);
   const closeLightbox = () => setLightboxIndex(null);
 
   const nextLightbox = () =>
-    setLightboxIndex((i) =>
-      i === selectedEvent.images.length - 1 ? 0 : i + 1
-    );
+    setLightboxIndex((i) => (i === selectedEvent.images.length - 1 ? 0 : i + 1));
 
   const prevLightbox = () =>
-    setLightboxIndex((i) =>
-      i === 0 ? selectedEvent.images.length - 1 : i - 1
-    );
+    setLightboxIndex((i) => (i === 0 ? selectedEvent.images.length - 1 : i - 1));
 
   return (
-    <div className="p-6 bg-gradient-to-b from-gray-50 to-gray-200 min-h-screen">
-      <h2 className="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+    <div className="p-4 sm:p-6 bg-gradient-to-b from-gray-50 to-gray-200 min-h-screen">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-600">
         Add Event Memories
       </h2>
 
-      {/* EVENTS LIST */}
-      <div className="space-y-8">
+      {/* EVENT LIST */}
+      <div className="space-y-6 sm:space-y-8">
         {events.map((event) => (
           <motion.div
             key={event.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl shadow-xl bg-white p-6 border border-gray-200 hover:shadow-2xl transition-all"
+            className="rounded-2xl shadow-xl bg-white p-4 sm:p-6 border border-gray-200 hover:shadow-2xl transition-all"
           >
-            <div className="flex justify-between gap-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 md:gap-6">
               <div className="flex-1">
-                <h3 className="text-2xl font-semibold text-gray-900">{event.title}</h3>
+                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">{event.title}</h3>
+
                 <p className="text-sm text-gray-600 mt-1">
-                  <span className="font-semibold">Date: </span>
-                  {formatDate(event.date)}
+                  <span className="font-semibold">Date:</span> {formatDate(event.date)}
                 </p>
 
                 <div className="text-sm text-gray-700 mt-3 space-y-1">
@@ -134,27 +132,29 @@ export default function AddMemoryPremium() {
                   <p><span className="font-semibold">Institution:</span> {event.institution?.name}</p>
                 </div>
 
-                <div className="flex gap-3 mt-5">
+                <div className="flex flex-wrap gap-3 mt-5">
                   <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 w-full sm:w-auto"
                     onClick={() => openUpload(event)}
                   >
                     Upload Images
                   </button>
+
                   <button
-                    className="px-4 py-2 bg-green-600 text-white rounded-xl shadow hover:bg-green-700"
+                    className="px-4 py-2 bg-green-600 text-white rounded-xl shadow hover:bg-green-700 w-full sm:w-auto"
                     onClick={() => openEvent(event)}
                   >
                     View Memories
                   </button>
                 </div>
 
-                <div className="text-sm text-gray-500 mt-3">
+                <p className="text-sm text-gray-500 mt-3">
                   🖼 {event.images?.length || 0} memories
-                </div>
+                </p>
               </div>
 
-              <div className="hidden md:block w-44">
+              {/* PREVIEW GRID */}
+              <div className="hidden md:block w-40 sm:w-44">
                 {event.images?.length ? (
                   <div className="grid grid-cols-2 gap-2">
                     {event.images.slice(0, 4).map((img, i) => (
@@ -189,24 +189,29 @@ export default function AddMemoryPremium() {
               onClick={(e) => e.stopPropagation()}
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl p-6 border border-gray-300"
+              className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl p-4 sm:p-6 border border-gray-300"
             >
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-lg sm:text-xl font-semibold">
                   Upload Images — {selectedEvent.title}
                 </h2>
-                <button className="px-3 py-1 bg-gray-100 rounded-lg" onClick={closeUpload}>
+
+                <button
+                  className="px-3 py-1 bg-gray-100 rounded-lg"
+                  onClick={closeUpload}
+                >
                   Close
                 </button>
               </div>
 
               <div className="flex flex-col md:flex-row gap-6">
+                {/* Upload Area */}
                 <div className="flex-1">
                   <div
                     ref={dropRef}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
-                    className="border-2 border-dashed border-gray-300 rounded-xl h-64 flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 transition cursor-pointer"
+                    className="border-2 border-dashed border-gray-300 rounded-xl h-52 sm:h-64 flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 transition cursor-pointer"
                   >
                     <p className="text-lg">Drag & Drop Images Here</p>
                     <p className="text-sm mt-1">or click below</p>
@@ -214,10 +219,14 @@ export default function AddMemoryPremium() {
                     <input type="file" multiple onChange={onFileInput} className="mt-3" />
                   </div>
 
+                  {/* Preview */}
                   <div className="flex flex-wrap gap-3 mt-4">
                     {previewImages.map((src, idx) => (
                       <div key={idx} className="relative">
-                        <img src={src} className="w-28 h-28 object-cover rounded-xl shadow" />
+                        <img
+                          src={src}
+                          className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl shadow"
+                        />
 
                         <button
                           onClick={() => {
@@ -240,18 +249,22 @@ export default function AddMemoryPremium() {
                   </button>
                 </div>
 
+                {/* Side Info */}
                 <div className="w-full md:w-80 p-4 bg-gray-50 rounded-xl border">
                   <h3 className="text-lg font-semibold text-gray-900">
                     {selectedEvent.title}
                   </h3>
+
                   <p className="text-xs text-gray-500">{formatDate(selectedEvent.date)}</p>
 
                   <p className="mt-3 text-sm text-gray-700">
                     <span className="font-semibold">Location:</span> {selectedEvent.location}
                   </p>
+
                   <p className="text-sm text-gray-700">
                     <span className="font-semibold">Hours:</span> {selectedEvent.hours}
                   </p>
+
                   <p className="mt-2 text-xs text-gray-500">
                     {selectedEvent.images?.length || 0} existing images
                   </p>
@@ -262,7 +275,7 @@ export default function AddMemoryPremium() {
         )}
       </AnimatePresence>
 
-      {/* EVENT MEMORIES MODAL */}
+      {/* VIEW MEMORIES MODAL */}
       <AnimatePresence>
         {openEventModal && selectedEvent && (
           <motion.div
@@ -279,10 +292,14 @@ export default function AddMemoryPremium() {
             >
               <div className="p-4 border-b flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-semibold">{selectedEvent.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold">{selectedEvent.title}</h3>
                   <p className="text-sm text-gray-500">{formatDate(selectedEvent.date)}</p>
                 </div>
-                <button className="px-3 py-1 bg-gray-200 rounded-lg" onClick={closeEvent}>
+
+                <button
+                  className="px-3 py-1 bg-gray-200 rounded-lg"
+                  onClick={closeEvent}
+                >
                   Close
                 </button>
               </div>
@@ -325,28 +342,33 @@ export default function AddMemoryPremium() {
               onClick={(e) => e.stopPropagation()}
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
-              className="relative max-w-5xl w-full"
+              className="relative max-w-4xl sm:max-w-5xl w-full"
             >
               <img
                 src={selectedEvent.images[lightboxIndex].url}
-                className="w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+                className="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
               />
 
+              {/* Prev */}
               <button
                 onClick={prevLightbox}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 text-white w-12 h-12 rounded-full backdrop-blur-xl text-3xl flex items-center justify-center"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 text-white w-10 sm:w-12 h-10 sm:h-12 rounded-full backdrop-blur-xl text-2xl sm:text-3xl flex items-center justify-center"
               >
                 ‹
               </button>
+
+              {/* Next */}
               <button
                 onClick={nextLightbox}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 text-white w-12 h-12 rounded-full backdrop-blur-xl text-3xl flex items-center justify-center"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 text-white w-10 sm:w-12 h-10 sm:h-12 rounded-full backdrop-blur-xl text-2xl sm:text-3xl flex items-center justify-center"
               >
                 ›
               </button>
+
+              {/* Close */}
               <button
                 onClick={closeLightbox}
-                className="absolute right-4 top-4 px-4 py-2 bg-white/20 text-white rounded-full backdrop-blur-xl"
+                className="absolute right-4 top-4 px-3 sm:px-4 py-2 bg-white/20 text-white rounded-full backdrop-blur-xl"
               >
                 Close
               </button>
@@ -356,4 +378,6 @@ export default function AddMemoryPremium() {
       </AnimatePresence>
     </div>
   );
-}
+};
+
+export default AddMemoryPremium;
