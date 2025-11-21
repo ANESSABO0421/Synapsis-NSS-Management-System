@@ -45,7 +45,7 @@ const Navbar = () => {
         transition-all duration-500 border-b border-white/10
         ${
           scrollY > 20
-            ? "backdrop-blur-5xl bg-green-500  shadow-xl"
+            ? "backdrop-blur-5xl bg-green-700/80  shadow-xl"
             : "bg-green-700"
         }`}
       >
@@ -55,7 +55,7 @@ const Navbar = () => {
             src="/Synapsis-Logo-bgRemover.png"
             className="h-10 sm:h-12 drop-shadow-lg"
           />
-          <h1 className="text-white font-extrabold text-2xl sm:text-3xl bg-clip-text text-transparent bg-gradient-to-r from-green-200 via-cyan-200 to-blue-200">
+          <h1 className="  font-extrabold text-2xl sm:text-3xl bg-clip-text text-transparent bg-gradient-to-r from-green-200 via-cyan-200 to-blue-200">
             SYNAPSIS
           </h1>
         </div>
