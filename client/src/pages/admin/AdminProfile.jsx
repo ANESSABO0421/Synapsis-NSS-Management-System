@@ -67,7 +67,7 @@ const AdminProfile = () => {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-green-50 to-white py-10">
+    <div className="flex justify-center items-center min-h-screen  py-10">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-2xl border border-green-200">
         <h1 className="text-3xl font-bold text-green-700 mb-8 text-center">
           Admin Profile

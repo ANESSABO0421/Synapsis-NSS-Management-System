@@ -71,7 +71,7 @@ const Sidebar = () => {
   ];
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <aside className="w-64 bg-white shadow-md p-5 flex-shrink-0 h-full">
+      <aside className="w-64 bg-white shadow-md p-5 flex-shrink-0 h-screen">
         <h1 className="text-xl font-bold text-green-700 mb-8">Admin Panel</h1>
         <nav>
           {navLinks.map((link) => (

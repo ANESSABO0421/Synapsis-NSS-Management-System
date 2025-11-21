@@ -18,7 +18,6 @@ const AllAlumni = () => {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
-  // ===== Fetch Dashboard Data =====
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
@@ -38,15 +37,15 @@ const AllAlumni = () => {
         rejected,
         growth: generateGrowthData(data),
       });
+
       setAlumni(data);
     } catch (err) {
-      console.error(err.message);
+      toast.error("Failed to fetch data");
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== Generate Growth Data for Chart =====
   const generateGrowthData = (data) => {
     const today = new Date();
     return Array.from({ length: 7 }).map((_, i) => {
@@ -60,12 +59,8 @@ const AllAlumni = () => {
     });
   };
 
-  // ===== Approve Alumni =====
   const handleApprove = async (id, name) => {
-    const confirmApprove = window.confirm(
-      `Are you sure you want to approve ${name}?`
-    );
-    if (!confirmApprove) return;
+    if (!window.confirm(`Approve ${name}?`)) return;
 
     try {
       await axios.put(
@@ -73,19 +68,15 @@ const AllAlumni = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(`✅ ${name} approved successfully`);
+      toast.success(`${name} approved successfully`);
       fetchDashboardData();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Approval failed");
+    } catch {
+      toast.error("Approval failed");
     }
   };
 
-  // ===== Reject Alumni =====
   const handleReject = async (id, name) => {
-    const confirmReject = window.confirm(
-      `Are you sure you want to reject ${name}?`
-    );
-    if (!confirmReject) return;
+    if (!window.confirm(`Reject ${name}?`)) return;
 
     try {
       await axios.put(
@@ -93,10 +84,10 @@ const AllAlumni = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.info(`❌ ${name} has been rejected`);
+      toast.info(`${name} rejected`);
       fetchDashboardData();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Rejection failed");
+    } catch {
+      toast.error("Rejection failed");
     }
   };
 
@@ -107,7 +98,7 @@ const AllAlumni = () => {
   if (loading || !stats) {
     return (
       <div className="flex h-[500px] items-center justify-center">
-        <div className="rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
+        <div className="rounded-xl border bg-white px-6 py-5 shadow-sm">
           <div className="flex items-center gap-3">
             <CircularProgress color="success" size={20} />
             <p className="text-sm font-medium text-gray-700">
@@ -120,43 +111,46 @@ const AllAlumni = () => {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-6">
-      {/* ===== HEADER ===== */}
-      <h2 className="mb-6 text-3xl font-bold text-gray-800">
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
+      {/* HEADER */}
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">
         Alumni Dashboard
       </h2>
 
-      {/* ===== STATS ===== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+      {/* STATS SECTION */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6 mb-10">
         <StatCard title="Total Alumni" value={stats.total} color="green" />
         <StatCard title="Active Alumni" value={stats.active} color="emerald" />
-        <StatCard title="Pending Alumni" value={stats.pending} color="amber" />
-        <StatCard title="Rejected Alumni" value={stats.rejected} color="red" />
+        <StatCard title="Pending" value={stats.pending} color="amber" />
+        <StatCard title="Rejected" value={stats.rejected} color="red" />
       </div>
 
-      {/* ===== CHART ===== */}
-      <div className="bg-white border rounded-2xl shadow p-6 mb-10">
+      {/* GROWTH CHART */}
+      <div className="bg-white border rounded-2xl shadow p-4 sm:p-6 mb-10">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">
           7-Day Alumni Signup Growth
         </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={stats.growth}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="count"
-              stroke="#00A63E"
-              strokeWidth={2}
-              dot
-            />
-          </LineChart>
-        </ResponsiveContainer>
+
+        <div className="h-[250px] sm:h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={stats.growth}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#00A63E"
+                strokeWidth={2}
+                dot
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      {/* ===== TABLE ===== */}
+      {/* ALUMNI TABLE (DESKTOP) */}
       <div className="bg-white border rounded-2xl shadow overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">
@@ -171,86 +165,89 @@ const AllAlumni = () => {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto text-sm text-left">
+        {/* DESKTOP TABLE */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="min-w-full table-auto text-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-3">Name</th>
-                <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Institution</th>
-                <th className="px-6 py-3">Graduation Year</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-center">Action</th>
+                <Header title="Name" />
+                <Header title="Email" />
+                <Header title="Institution" />
+                <Header title="Graduation Year" />
+                <Header title="Status" />
+                <Header title="Action" center />
               </tr>
             </thead>
+
             <tbody>
-              {alumni.length > 0 ? (
-                alumni.map((a, idx) => (
-                  <tr
-                    key={a._id}
-                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                  >
-                    <td className="px-6 py-3 font-medium">{a.name}</td>
-                    <td className="px-6 py-3">{a.email}</td>
-                    <td className="px-6 py-3">
-                      {a.institution?.name || "—"}
-                    </td>
-                    <td className="px-6 py-3">{a.graduationYear || "—"}</td>
-                    <td className="px-6 py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          a.status === "active"
-                            ? "bg-green-100 text-green-700"
-                            : a.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {a.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-center">
-                      {a.status === "active" ? (
-                        <button
-                          onClick={() => handleReject(a._id, a.name)}
-                          className="px-3 py-1 bg-red-500 text-white rounded-md text-xs hover:bg-red-600"
-                        >
-                          Reject
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleApprove(a._id, a.name)}
-                          className="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700"
-                        >
-                          Approve
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-6 text-gray-500">
-                    No alumni found
+              {alumni.map((a, idx) => (
+                <tr key={a._id} className={idx % 2 ? "bg-gray-50" : "bg-white"}>
+                  <Cell>{a.name}</Cell>
+                  <Cell>{a.email}</Cell>
+                  <Cell>{a.institution?.name || "—"}</Cell>
+                  <Cell>{a.graduationYear || "—"}</Cell>
+
+                  <Cell>
+                    <StatusBadge status={a.status} />
+                  </Cell>
+
+                  <td className="px-6 py-3 text-center">
+                    {a.status === "active" ? (
+                      <RejectBtn onClick={() => handleReject(a._id, a.name)} />
+                    ) : (
+                      <ApproveBtn
+                        onClick={() => handleApprove(a._id, a.name)}
+                      />
+                    )}
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE CARDS */}
+        <div className="md:hidden p-4 space-y-4">
+          {alumni.map((a) => (
+            <div key={a._id} className="border rounded-xl p-4 shadow-sm bg-white">
+              <h4 className="font-bold text-gray-900 text-lg">{a.name}</h4>
+              <p className="text-gray-700 text-sm">{a.email}</p>
+
+              <div className="mt-3 space-y-1 text-sm text-gray-600">
+                <p>
+                  <b>Institution: </b> {a.institution?.name || "—"}
+                </p>
+                <p>
+                  <b>Graduation Year: </b> {a.graduationYear || "—"}
+                </p>
+
+                <p>
+                  <b>Status: </b> <StatusBadge status={a.status} />
+                </p>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                {a.status === "active" ? (
+                  <RejectMobile onClick={() => handleReject(a._id, a.name)} />
+                ) : (
+                  <ApproveMobile onClick={() => handleApprove(a._id, a.name)} />
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-// ===== Helper Component for Stats =====
+/* ---------- UI COMPONENTS ---------- */
+
 const StatCard = ({ title, value, color }) => (
-  <div
-    className={`bg-white border rounded-2xl shadow p-5 text-center border-${color}-200`}
-  >
+  <div className="bg-white border rounded-2xl shadow p-4 text-center">
     <p className="text-gray-500 text-sm">{title}</p>
     <h3
-      className={`text-3xl font-bold ${
+      className={`text-2xl sm:text-3xl font-bold ${
         color === "red"
           ? "text-red-600"
           : color === "amber"
@@ -261,6 +258,66 @@ const StatCard = ({ title, value, color }) => (
       {value}
     </h3>
   </div>
+);
+
+const Header = ({ title, center }) => (
+  <th className={`px-6 py-3 ${center ? "text-center" : "text-left"}`}>
+    {title}
+  </th>
+);
+
+const Cell = ({ children }) => (
+  <td className="px-6 py-3 text-gray-700">{children}</td>
+);
+
+const StatusBadge = ({ status }) => (
+  <span
+    className={`px-2 py-1 rounded-full text-xs font-medium ${
+      status === "active"
+        ? "bg-green-100 text-green-700"
+        : status === "pending"
+        ? "bg-yellow-100 text-yellow-700"
+        : "bg-red-100 text-red-700"
+    }`}
+  >
+    {status}
+  </span>
+);
+
+const ApproveBtn = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="px-3 py-1 bg-green-600 text-white rounded-md text-xs hover:bg-green-700"
+  >
+    Approve
+  </button>
+);
+
+const RejectBtn = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="px-3 py-1 bg-red-500 text-white rounded-md text-xs hover:bg-red-600"
+  >
+    Reject
+  </button>
+);
+
+const ApproveMobile = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="w-full bg-green-600 text-white px-3 py-2 rounded-md text-sm hover:bg-green-700"
+  >
+    Approve
+  </button>
+);
+
+const RejectMobile = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="w-full bg-red-500 text-white px-3 py-2 rounded-md text-sm hover:bg-red-600"
+  >
+    Reject
+  </button>
 );
 
 export default AllAlumni;

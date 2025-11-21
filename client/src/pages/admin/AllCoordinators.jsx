@@ -18,7 +18,6 @@ const AllCoordinators = () => {
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
 
-  // ===== Fetch Dashboard Data =====
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
@@ -28,13 +27,12 @@ const AllCoordinators = () => {
       );
       setStats(res.data.Data.coordinator);
     } catch (err) {
-      console.error(err.message);
+      toast.error("Failed to fetch coordinator stats");
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== Fetch All Coordinators =====
   const fetchCoordinators = async () => {
     try {
       const res = await axios.get(
@@ -43,16 +41,12 @@ const AllCoordinators = () => {
       );
       setCoordinators(res.data.coordinator || []);
     } catch (err) {
-      console.error(err.message);
+      toast.error("Failed to load coordinators");
     }
   };
 
-  // ===== Approve Coordinator =====
   const handleApprove = async (id, name) => {
-    const confirmApprove = window.confirm(
-      `Are you sure you want to approve ${name}?`
-    );
-    if (!confirmApprove) return;
+    if (!window.confirm(`Are you sure you want to approve ${name}?`)) return;
 
     try {
       await axios.put(
@@ -60,19 +54,15 @@ const AllCoordinators = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(`✅ ${name} approved successfully`);
+      toast.success(`Approved ${name}`);
       fetchCoordinators();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Approval failed");
+      toast.error("Approval failed");
     }
   };
 
-  // ===== Reject Coordinator =====
   const handleReject = async (id, name) => {
-    const confirmReject = window.confirm(
-      `Are you sure you want to reject ${name}?`
-    );
-    if (!confirmReject) return;
+    if (!window.confirm(`Are you sure you want to reject ${name}?`)) return;
 
     try {
       await axios.put(
@@ -80,10 +70,10 @@ const AllCoordinators = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.info(`❌ ${name} has been rejected`);
+      toast.info(`Rejected ${name}`);
       fetchCoordinators();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Rejection failed");
+      toast.error("Rejection failed");
     }
   };
 
@@ -95,7 +85,7 @@ const AllCoordinators = () => {
   if (loading || !stats) {
     return (
       <div className="flex h-[500px] items-center justify-center">
-        <div className="rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm">
+        <div className="rounded-xl border bg-white px-6 py-5 shadow-sm">
           <div className="flex items-center gap-3">
             <CircularProgress color="success" size={20} />
             <p className="text-sm font-medium text-gray-700">
@@ -108,59 +98,70 @@ const AllCoordinators = () => {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-6">
-      {/* ===== HEADER ===== */}
-      <h2 className="mb-6 text-3xl font-bold text-gray-800">
+    <div className="mx-auto max-w-7xl p-4 sm:p-6">
+      {/* HEADER */}
+      <h2 className="mb-6 text-2xl sm:text-3xl font-bold text-gray-800">
         Coordinator Dashboard
       </h2>
 
-      {/* ===== STATS ===== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white border rounded-2xl shadow p-5 text-center">
-          <p className="text-gray-500 text-sm">Total Coordinators</p>
-          <h3 className="text-3xl font-bold text-green-600">{stats.total}</h3>
+      {/* STATS GRID */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 mb-10">
+        <div className="bg-white border rounded-2xl shadow p-4 sm:p-5 text-center">
+          <p className="text-gray-500 text-xs sm:text-sm">Total Coordinators</p>
+          <h3 className="text-2xl sm:text-3xl font-bold text-green-600">
+            {stats.total}
+          </h3>
         </div>
-        <div className="bg-white border rounded-2xl shadow p-5 text-center">
-          <p className="text-gray-500 text-sm">Active Coordinators</p>
-          <h3 className="text-3xl font-bold text-green-600">{stats.active}</h3>
+
+        <div className="bg-white border rounded-2xl shadow p-4 sm:p-5 text-center">
+          <p className="text-gray-500 text-xs sm:text-sm">Active</p>
+          <h3 className="text-2xl sm:text-3xl font-bold text-green-600">
+            {stats.active}
+          </h3>
         </div>
-        <div className="bg-white border rounded-2xl shadow p-5 text-center">
-          <p className="text-gray-500 text-sm">Pending Coordinators</p>
-          <h3 className="text-3xl font-bold text-amber-500">
+
+        <div className="bg-white border rounded-2xl shadow p-4 sm:p-5 text-center">
+          <p className="text-gray-500 text-xs sm:text-sm">Pending</p>
+          <h3 className="text-2xl sm:text-3xl font-bold text-amber-500">
             {stats.pending}
           </h3>
         </div>
       </div>
 
-      {/* ===== CHART ===== */}
-      <div className="bg-white border rounded-2xl shadow p-6 mb-10">
+      {/* SIGNUP GROWTH CHART */}
+      <div className="bg-white border rounded-2xl shadow p-4 sm:p-6 mb-10">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">
           7-Day Coordinator Signup Growth
         </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={stats.growth}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Line
-              type="monotone"
-              dataKey="count"
-              stroke="#00A63E"
-              strokeWidth={2}
-              dot
-            />
-          </LineChart>
-        </ResponsiveContainer>
+
+        <div className="h-[250px] sm:h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={stats.growth}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#00A63E"
+                strokeWidth={2}
+                dot
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      {/* ===== TABLE ===== */}
+      {/* TABLE + MOBILE CARDS */}
       <div className="bg-white border rounded-2xl shadow overflow-hidden">
+        {/* Header */}
         <div className="p-4 border-b flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">
             All Coordinators{" "}
             <span className="text-green-600">({coordinators.length})</span>
           </h3>
+
           <button
             onClick={fetchCoordinators}
             className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
@@ -169,7 +170,8 @@ const AllCoordinators = () => {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* DESKTOP TABLE */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full table-auto text-sm text-left">
             <thead className="bg-gray-100">
               <tr>
@@ -180,16 +182,18 @@ const AllCoordinators = () => {
                 <th className="px-6 py-3 text-center">Action</th>
               </tr>
             </thead>
+
             <tbody>
               {coordinators.length > 0 ? (
                 coordinators.map((c, idx) => (
                   <tr
                     key={c._id}
-                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                    className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
                   >
                     <td className="px-6 py-3 font-medium">{c.name}</td>
                     <td className="px-6 py-3">{c.email}</td>
                     <td className="px-6 py-3">{c.department || "—"}</td>
+
                     <td className="px-6 py-3">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -203,6 +207,7 @@ const AllCoordinators = () => {
                         {c.status}
                       </span>
                     </td>
+
                     <td className="px-6 py-3 text-center">
                       {c.status === "active" ? (
                         <button
@@ -231,6 +236,59 @@ const AllCoordinators = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* MOBILE CARD VIEW */}
+        <div className="md:hidden p-4 space-y-4">
+          {coordinators.map((c) => (
+            <div
+              key={c._id}
+              className="border rounded-xl p-4 bg-white shadow-sm"
+            >
+              <h4 className="font-bold text-gray-900 text-lg">{c.name}</h4>
+              <p className="text-gray-700 text-sm">{c.email}</p>
+
+              <div className="mt-3 space-y-1 text-sm text-gray-600">
+                <p>
+                  <b>Department:</b> {c.department || "—"}
+                </p>
+
+                <p>
+                  <b>Status:</b>{" "}
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      c.status === "active"
+                        ? "bg-green-100 text-green-700"
+                        : c.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {c.status}
+                  </span>
+                </p>
+              </div>
+
+              {/* Mobile Actions */}
+              <div className="mt-4 flex gap-2">
+                {c.status === "active" ? (
+                  <button
+                    onClick={() => handleReject(c._id, c.name)}
+                    className="w-full bg-red-500 text-white px-3 py-2 rounded-md text-sm hover:bg-red-600"
+                  >
+                    Reject
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleApprove(c._id, c.name)}
+                    className="w-full bg-green-600 text-white px-3 py-2 rounded-md text-sm hover:bg-green-700"
+                  >
+                    Approve
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -67,60 +67,127 @@ const GetAllPendingAlumni = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
+      {/* Heading */}
+      <h1 className="text-center text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
         Pending Alumni Approvals
       </h1>
 
+      {/* Loading State */}
       {loading ? (
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-center text-gray-600 text-lg">Loading...</p>
       ) : alumniList.length === 0 ? (
-        <p className="text-gray-600">No pending alumni found.</p>
+        <p className="text-center text-gray-600 text-lg">
+          🎉 No pending alumni found.
+        </p>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-xl shadow-md">
-          <table className="min-w-full text-left border border-gray-200">
-            <thead className="bg-gray-100 border-b">
-              <tr>
-                <th className="p-3">Name</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Institution</th>
-                <th className="p-3">Graduation Year</th>
-                <th className="p-3 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {alumniList.map((alumni) => (
-                <tr
-                  key={alumni._id}
-                  className="border-b hover:bg-gray-50 transition-all"
-                >
-                  <td className="p-3 font-medium text-gray-800">{alumni.name}</td>
-                  <td className="p-3 text-gray-600">{alumni.email}</td>
-                  <td className="p-3 text-gray-600">
-                    {alumni.institution?.name || "N/A"}
-                  </td>
-                  <td className="p-3 text-gray-600">
-                    {alumni.graduationYear || "N/A"}
-                  </td>
-                  <td className="p-3 text-center flex justify-center gap-3">
-                    <button
-                      onClick={() => handleApprove(alumni._id)}
-                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg flex items-center gap-2"
-                    >
-                      <FiCheckCircle /> Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(alumni._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg flex items-center gap-2"
-                    >
-                      <FiXCircle /> Reject
-                    </button>
-                  </td>
+        <>
+          {/* DESKTOP TABLE */}
+          <div className="hidden md:block overflow-x-auto bg-white rounded-xl shadow-md">
+            <table className="min-w-full text-left border border-gray-200">
+              <thead className="bg-gray-100 border-b">
+                <tr>
+                  <th className="p-3">Name</th>
+                  <th className="p-3">Email</th>
+                  <th className="p-3">Institution</th>
+                  <th className="p-3">Graduation Year</th>
+                  <th className="p-3 text-center">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+
+              <tbody>
+                {alumniList.map((alumni) => (
+                  <tr
+                    key={alumni._id}
+                    className="border-b hover:bg-gray-50 transition-all"
+                  >
+                    <td className="p-3 font-medium text-gray-800">
+                      {alumni.name}
+                    </td>
+
+                    <td className="p-3 text-gray-600">{alumni.email}</td>
+
+                    <td className="p-3 text-gray-600">
+                      {alumni.institution?.name || "N/A"}
+                    </td>
+
+                    <td className="p-3 text-gray-600">
+                      {alumni.graduationYear || "N/A"}
+                    </td>
+
+                    <td className="p-3 text-center flex justify-center gap-3">
+                      <button
+                        onClick={() => handleApprove(alumni._id)}
+                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg flex items-center gap-2"
+                      >
+                        <FiCheckCircle /> Approve
+                      </button>
+
+                      <button
+                        onClick={() => handleReject(alumni._id)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg flex items-center gap-2"
+                      >
+                        <FiXCircle /> Reject
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* MOBILE CARD VIEW */}
+          <div className="md:hidden space-y-4 mt-4">
+            {alumniList.map((alumni) => (
+              <div
+                key={alumni._id}
+                className="bg-white rounded-xl shadow p-4 border border-gray-200"
+              >
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {alumni.name}
+                </h2>
+                <p className="text-gray-600 text-sm">{alumni.email}</p>
+
+                <div className="mt-3">
+                  <p className="text-sm text-gray-500">
+                    Institution:{" "}
+                    <span className="font-medium text-gray-700">
+                      {alumni.institution?.name || "N/A"}
+                    </span>
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+                    Graduation Year:{" "}
+                    <span className="font-medium text-gray-700">
+                      {alumni.graduationYear || "N/A"}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Mobile Buttons */}
+                <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                  <button
+                    onClick={() => handleApprove(alumni._id)}
+                    className="w-full rounded-lg bg-green-500 px-3 py-2 text-sm font-semibold text-white hover:bg-green-600"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <FiCheckCircle /> Approve
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleReject(alumni._id)}
+                    className="w-full rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white hover:bg-red-600"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <FiXCircle /> Reject
+                    </div>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
