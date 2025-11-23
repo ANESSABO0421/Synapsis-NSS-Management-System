@@ -19,6 +19,7 @@ const GetAllPendingAlumni = () => {
       const res = await axios.get("http://localhost:3000/api/alumni/pending", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(res.data)
 
       setAlumniList(res.data.alumni || []);
     } catch (error) {

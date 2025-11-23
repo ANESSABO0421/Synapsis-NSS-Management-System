@@ -479,10 +479,10 @@ export const addTestimonial = async (req, res) => {
 export const updateTestimonialVisibility = async (req, res) => {
   try {
     // ⭐ Admin info from middleware
-    const adminId = req.user.id;  
+    const adminId = req.user.id;
 
     // ⭐ Alumni + testimonial from params
-    const { id, testimonialId } = req.params; 
+    const { id, testimonialId } = req.params;
     const { visibility } = req.body;
 
     // Optional: log who approved
@@ -553,9 +553,9 @@ export const getTopTestimonials = async (req, res) => {
 // alumni (approve and reject)
 export const getAllPendingAlumni = async (req, res) => {
   try {
-    const pendingAlumni = await Alumni.find({ status: "pending" }).select(
-      "-password -otp -otpExpiry"
-    );
+    const pendingAlumni = await Alumni.find({ status: "pending" })
+      .select("-password -otp -otpExpiry")
+      .populate("institution", "name address");
 
     res.json({
       success: true,
@@ -682,7 +682,9 @@ export const getAlumniDashboard = async (req, res) => {
     const alumniId = req.user.id;
 
     const alumni = await Alumni.findById(alumniId)
-      .select("name email department graduationYear profileImage mentorships achievements testimonials institution")
+      .select(
+        "name email department graduationYear profileImage mentorships achievements testimonials institution"
+      )
       .populate("institution", "name address contactEmail")
       .populate({
         path: "mentorships",
@@ -691,16 +693,13 @@ export const getAlumniDashboard = async (req, res) => {
 
     return res.json({
       success: true,
-      data: alumni
+      data: alumni,
     });
-
   } catch (error) {
     console.log("Dashboard Error:", error);
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
-
 
 export const getAlumniProfile = async (req, res) => {
   try {
@@ -711,7 +710,9 @@ export const getAlumniProfile = async (req, res) => {
       .populate("institution", "name address contactEmail");
 
     if (!alumni) {
-      return res.status(404).json({ success: false, message: "Alumni not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni not found" });
     }
 
     return res.json({ success: true, data: alumni });
@@ -763,12 +764,12 @@ export const updateAlumniProfile = async (req, res) => {
   }
 };
 
-
 // get all testimonials
 export const getAllTestimonials = async (req, res) => {
   try {
-    const alumnis = await Alumni.find()
-      .select("name department graduationYear profileImage testimonials");
+    const alumnis = await Alumni.find().select(
+      "name department graduationYear profileImage testimonials"
+    );
 
     // Flatten testimonials into one clean array
     const result = alumnis.flatMap((alumni) =>

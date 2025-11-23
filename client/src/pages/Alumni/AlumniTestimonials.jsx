@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const AlumniTestimonials = () => {
   const [message, setMessage] = useState("");
@@ -9,7 +10,7 @@ const AlumniTestimonials = () => {
     e.preventDefault();
 
     if (!message.trim()) {
-      return alert("Please write your testimonial.");
+      return toast.info("Please write your testimonial.");
     }
 
     try {
@@ -26,10 +27,10 @@ const AlumniTestimonials = () => {
         }
       );
 
-      alert(res.data.message);
+      toast.success(res.data.message);
       setMessage("");
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+      toast.info(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,6 @@ const AlumniTestimonials = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-10 min-h-screen bg-gray-50 flex justify-center">
       <div className="w-full max-w-3xl bg-white shadow-xl rounded-3xl p-6 sm:p-10 border border-gray-100">
-
         {/* Title */}
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2">
           Share Your Experience ✨
@@ -98,7 +98,6 @@ const AlumniTestimonials = () => {
             {loading ? "Submitting..." : "Submit Testimonial"}
           </button>
         </form>
-
       </div>
     </div>
   );

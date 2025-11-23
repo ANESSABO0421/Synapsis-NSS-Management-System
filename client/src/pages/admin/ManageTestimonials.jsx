@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const ManageTestimonials = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -18,7 +19,7 @@ const ManageTestimonials = () => {
       setTestimonials(res.data.testimonials || []);
     } catch (error) {
       console.error(error);
-      alert("Failed to load testimonials");
+      toast.error("Failed to load testimonials");
     } finally {
       setLoading(false);
     }
@@ -44,10 +45,10 @@ const ManageTestimonials = () => {
         )
       );
 
-      alert(`Testimonial ${visibility} successfully`);
+      toast.success(`Testimonial ${visibility} successfully`);
     } catch (error) {
       console.error(error);
-      alert("Error updating testimonial");
+      toast.error("Error updating testimonial");
     }
   };
 
@@ -115,11 +116,7 @@ const ManageTestimonials = () => {
                 <div className="flex flex-wrap gap-3 mt-4">
                   <button
                     onClick={() =>
-                      updateVisibility(
-                        t.alumniId,
-                        t.testimonialId,
-                        "approved"
-                      )
+                      updateVisibility(t.alumniId, t.testimonialId, "approved")
                     }
                     disabled={t.visibility === "approved"}
                     className={`px-4 py-2 rounded-lg text-white text-sm sm:text-base ${
@@ -133,11 +130,7 @@ const ManageTestimonials = () => {
 
                   <button
                     onClick={() =>
-                      updateVisibility(
-                        t.alumniId,
-                        t.testimonialId,
-                        "rejected"
-                      )
+                      updateVisibility(t.alumniId, t.testimonialId, "rejected")
                     }
                     disabled={t.visibility === "rejected"}
                     className={`px-4 py-2 rounded-lg text-white text-sm sm:text-base ${
