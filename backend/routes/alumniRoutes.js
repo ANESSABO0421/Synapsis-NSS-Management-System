@@ -70,6 +70,7 @@ import {
   getAlumniProfile,
   updateAlumniProfile,
   getAllTestimonials,
+  getAllImages,
 } from "../controllers/alumniController.js";
 import {
   adminOnly,
@@ -148,6 +149,8 @@ alumniRouter.put(
   upload.single("profileImage"),
   updateAlumniProfile
 );
+
+alumniRouter.get("/allinstituteimages",protect,alumniOnly,getAllImages)
 
 alumniRouter.get("/testimonials", protect, superAdminOnly, getAllTestimonials);
 

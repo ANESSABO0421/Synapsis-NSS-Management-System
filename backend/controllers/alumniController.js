@@ -310,6 +310,7 @@ import Alumni from "../models/Alumni.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import cloudinary from "../utils/cloudinary.js";
 import Mentorship from "../models/Mentorship.js";
+import Event from "../models/Event.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex =
@@ -790,6 +791,25 @@ export const getAllTestimonials = async (req, res) => {
       success: true,
       testimonials: result,
     });
+  } catch (error) {
+    console.error("Fetch testimonials error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getAllImages = async (req, res) => {
+  try {
+    const alumniId = req.user.id;
+    const alumni = await Alumni.findById(alumniId);
+    if (!alumni) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Alumni Not found" });
+    }
+    const alumniInstitute = alumni.institution;
+    const EventofInstitute = await Event.find({ institution: alumniInstitute });
+    const allImages = EventofInstitute.flatMap((event) => event.images || []);
+    res.json({ success: true, images: allImages });
   } catch (error) {
     console.error("Fetch testimonials error:", error);
     return res.status(500).json({ success: false, message: error.message });

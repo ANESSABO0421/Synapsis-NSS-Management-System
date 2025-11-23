@@ -73,6 +73,7 @@ import StudentMentorshipLayout from "./pages/student/StudentMentorshipLayout";
 import AlumniFeedback from "./pages/Alumni/AlumniFeedback";
 import AddMemory from "./pages/student/AddMemory";
 import EventAlbum from "./pages/EventAlbum";
+import AlumniGallery from "./pages/Alumni/AlumniGallery";
 
 const App = () => {
   return (
@@ -191,6 +192,10 @@ const App = () => {
             <Route
               path="/alumnilayout/feedback"
               element={<AlumniFeedback />}
+            />
+            <Route
+              path="/alumnilayout/gallery"
+              element={<AlumniGallery />}
             />
             <Route
               path="/alumnilayout/testimonials"
