@@ -1033,6 +1033,7 @@ export const getMyEvents = async (req, res) => {
       _id: e._id,
       title: e.title,
       date: e.date,
+      description:e.description,
       location: e.location,
       status: e.status,
       hours: e.hours,

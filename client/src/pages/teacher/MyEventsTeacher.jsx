@@ -38,6 +38,7 @@ const MyEventsTeacher = () => {
       const res = await axios.get("http://localhost:3000/api/teacher/teachermyevents", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(res.data)
 
       if (res.data.success) {
         setEvents(res.data.data);
