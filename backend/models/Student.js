@@ -103,20 +103,26 @@ const StudentSchema = new mongoose.Schema(
 
     // Grace mark Recommendation
     pendingGraceRecommendation: {
-      marks: { type: Number, default: 0 },
-      reason: { type: String, default: "" },
-      recommendedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Coordinator",
-      },
-      assignedTeachers: [
-        { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
-      ],
-      status: {
-        type: String,
-        enum: ["pending", "approved", "rejected"],
-        default: "pending",
-      },
+      type: new mongoose.Schema(
+        {
+          marks: { type: Number, default: 0 },
+          reason: { type: String, default: "" },
+          recommendedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Coordinator",
+          },
+          assignedTeachers: [
+            { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
+          ],
+          status: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "pending",
+          },
+        },
+        { _id: false }
+      ),
+      default: null,
     },
     assignedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
 
