@@ -535,7 +535,9 @@ export const generateAttendancePdf = async (req, res) => {
     }
 
     const total = event.attendance.length;
-    const present = event.attendance.filter((a) => a.status === "Present").length;
+    const present = event.attendance.filter(
+      (a) => a.status === "Present"
+    ).length;
     const percent = total ? ((present / total) * 100).toFixed(2) : 0;
 
     // === AI Insight ===
@@ -546,7 +548,8 @@ export const generateAttendancePdf = async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "You write formal, impressive NSS-style attendance insights.",
+            content:
+              "You write formal, impressive NSS-style attendance insights.",
           },
           {
             role: "user",
@@ -586,7 +589,10 @@ Focus on social impact, volunteer engagement, and community value.`,
     doc.rect(0, 0, pageWidth, 80).fill(primaryColor);
     doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(22);
     doc.text(event.title.toUpperCase(), 0, 28, { align: "center" });
-    doc.fontSize(13).font("Helvetica").text("Attendance Report", 0, 55, { align: "center" });
+    doc
+      .fontSize(13)
+      .font("Helvetica")
+      .text("Attendance Report", 0, 55, { align: "center" });
 
     doc.lineWidth(1.2).strokeColor(borderColor);
     doc.rect(40, 100, pageWidth - 80, pageHeight - 160).stroke();
@@ -599,7 +605,11 @@ Focus on social impact, volunteer engagement, and community value.`,
     doc.text(`Attendance Rate: ${percent}%`, 60, 200);
 
     const aiStartY = 240;
-    doc.font("Helvetica-Bold").fontSize(14).fillColor(primaryColor).text("AI Attendance Insight", 60, aiStartY, { underline: true });
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .fillColor(primaryColor)
+      .text("AI Attendance Insight", 60, aiStartY, { underline: true });
 
     const aiTextHeight = doc.heightOfString(aiInsight, {
       width: pageWidth - 120,
@@ -607,12 +617,16 @@ Focus on social impact, volunteer engagement, and community value.`,
       lineGap: 4,
     });
 
-    doc.font("Helvetica").fontSize(11).fillColor("black").text(aiInsight, 60, aiStartY + 25, {
-      width: pageWidth - 120,
-      align: "justify",
-      indent: 25,
-      lineGap: 4,
-    });
+    doc
+      .font("Helvetica")
+      .fontSize(11)
+      .fillColor("black")
+      .text(aiInsight, 60, aiStartY + 25, {
+        width: pageWidth - 120,
+        align: "justify",
+        indent: 25,
+        lineGap: 4,
+      });
 
     const tableX = 60;
     const tableWidth = pageWidth - 120;
@@ -644,7 +658,7 @@ Focus on social impact, volunteer engagement, and community value.`,
       // event-wise grace mark
       const eventMark =
         s?.graceHistory?.find(
-          h => h.eventId?.toString() === event._id.toString()
+          (h) => h.eventId?.toString() === event._id.toString()
         )?.marks || 0;
 
       doc.rect(tableX, y, tableWidth, rowHeight).fillAndStroke(bg, "#c5cae9");
@@ -671,17 +685,25 @@ Focus on social impact, volunteer engagement, and community value.`,
     });
 
     doc.fontSize(60).fillColor("#e8f5e9").opacity(0.15);
-    doc.rotate(-30, { origin: [pageWidth /2, pageHeight /2] });
-    doc.text("NSS", pageWidth /2 - 100, pageHeight /2);
+    doc.rotate(-30, { origin: [pageWidth / 2, pageHeight / 2] });
+    doc.text("NSS", pageWidth / 2 - 100, pageHeight / 2);
     doc.rotate(30).opacity(1);
 
-    doc.moveTo(50, pageHeight - 80).lineTo(pageWidth - 50, pageHeight - 80).strokeColor(borderColor).lineWidth(1.2).stroke();
-    doc.fontSize(10).fillColor("gray").text(
-      "Generated automatically by NSS Attendance Management System | AI Insights powered by OpenAI",
-      0,
-      pageHeight - 65,
-      { align: "center" }
-    );
+    doc
+      .moveTo(50, pageHeight - 80)
+      .lineTo(pageWidth - 50, pageHeight - 80)
+      .strokeColor(borderColor)
+      .lineWidth(1.2)
+      .stroke();
+    doc
+      .fontSize(10)
+      .fillColor("gray")
+      .text(
+        "Generated automatically by NSS Attendance Management System | AI Insights powered by OpenAI",
+        0,
+        pageHeight - 65,
+        { align: "center" }
+      );
 
     doc.end();
 
@@ -693,12 +715,6 @@ Focus on social impact, volunteer engagement, and community value.`,
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
-
-
-
-
 
 // grace mark assigning
 // export const assignGraceMark = async (req, res) => {
@@ -774,7 +790,6 @@ Focus on social impact, volunteer engagement, and community value.`,
 //   }
 // };
 
-
 // test
 export const assignGraceMark = async (req, res) => {
   try {
@@ -782,10 +797,12 @@ export const assignGraceMark = async (req, res) => {
 
     const student = await Student.findById(studentId);
     if (!student)
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
 
     const exists = student.graceHistory.some(
-      h => h.eventId.toString() === eventId
+      (h) => h.eventId.toString() === eventId
     );
 
     if (exists) {
@@ -798,7 +815,7 @@ export const assignGraceMark = async (req, res) => {
     student.graceHistory.push({
       eventId,
       marks: Number(marks),
-      date: new Date()
+      date: new Date(),
     });
 
     await student.save(); // auto recalculates total
@@ -809,7 +826,6 @@ export const assignGraceMark = async (req, res) => {
   }
 };
 
-
 export const updateGraceMark = async (req, res) => {
   try {
     const { studentId, eventId } = req.params;
@@ -817,10 +833,12 @@ export const updateGraceMark = async (req, res) => {
 
     const student = await Student.findById(studentId);
     if (!student)
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
 
     const record = student.graceHistory.find(
-      h => h.eventId.toString() === eventId
+      (h) => h.eventId.toString() === eventId
     );
 
     if (!record)
@@ -839,36 +857,31 @@ export const updateGraceMark = async (req, res) => {
   }
 };
 
-
 export const deleteGraceMark = async (req, res) => {
   try {
     const { studentId, eventId } = req.params;
 
     const student = await Student.findById(studentId);
     if (!student)
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Student not found" });
 
     student.graceHistory = student.graceHistory.filter(
-      h => h.eventId.toString() !== eventId
+      (h) => h.eventId.toString() !== eventId
     );
 
     await student.save(); // auto recalculates
 
-    res.json({ success: true, message: "Grace mark removed for event", student });
+    res.json({
+      success: true,
+      message: "Grace mark removed for event",
+      student,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
-
-
-
-
-
-
-
-
 
 // gracemark recommended by coordinator approve
 // ✅ Approve or reject a pending grace mark recommendation
@@ -1309,7 +1322,7 @@ export const getMyEvents = async (req, res) => {
       _id: e._id,
       title: e.title,
       date: e.date,
-      description:e.description,
+      description: e.description,
       location: e.location,
       status: e.status,
       hours: e.hours,
@@ -1446,8 +1459,6 @@ export const editEvent = async (req, res) => {
   }
 };
 
-
-
 // ==============================
 // 🟢 Get Teacher Profile
 // ==============================
@@ -1455,11 +1466,14 @@ export const getTeacherProfile = async (req, res) => {
   try {
     const teacherId = req.user._id; // ✅ from auth middleware
 
-    const teacher = await Teacher.findById(teacherId)
-      .select("-password -otp -otpExpiry -__v");
+    const teacher = await Teacher.findById(teacherId).select(
+      "-password -otp -otpExpiry -__v"
+    );
 
     if (!teacher) {
-      return res.status(404).json({ success: false, message: "Teacher not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found" });
     }
 
     res.status(200).json({
@@ -1469,7 +1483,9 @@ export const getTeacherProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching teacher profile:", error);
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -1502,7 +1518,9 @@ export const updateTeacherProfile = async (req, res) => {
     ).select("-password -otp -otpExpiry -__v");
 
     if (!updatedTeacher) {
-      return res.status(404).json({ success: false, message: "Teacher not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Teacher not found" });
     }
 
     res.status(200).json({
@@ -1512,6 +1530,36 @@ export const updateTeacherProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating teacher profile:", error);
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// GET participants of a specific event with event-wise grace marks
+export const getParticipantsOfEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+    }
+
+    // Fetch only students assigned to this event
+    const participants = await Student.find({
+      assignedEvents: eventId,
+    })
+      .select("name email department graceHistory assignedEvents")
+      .populate("graceHistory.eventId", "_id title")
+      .lean();
+    
+
+    return res.json({ success: true, participants });
+  } catch (err) {
+    console.error("Error fetching participants:", err);
+    return res.status(500).json({ success: false, message: err.message });
   }
 };

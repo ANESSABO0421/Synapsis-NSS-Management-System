@@ -2,12 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import {
-  FaUserGraduate,
-  FaClipboardCheck,
-  FaEdit,
-  FaTrash,
-} from "react-icons/fa";
+import { FaUserGraduate, FaClipboardCheck, FaEdit, FaTrash } from "react-icons/fa";
 
 const AssignGraceMark = () => {
   const [events, setEvents] = useState([]);
@@ -19,126 +14,157 @@ const AssignGraceMark = () => {
   const API_BASE = "http://localhost:3000/api";
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const loadEvents = async () => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(`${API_BASE}/teacher/teachermyevents`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const completedEvents =
-          res.data.data?.filter((e) => e.status === "Completed") || [];
-        setEvents(completedEvents);
+        setEvents(res.data.data.filter((e) => e.status === "Completed"));
       } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch events");
+        toast.error("Failed to load events");
       }
     };
-    fetchEvents();
+
+    loadEvents();
   }, []);
 
   useEffect(() => {
-    const fetchParticipants = async () => {
+    const loadParticipants = async () => {
       if (!selectedEvent) return;
+
       try {
+        const token = localStorage.getItem("token");
+
         const res = await axios.get(
-          `${API_BASE}/events/participantsofevents/${selectedEvent}`
+          `${API_BASE}/teacher/participantsofevents/${selectedEvent}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+
         const list = res.data.participants || [];
         setParticipants(list);
 
-        // build marks map
         const marksObj = {};
-        list.forEach((p) => {
-          marksObj[p._id] =
-            p.graceMarks && !isNaN(p.graceMarks) ? p.graceMarks : "";
+
+        list.forEach((student) => {
+          const record = student.graceHistory?.find((h) => {
+            const id = h.eventId?._id || h.eventId;
+            return id === selectedEvent;
+          });
+
+          marksObj[student._id] = record ? record.marks : "";
         });
+
         setMarks(marksObj);
       } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch participants");
+        toast.error("Failed to load participants");
       }
     };
-    fetchParticipants();
+
+    loadParticipants();
   }, [selectedEvent]);
 
-  const handleAssignOrUpdate = async (studentId, type) => {
-    const studentMarks = marks[studentId];
-    if (studentMarks === "" || studentMarks === undefined) {
-      toast.warn("Enter valid marks first!");
+  const refresh = async () => {
+    if (!selectedEvent) return;
+
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      `${API_BASE}/teacher/participantsofevents/${selectedEvent}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const list = res.data.participants || [];
+    setParticipants(list);
+
+    const marksObj = {};
+
+    list.forEach((student) => {
+      const record = student.graceHistory?.find((h) => {
+        const id = h.eventId?._id || h.eventId;
+        return id === selectedEvent;
+      });
+      marksObj[student._id] = record ? record.marks : "";
+    });
+
+    setMarks(marksObj);
+  };
+
+  const applyMarks = async (studentId, type) => {
+    const value = marks[studentId];
+
+    if (value === "" || isNaN(value)) {
+      toast.warn("Enter valid marks");
       return;
     }
 
     setLoading(true);
+
     try {
       const token = localStorage.getItem("token");
-      const payload = {
-        studentId,
-        eventId: selectedEvent,
-        marks: Number(studentMarks),
-      };
 
       if (type === "assign") {
-        await axios.post(`${API_BASE}/teacher/grace-marks`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        toast.success("Grace marks assigned ✅");
-      } else {
-        await axios.put(
-          `${API_BASE}/teacher/grace-marks/${studentId}`,
-          { marks: Number(studentMarks) },
+        await axios.post(
+          `${API_BASE}/teacher/grace-marks`,
+          { studentId, eventId: selectedEvent, marks: Number(value) },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        toast.success("Grace marks updated 🔄");
+        toast.success("Assigned");
+      } else {
+        await axios.put(
+          `${API_BASE}/teacher/update/${studentId}/${selectedEvent}`,
+          { marks: Number(value) },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        toast.success("Updated");
       }
+
+      await refresh();
     } catch (err) {
-      console.error(err);
-      toast.error("the mark is assigned for the event already");
-    } finally {
-      setLoading(false);
+      toast.error(err.response?.data?.message || "Action failed");
     }
+
+    setLoading(false);
   };
 
-  const handleDelete = async (studentId) => {
-    if (!window.confirm("Delete this student's grace marks?")) return;
+  const deleteMarks = async (studentId) => {
+    if (!window.confirm("Delete marks for this event?")) return;
 
     setLoading(true);
+
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${API_BASE}/teacher/grace-marks/${studentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
 
-      setMarks({ ...marks, [studentId]: "" });
-      toast.success("Grace marks deleted 🗑️");
+      await axios.delete(
+        `${API_BASE}/teacher/delete/${studentId}/${selectedEvent}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Deleted");
+      await refresh();
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete grace marks");
-    } finally {
-      setLoading(false);
+      toast.error("Failed");
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-100 p-8">
+    <div className="p-4 md:p-8 bg-green-50 min-h-screen">
       <motion.h1
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-4xl font-extrabold text-green-800 text-center mb-10"
+        className="text-3xl md:text-4xl font-bold text-green-800 text-center mb-10"
       >
-        🌱 Manage Grace Marks
+        🌱 Manage Event-wise Grace Marks
       </motion.h1>
 
-      {/* Event Selector */}
-      <div className="max-w-2xl mx-auto mb-10 bg-white p-6 rounded-xl shadow-md border border-green-100">
-        <label className="block text-lg font-semibold mb-3 text-green-700">
-          Select Completed Event
-        </label>
+      <div className="max-w-xl mx-auto bg-white p-5 rounded-lg shadow">
         <select
+          className="w-full p-3 border rounded-lg"
           value={selectedEvent}
           onChange={(e) => setSelectedEvent(e.target.value)}
-          className="w-full p-3 rounded-lg border border-green-300 shadow-sm focus:ring-2 focus:ring-green-500 bg-white transition-all"
         >
-          <option value="">-- Select Event --</option>
+          <option value="">Select Completed Event</option>
           {events.map((event) => (
             <option key={event._id} value={event._id}>
               {event.title}
@@ -147,103 +173,80 @@ const AssignGraceMark = () => {
         </select>
       </div>
 
-      {/* Participants Table */}
       {selectedEvent && (
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white shadow-2xl rounded-2xl p-6 max-w-6xl mx-auto border border-green-100"
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <FaClipboardCheck className="text-green-600 text-2xl" />
-            <h2 className="text-2xl font-semibold text-green-700">
-              Event Participants
-            </h2>
-          </div>
+        <div className="max-w-6xl mx-auto mt-8 bg-white shadow rounded-lg p-4 overflow-x-auto">
+          <table className="w-full min-w-[800px] border">
+            <thead>
+              <tr className="bg-green-100 text-green-800">
+                <th className="p-2">Name</th>
+                <th className="p-2">Email</th>
+                <th className="p-2 text-center">Current</th>
+                <th className="p-2 text-center">New Marks</th>
+                <th className="p-2 text-center">Actions</th>
+              </tr>
+            </thead>
 
-          {participants.length === 0 ? (
-            <p className="text-gray-600 text-center py-6">
-              No participants found for this event.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full border border-gray-200 rounded-xl text-sm md:text-base">
-                <thead>
-                  <tr className="bg-green-100 text-green-800">
-                    <th className="px-4 py-2 text-left">Name</th>
-                    <th className="px-4 py-2 text-left">Email</th>
-                    <th className="px-4 py-2 text-center">Current</th>
-                    <th className="px-4 py-2 text-center">New Marks</th>
-                    <th className="px-4 py-2 text-center">Actions</th>
+            <tbody>
+              {participants.map((s) => {
+                const record = s.graceHistory?.find((h) => {
+                  const id = h.eventId?._id || h.eventId;
+                  return id === selectedEvent;
+                });
+
+                const current = record ? record.marks : "—";
+
+                return (
+                  <tr key={s._id} className="border-b hover:bg-green-50">
+                    <td className="p-2 flex items-center gap-2">
+                      <FaUserGraduate className="text-green-600" />
+                      {s.name}
+                    </td>
+                    <td className="p-2">{s.email}</td>
+                    <td className="p-2 text-center">{current}</td>
+                    <td className="p-2 text-center">
+                      <input
+                        type="number"
+                        value={marks[s._id]}
+                        onChange={(e) =>
+                          setMarks({ ...marks, [s._id]: e.target.value })
+                        }
+                        className="w-20 p-1 border rounded text-center"
+                      />
+                    </td>
+                    <td className="p-2 text-center space-x-2">
+                      <button
+                        className="bg-green-600 text-white px-3 py-1 rounded"
+                        onClick={() => applyMarks(s._id, "assign")}
+                      >
+                        Assign
+                      </button>
+
+                      <button
+                        className="bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => applyMarks(s._id, "update")}
+                      >
+                        <FaEdit />
+                      </button>
+
+                      <button
+                        className="bg-red-600 text-white px-3 py-1 rounded"
+                        onClick={() => deleteMarks(s._id)}
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {participants.map((student) => (
-                    <motion.tr
-                      key={student._id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="border-t hover:bg-green-50 transition-all"
-                    >
-                      <td className="px-4 py-2 flex items-center gap-2 font-medium text-gray-800">
-                        <FaUserGraduate className="text-green-600" />
-                        {student.name}
-                      </td>
-                      <td className="px-4 py-2 text-gray-600">
-                        {student.email}
-                      </td>
-                      <td className="px-4 py-2 text-center font-semibold text-green-700">
-                        {student.graceMarks ?? "—"}
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <input
-                          type="number"
-                          min="0"
-                          max="10"
-                          value={marks[student._id] ?? ""}
-                          onChange={(e) =>
-                            setMarks({
-                              ...marks,
-                              [student._id]: e.target.value,
-                            })
-                          }
-                          className="w-24 border border-green-300 rounded-md p-1 text-center focus:ring-2 focus:ring-green-500 focus:border-green-400 transition-all shadow-sm"
-                        />
-                      </td>
-                      <td className="px-4 py-2 text-center space-x-2">
-                        <button
-                          onClick={() =>
-                            handleAssignOrUpdate(student._id, "assign")
-                          }
-                          disabled={loading}
-                          className="bg-green-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-green-700 transition disabled:opacity-50"
-                        >
-                          Assign
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleAssignOrUpdate(student._id, "update")
-                          }
-                          disabled={loading}
-                          className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700 transition disabled:opacity-50"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(student._id)}
-                          disabled={loading}
-                          className="bg-red-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-700 transition disabled:opacity-50"
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                );
+              })}
+            </tbody>
+          </table>
+
+          {participants.length === 0 && (
+            <p className="text-center text-gray-600 py-4">
+              No participants found.
+            </p>
           )}
-        </motion.div>
+        </div>
       )}
     </div>
   );
