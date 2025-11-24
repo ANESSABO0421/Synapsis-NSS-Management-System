@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
   const sectionRef = useRef(null);
@@ -11,6 +12,7 @@ const Hero = () => {
   const buttonsRef = useRef(null);
   const blob1Ref = useRef(null);
   const blob2Ref = useRef(null);
+  const navigate=useNavigate()
 
   const bgImages = [
     "/Images/IMG2.png",
@@ -126,13 +128,13 @@ const Hero = () => {
           ref={buttonsRef}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-500 rounded-full font-semibold shadow-lg hover:scale-105 hover:shadow-2xl hover:from-green-700 hover:to-blue-600 transition-all duration-300">
+          <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-500 rounded-full font-semibold shadow-lg hover:scale-105 hover:shadow-2xl hover:from-green-700 hover:to-blue-600 transition-all duration-300" onClick={()=>navigate("/login")}>
             Get Started
           </button>
 
-          <button className="px-8 py-4 border-2 border-green-400/70 rounded-full font-semibold text-green-300 hover:bg-gradient-to-r hover:from-green-500 hover:to-teal-500 hover:text-white transition-all duration-300 shadow-md" onClick={()=>window.scrollTo("smooth",500,500)}>
+          {/* <button className="px-8 py-4 border-2 border-green-400/70 rounded-full font-semibold text-green-300 hover:bg-gradient-to-r hover:from-green-500 hover:to-teal-500 hover:text-white transition-all duration-300 shadow-md" onClick={()=>window.scrollTo("smooth",500,500)}>
             Explore Features
-          </button>
+          </button> */}
         </div>
       </div>
 

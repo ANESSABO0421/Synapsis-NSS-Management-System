@@ -325,12 +325,209 @@ export const markAttendance = async (req, res) => {
 //   }
 // };
 
+// export const generateAttendancePdf = async (req, res) => {
+//   try {
+//     const event = await Event.findById(req.params.eventId).populate(
+//       "attendance.student",
+//       "name department graceMarks"
+//     );
+//     if (!event) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Event not found" });
+//     }
+
+//     const total = event.attendance.length;
+//     const present = event.attendance.filter(
+//       (a) => a.status === "Present"
+//     ).length;
+//     const percent = total ? ((present / total) * 100).toFixed(2) : 0;
+
+//     // === AI Insight ===
+//     let aiInsight = "AI insight could not be generated.";
+//     try {
+//       const completion = await openai.chat.completions.create({
+//         model: "gpt-4o-mini",
+//         messages: [
+//           {
+//             role: "system",
+//             content:
+//               "You write formal, impressive NSS-style attendance insights.",
+//           },
+//           {
+//             role: "user",
+//             content: `Generate a 3-sentence formal paragraph for an NSS attendance report based on:
+// Event: ${event.title}
+// Date: ${new Date(event.date).toDateString()}
+// Location: ${event.location}
+// Attendance Rate: ${percent}%
+// Total Volunteers: ${total}
+// Focus on social impact, volunteer engagement, and community value.`,
+//           },
+//         ],
+//       });
+//       aiInsight = completion.choices[0]?.message?.content?.trim() || aiInsight;
+//     } catch (err) {
+//       console.error("AI Error:", err.message);
+//     }
+
+//     // === PDF GENERATION ===
+//     const doc = new PDFDocument({ margin: 50 });
+//     const folder = "uploads";
+//     if (!fs.existsSync(folder)) fs.mkdirSync(folder);
+
+//     const fileName = `attendance_${event._id}.pdf`;
+//     const filePath = path.join(folder, fileName);
+//     const stream = fs.createWriteStream(filePath);
+//     doc.pipe(stream);
+
+//     const pageWidth = doc.page.width;
+//     const pageHeight = doc.page.height;
+
+//     // === GREEN THEME (Replaced Blue) ===
+//     const primaryColor = "#2e7d32"; // Deep Green
+//     const borderColor = "#4caf50"; // Light Green
+//     const lightBg = "#e8f5e9"; // Very Light Green
+
+//     // === HEADER BAR (Now with Event Name & Green) ===
+//     doc.rect(0, 0, pageWidth, 80).fill(primaryColor);
+//     doc
+//       .fillColor("#ffffff")
+//       .font("Helvetica-Bold")
+//       .fontSize(22)
+//       .text(event.title.toUpperCase(), 0, 28, { align: "center" }); // ← EVENT NAME
+//     doc
+//       .fontSize(13)
+//       .font("Helvetica")
+//       .text("Attendance Report", 0, 55, { align: "center" });
+
+//     // === BORDER BOX ===
+//     doc.lineWidth(1.2).strokeColor(borderColor);
+//     doc.rect(40, 100, pageWidth - 80, pageHeight - 160).stroke();
+
+//     // === EVENT DETAILS ===
+//     doc.fillColor("black").font("Helvetica").fontSize(12);
+//     doc.text(`Date: ${new Date(event.date).toLocaleDateString()}`, 60, 120);
+//     doc.text(`Location: ${event.location}`, 60, 140);
+//     doc.text(`Hours: ${event.hours || "-"} hrs`, 60, 160);
+//     doc.text(`Total Volunteers: ${total}`, 60, 180);
+//     doc.text(`Attendance Rate: ${percent}%`, 60, 200);
+
+//     // === AI INSIGHT SECTION ===
+//     const aiStartY = 240;
+//     doc
+//       .font("Helvetica-Bold")
+//       .fontSize(14)
+//       .fillColor(primaryColor)
+//       .text("AI Attendance Insight", 60, aiStartY, {
+//         underline: true,
+//       });
+
+//     const aiTextHeight = doc.heightOfString(aiInsight, {
+//       width: pageWidth - 120,
+//       align: "justify",
+//       lineGap: 4,
+//     });
+
+//     doc
+//       .font("Helvetica")
+//       .fontSize(11)
+//       .fillColor("black")
+//       .text(aiInsight, 60, aiStartY + 25, {
+//         width: pageWidth - 120,
+//         align: "justify",
+//         indent: 25,
+//         lineGap: 4,
+//       });
+
+//     // === TABLE SETUP (Fits perfectly inside border) ===
+//     const tableX = 60;
+//     const tableWidth = pageWidth - 120;
+//     const colWidths = [40, 120, 130, 80, 90];
+//     const headers = ["No.", "Name", "Department", "Status", "Grace Marks"];
+
+//     let y = aiStartY + aiTextHeight + 50;
+
+//     // === TABLE HEADER ===
+//     doc.rect(tableX, y, tableWidth, 28).fillAndStroke(lightBg, borderColor);
+//     doc.fillColor(primaryColor).font("Helvetica-Bold").fontSize(11);
+//     let x = tableX + 10;
+//     headers.forEach((h, i) => {
+//       const align = i === 0 || i === 4 ? "center" : "left";
+//       doc.text(h, x, y + 8, { width: colWidths[i] - 10, align });
+//       x += colWidths[i];
+//     });
+//     y += 28;
+
+//     // === TABLE ROWS ===
+//     doc.font("Helvetica").fontSize(10).fillColor("black");
+//     event.attendance.forEach((a, i) => {
+//       const s = a.student || {};
+//       const bg = i % 2 === 0 ? "#ffffff" : "#f9f9f9";
+//       const rowHeight = 25;
+
+//       doc.rect(tableX, y, tableWidth, rowHeight).fillAndStroke(bg, "#c5cae9");
+//       let x = tableX + 10;
+//       const row = [
+//         i + 1,
+//         s.name || "-",
+//         s.department || "-",
+//         a.status || "-",
+//         s.graceMarks || 0,
+//       ];
+
+//       row.forEach((val, j) => {
+//         const align = j === 0 || j === 4 ? "center" : "left";
+//         doc.fillColor("black").text(String(val), x, y + 7, {
+//           width: colWidths[j] - 10,
+//           align,
+//         });
+//         x += colWidths[j];
+//       });
+//       y += rowHeight;
+//     });
+
+//     // === WATERMARK (Updated to Green) ===
+//     doc.fontSize(60).fillColor("#e8f5e9").opacity(0.15);
+//     doc.rotate(-30, { origin: [pageWidth / 2, pageHeight / 2] });
+//     doc.text("NSS", pageWidth / 2 - 100, pageHeight / 2);
+//     doc.rotate(30).opacity(1);
+
+//     // === FOOTER ===
+//     doc
+//       .moveTo(50, pageHeight - 80)
+//       .lineTo(pageWidth - 50, pageHeight - 80)
+//       .strokeColor(borderColor)
+//       .lineWidth(1.2)
+//       .stroke();
+//     doc
+//       .fontSize(10)
+//       .fillColor("gray")
+//       .text(
+//         "Generated automatically by NSS Attendance Management System | AI Insights powered by OpenAI",
+//         0,
+//         pageHeight - 65,
+//         { align: "center" }
+//       );
+
+//     doc.end();
+
+//     stream.on("finish", () => {
+//       res.download(filePath, fileName, () => fs.unlinkSync(filePath));
+//     });
+//   } catch (error) {
+//     console.error("PDF Generation Error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 export const generateAttendancePdf = async (req, res) => {
   try {
     const event = await Event.findById(req.params.eventId).populate(
       "attendance.student",
-      "name department graceMarks"
+      "name department graceHistory"
     );
+
     if (!event) {
       return res
         .status(404)
@@ -338,9 +535,7 @@ export const generateAttendancePdf = async (req, res) => {
     }
 
     const total = event.attendance.length;
-    const present = event.attendance.filter(
-      (a) => a.status === "Present"
-    ).length;
+    const present = event.attendance.filter((a) => a.status === "Present").length;
     const percent = total ? ((present / total) * 100).toFixed(2) : 0;
 
     // === AI Insight ===
@@ -351,8 +546,7 @@ export const generateAttendancePdf = async (req, res) => {
         messages: [
           {
             role: "system",
-            content:
-              "You write formal, impressive NSS-style attendance insights.",
+            content: "You write formal, impressive NSS-style attendance insights.",
           },
           {
             role: "user",
@@ -384,28 +578,19 @@ Focus on social impact, volunteer engagement, and community value.`,
     const pageWidth = doc.page.width;
     const pageHeight = doc.page.height;
 
-    // === GREEN THEME (Replaced Blue) ===
-    const primaryColor = "#2e7d32"; // Deep Green
-    const borderColor = "#4caf50"; // Light Green
-    const lightBg = "#e8f5e9"; // Very Light Green
+    const primaryColor = "#2e7d32";
+    const borderColor = "#4caf50";
+    const lightBg = "#e8f5e9";
 
-    // === HEADER BAR (Now with Event Name & Green) ===
+    // HEADER
     doc.rect(0, 0, pageWidth, 80).fill(primaryColor);
-    doc
-      .fillColor("#ffffff")
-      .font("Helvetica-Bold")
-      .fontSize(22)
-      .text(event.title.toUpperCase(), 0, 28, { align: "center" }); // ← EVENT NAME
-    doc
-      .fontSize(13)
-      .font("Helvetica")
-      .text("Attendance Report", 0, 55, { align: "center" });
+    doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(22);
+    doc.text(event.title.toUpperCase(), 0, 28, { align: "center" });
+    doc.fontSize(13).font("Helvetica").text("Attendance Report", 0, 55, { align: "center" });
 
-    // === BORDER BOX ===
     doc.lineWidth(1.2).strokeColor(borderColor);
     doc.rect(40, 100, pageWidth - 80, pageHeight - 160).stroke();
 
-    // === EVENT DETAILS ===
     doc.fillColor("black").font("Helvetica").fontSize(12);
     doc.text(`Date: ${new Date(event.date).toLocaleDateString()}`, 60, 120);
     doc.text(`Location: ${event.location}`, 60, 140);
@@ -413,15 +598,8 @@ Focus on social impact, volunteer engagement, and community value.`,
     doc.text(`Total Volunteers: ${total}`, 60, 180);
     doc.text(`Attendance Rate: ${percent}%`, 60, 200);
 
-    // === AI INSIGHT SECTION ===
     const aiStartY = 240;
-    doc
-      .font("Helvetica-Bold")
-      .fontSize(14)
-      .fillColor(primaryColor)
-      .text("AI Attendance Insight", 60, aiStartY, {
-        underline: true,
-      });
+    doc.font("Helvetica-Bold").fontSize(14).fillColor(primaryColor).text("AI Attendance Insight", 60, aiStartY, { underline: true });
 
     const aiTextHeight = doc.heightOfString(aiInsight, {
       width: pageWidth - 120,
@@ -429,18 +607,13 @@ Focus on social impact, volunteer engagement, and community value.`,
       lineGap: 4,
     });
 
-    doc
-      .font("Helvetica")
-      .fontSize(11)
-      .fillColor("black")
-      .text(aiInsight, 60, aiStartY + 25, {
-        width: pageWidth - 120,
-        align: "justify",
-        indent: 25,
-        lineGap: 4,
-      });
+    doc.font("Helvetica").fontSize(11).fillColor("black").text(aiInsight, 60, aiStartY + 25, {
+      width: pageWidth - 120,
+      align: "justify",
+      indent: 25,
+      lineGap: 4,
+    });
 
-    // === TABLE SETUP (Fits perfectly inside border) ===
     const tableX = 60;
     const tableWidth = pageWidth - 120;
     const colWidths = [40, 120, 130, 80, 90];
@@ -448,32 +621,41 @@ Focus on social impact, volunteer engagement, and community value.`,
 
     let y = aiStartY + aiTextHeight + 50;
 
-    // === TABLE HEADER ===
     doc.rect(tableX, y, tableWidth, 28).fillAndStroke(lightBg, borderColor);
     doc.fillColor(primaryColor).font("Helvetica-Bold").fontSize(11);
+
     let x = tableX + 10;
     headers.forEach((h, i) => {
       const align = i === 0 || i === 4 ? "center" : "left";
       doc.text(h, x, y + 8, { width: colWidths[i] - 10, align });
       x += colWidths[i];
     });
+
     y += 28;
 
-    // === TABLE ROWS ===
+    // === TABLE ROWS (with correct event-wise grace marks) ===
     doc.font("Helvetica").fontSize(10).fillColor("black");
+
     event.attendance.forEach((a, i) => {
       const s = a.student || {};
       const bg = i % 2 === 0 ? "#ffffff" : "#f9f9f9";
       const rowHeight = 25;
 
+      // event-wise grace mark
+      const eventMark =
+        s?.graceHistory?.find(
+          h => h.eventId?.toString() === event._id.toString()
+        )?.marks || 0;
+
       doc.rect(tableX, y, tableWidth, rowHeight).fillAndStroke(bg, "#c5cae9");
+
       let x = tableX + 10;
       const row = [
         i + 1,
         s.name || "-",
         s.department || "-",
         a.status || "-",
-        s.graceMarks || 0,
+        eventMark,
       ];
 
       row.forEach((val, j) => {
@@ -484,31 +666,22 @@ Focus on social impact, volunteer engagement, and community value.`,
         });
         x += colWidths[j];
       });
+
       y += rowHeight;
     });
 
-    // === WATERMARK (Updated to Green) ===
     doc.fontSize(60).fillColor("#e8f5e9").opacity(0.15);
-    doc.rotate(-30, { origin: [pageWidth / 2, pageHeight / 2] });
-    doc.text("NSS", pageWidth / 2 - 100, pageHeight / 2);
+    doc.rotate(-30, { origin: [pageWidth /2, pageHeight /2] });
+    doc.text("NSS", pageWidth /2 - 100, pageHeight /2);
     doc.rotate(30).opacity(1);
 
-    // === FOOTER ===
-    doc
-      .moveTo(50, pageHeight - 80)
-      .lineTo(pageWidth - 50, pageHeight - 80)
-      .strokeColor(borderColor)
-      .lineWidth(1.2)
-      .stroke();
-    doc
-      .fontSize(10)
-      .fillColor("gray")
-      .text(
-        "Generated automatically by NSS Attendance Management System | AI Insights powered by OpenAI",
-        0,
-        pageHeight - 65,
-        { align: "center" }
-      );
+    doc.moveTo(50, pageHeight - 80).lineTo(pageWidth - 50, pageHeight - 80).strokeColor(borderColor).lineWidth(1.2).stroke();
+    doc.fontSize(10).fillColor("gray").text(
+      "Generated automatically by NSS Attendance Management System | AI Insights powered by OpenAI",
+      0,
+      pageHeight - 65,
+      { align: "center" }
+    );
 
     doc.end();
 
@@ -520,35 +693,115 @@ Focus on social impact, volunteer engagement, and community value.`,
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+
+
+
 // grace mark assigning
+// export const assignGraceMark = async (req, res) => {
+//   try {
+//     const { studentId, eventId, marks } = req.body;
+
+//     const student = await Student.findById(studentId);
+//     if (!student) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Student not found" });
+//     }
+
+//     // Check if already assigned for this event
+//     const alreadyAssigned = student.graceHistory.some(
+//       (record) => record.eventId.toString() === eventId
+//     );
+
+//     if (alreadyAssigned) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Grace marks already assigned for this event",
+//       });
+//     }
+
+//     // Add to history and update total
+//     student.graceHistory.push({ eventId, marks });
+//     student.graceMarks += Number(marks);
+
+//     await student.save();
+
+//     res.json({ success: true, message: "Grace marks assigned", student });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// export const updateGraceMark = async (req, res) => {
+//   try {
+//     const { studentId } = req.params;
+//     const { marks } = req.body;
+
+//     const student = await Student.findById(studentId);
+//     if (!student)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Student not found" });
+
+//     student.graceMarks = Number(marks);
+//     await student.save();
+
+//     res.json({ success: true, message: "Grace marks updated", student });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+// export const deleteGraceMark = async (req, res) => {
+//   try {
+//     const { studentId } = req.params;
+//     const student = await Student.findById(studentId);
+//     if (!student)
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Student not found" });
+
+//     student.graceMarks = 0; // 🧹 reset marks
+//     await student.save();
+
+//     res.json({ success: true, message: "Grace marks deleted", student });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+
+// test
 export const assignGraceMark = async (req, res) => {
   try {
     const { studentId, eventId, marks } = req.body;
 
     const student = await Student.findById(studentId);
-    if (!student) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
-    }
+    if (!student)
+      return res.status(404).json({ success: false, message: "Student not found" });
 
-    // Check if already assigned for this event
-    const alreadyAssigned = student.graceHistory.some(
-      (record) => record.eventId.toString() === eventId
+    const exists = student.graceHistory.some(
+      h => h.eventId.toString() === eventId
     );
 
-    if (alreadyAssigned) {
+    if (exists) {
       return res.status(400).json({
         success: false,
         message: "Grace marks already assigned for this event",
       });
     }
 
-    // Add to history and update total
-    student.graceHistory.push({ eventId, marks });
-    student.graceMarks += Number(marks);
+    student.graceHistory.push({
+      eventId,
+      marks: Number(marks),
+      date: new Date()
+    });
 
-    await student.save();
+    await student.save(); // auto recalculates total
 
     res.json({ success: true, message: "Grace marks assigned", student });
   } catch (error) {
@@ -556,43 +809,66 @@ export const assignGraceMark = async (req, res) => {
   }
 };
 
+
 export const updateGraceMark = async (req, res) => {
   try {
-    const { studentId } = req.params;
+    const { studentId, eventId } = req.params;
     const { marks } = req.body;
 
     const student = await Student.findById(studentId);
     if (!student)
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
+      return res.status(404).json({ success: false, message: "Student not found" });
 
-    student.graceMarks = Number(marks);
-    await student.save();
+    const record = student.graceHistory.find(
+      h => h.eventId.toString() === eventId
+    );
 
-    res.json({ success: true, message: "Grace marks updated", student });
+    if (!record)
+      return res.status(404).json({
+        success: false,
+        message: "No grace marks found for this event",
+      });
+
+    record.marks = Number(marks);
+
+    await student.save(); // auto recalculates
+
+    res.json({ success: true, message: "Event grace mark updated", student });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 export const deleteGraceMark = async (req, res) => {
   try {
-    const { studentId } = req.params;
+    const { studentId, eventId } = req.params;
+
     const student = await Student.findById(studentId);
     if (!student)
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
+      return res.status(404).json({ success: false, message: "Student not found" });
 
-    student.graceMarks = 0; // 🧹 reset marks
-    await student.save();
+    student.graceHistory = student.graceHistory.filter(
+      h => h.eventId.toString() !== eventId
+    );
 
-    res.json({ success: true, message: "Grace marks deleted", student });
+    await student.save(); // auto recalculates
+
+    res.json({ success: true, message: "Grace mark removed for event", student });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+
+
+
+
+
+
+
 
 // gracemark recommended by coordinator approve
 // ✅ Approve or reject a pending grace mark recommendation

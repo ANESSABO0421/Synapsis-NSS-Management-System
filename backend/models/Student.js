@@ -126,8 +126,8 @@ const StudentSchema = new mongoose.Schema(
     totalVolunteerHours: { type: Number, default: 0 },
     awards: [
       {
-        title: { type: String },          // e.g., "Bronze Volunteer"
-        description: { type: String },    // e.g., "Completed 10 hours"
+        title: { type: String }, // e.g., "Bronze Volunteer"
+        description: { type: String }, // e.g., "Completed 10 hours"
         date: { type: Date, default: Date.now },
       },
     ],
@@ -139,5 +139,14 @@ const StudentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// add the mark
+StudentSchema.pre("save", function (next) {
+  this.graceMarks = this.graceHistory.reduce(
+    (sum, rec) => sum + Number(rec.marks || 0),
+    0
+  );
+  next();
+});
 
 export default mongoose.model("student", StudentSchema);

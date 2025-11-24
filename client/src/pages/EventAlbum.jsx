@@ -25,7 +25,7 @@ const EventAlbum = () => {
       {/* Green Premium Background */}
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-green-100 to-green-200 px-8 py-14">
         <h1 className="text-5xl font-extrabold tracking-tight text-center mb-16 text-green-800 drop-shadow-[0_4px_8px_rgba(0,0,0,0.2)]">
-          NSS Green Premium Gallery 
+          Synapsis Gallery 
         </h1>
 
         {/* Premium Masonry Grid */}
