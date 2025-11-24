@@ -52,7 +52,7 @@ const AddMemoryPremium = () => {
 
     try {
       await axios.post(
-        `http://localhost:3000/api/students/${selectedEvent.id}/uploadimagesbystudent`,
+        `http://localhost:3000/api/students/${selectedEvent._id}/uploadimagesbystudent`,
         formData,
         {
           headers: {
