@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import Teacher from "../models/Teacher.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
@@ -11,7 +11,7 @@ import Event from "../models/Event.js";
 import Institution from "../models/Institution.js";
 import Coordinator from "../models/Coordinator.js";
 import { HfInference } from "@huggingface/inference";
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 
 const generateToken = (id) =>
   jwt.sign({ id, role: "teacher" }, process.env.JWT_SECRET, {
@@ -20,8 +20,8 @@ const generateToken = (id) =>
 
 const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
 
-const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
@@ -65,24 +65,16 @@ export const teacherSignUp = async (req, res) => {
     let verificationDocument = { url: "", public_id: "" };
 
     if (req.files?.profileImage?.[0]) {
-      const uploaded = await cloudinary.uploader.upload(
-        req.files.profileImage[0].path,
-        { folder: "teacher_profiles" }
-      );
       profileImage = {
-        url: uploaded.secure_url,
-        public_id: uploaded.public_id,
+        url: req.files.profileImage[0].path,
+        public_id: req.files.profileImage[0].filename || req.files.profileImage[0].path,
       };
     }
 
     if (req.files?.verificationDocument?.[0]) {
-      const uploaded = await cloudinary.uploader.upload(
-        req.files.verificationDocument[0].path,
-        { folder: "teacher_verify_documents" }
-      );
       verificationDocument = {
-        url: uploaded.secure_url,
-        public_id: uploaded.public_id,
+        url: req.files.verificationDocument[0].path,
+        public_id: req.files.verificationDocument[0].filename || req.files.verificationDocument[0].path,
       };
     } else {
       return res.status(400).json({
@@ -111,7 +103,7 @@ export const teacherSignUp = async (req, res) => {
     });
 
     // otp
-    await sendEmail(email, "Verify your Teacher account", `Your OTP is ${otp}`);
+    sendEmail(email, "Verify your Teacher account", `Your OTP is ${otp}`).catch(console.error);
 
     return res.status(201).json({
       success: true,
@@ -543,8 +535,8 @@ export const generateAttendancePdf = async (req, res) => {
     // === AI Insight ===
     let aiInsight = "AI insight could not be generated.";
     try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
         messages: [
           {
             role: "system",
@@ -699,7 +691,7 @@ Focus on social impact, volunteer engagement, and community value.`,
       .fontSize(10)
       .fillColor("gray")
       .text(
-        "Generated automatically by NSS Attendance Management System | AI Insights powered by OpenAI",
+        "Generated automatically by NSS Attendance Management System | AI Insights powered by Groq",
         0,
         pageHeight - 65,
         { align: "center" }

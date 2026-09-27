@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BiLayout, BiMenuAltLeft, BiX } from "react-icons/bi";
 import {
   FaUsers,
@@ -17,6 +20,7 @@ import { MdOutlineVolunteerActivism, MdRecommend } from "react-icons/md";
 import { File } from "lucide-react";
 
 const CoordinatorSidebar = () => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
@@ -102,22 +106,19 @@ const CoordinatorSidebar = () => {
         </h1>
         <nav>
           {navLinks.map((link) => (
-            <NavLink
+            <Link
               key={link.name}
-              to={link.path}
-              end
+              href={link.path}
               onClick={() => setIsOpen(false)} // Auto-close on mobile link click
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
-                  isActive
-                    ? "bg-green-600 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`
-              }
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
+                pathname === link.path
+                  ? "bg-green-600 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               {link.icon}
               {link.name}
-            </NavLink>
+            </Link>
           ))}
         </nav>
       </aside>

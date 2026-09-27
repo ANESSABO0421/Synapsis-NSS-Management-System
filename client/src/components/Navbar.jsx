@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { BiMenu, BiX, BiChevronDown } from "react-icons/bi";
 import { motion, AnimatePresence } from "framer-motion";

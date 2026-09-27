@@ -1,3 +1,7 @@
+"use client";
+
+import { getToken } from "@/utils/auth";
+import { API_URL } from "@/utils/config";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -5,7 +9,7 @@ import { toast } from "react-toastify";
 const MentorshipMeetingLinkModal = ({ mentorshipId, onClose }) => {
   const [link, setLink] = useState("");
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   // ===========================
   // FETCH EXISTING MEETING LINK
@@ -13,7 +17,7 @@ const MentorshipMeetingLinkModal = ({ mentorshipId, onClose }) => {
   const fetchLink = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/mentorship/mentor`,
+        `${API_URL}/api/mentorship/mentor`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -45,7 +49,7 @@ const MentorshipMeetingLinkModal = ({ mentorshipId, onClose }) => {
 
     try {
       await axios.put(
-        `http://localhost:3000/api/mentorship/${mentorshipId}/meeting-link`,
+        `${API_URL}/api/mentorship/${mentorshipId}/meeting-link`,
         { link },
         {
           headers: { Authorization: `Bearer ${token}` },

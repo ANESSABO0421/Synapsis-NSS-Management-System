@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Coordinator from "../models/Coordinator.js";
 import cloudinary from "../utils/cloudinary.js";
@@ -12,9 +12,9 @@ import Teacher from "../models/Teacher.js";
 import Institution from "../models/Institution.js";
 import { HfInference } from "@huggingface/inference";
 import Notification from "../models/Notification.js";
-import OpenAI from "openai";
-const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_KEY,
+import Groq from "groq-sdk";
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
@@ -68,27 +68,17 @@ export const coordinatorSignup = async (req, res) => {
     let verificationDocument = { url: "", public_id: "" };
 
     if (req.files?.profileImage?.[0]) {
-      const uploaded = await cloudinary.uploader.upload(
-        req.files.profileImage[0].path,
-        {
-          folder: "coordinator_profiles",
-        }
-      );
       profileImage = {
-        url: uploaded.secure_url,
-        public_id: uploaded.public_id,
+        url: req.files.profileImage[0].path,
+        public_id: req.files.profileImage[0].filename || req.files.profileImage[0].path,
       };
     }
 
     // verification document
     if (req.files?.verificationDocument?.[0]) {
-      const uploaded = await cloudinary.uploader.upload(
-        req.files.verificationDocument[0].path,
-        { folder: "coordinator_verify_documents" }
-      );
       verificationDocument = {
-        url: uploaded.secure_url,
-        public_id: uploaded.public_id,
+        url: req.files.verificationDocument[0].path,
+        public_id: req.files.verificationDocument[0].filename || req.files.verificationDocument[0].path,
       };
     } else {
       return res.status(400).json({
@@ -102,17 +92,20 @@ export const coordinatorSignup = async (req, res) => {
       phoneNumber,
       department,
       password: hashed,
-      otp,
-      verificationDocument,
-      otpExpiry,
-      profileImage,
       institution: institutionId,
+      role: "coordinator",
+      status: "pending",
+      profileImage,
+      verificationDocument,
+      otp,
+      otpExpiry,
     });
+    // Link to Institution
     await Institution.findByIdAndUpdate(institutionId, {
       $push: { coordinators: coordinator._id },
     });
 
-    await sendEmail(email, "Verify Coordinator Account", `Your OTP: ${otp}`);
+    sendEmail(email, "Verify Coordinator Account", `Your OTP: ${otp}`).catch(console.error);
     res.status(201).json({
       success: true,
       message: "Successfully created Coordinator verify Otp now",
@@ -1453,8 +1446,8 @@ Participants Count: ${participants.length}
 Write a rich, detailed, professional 120–180 word summary highlighting objectives, activities, participation, outcomes, and impact.
 `;
 
-      const aiRes = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+      const aiRes = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.5,
       });

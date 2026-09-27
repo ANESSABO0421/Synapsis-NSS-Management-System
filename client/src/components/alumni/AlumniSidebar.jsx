@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 import {
@@ -14,6 +17,7 @@ import { MdFeedback } from "react-icons/md";
 import { Image } from "lucide-react";
 
 const AlumniSidebar = ({ setIsOpen }) => {
+  const pathname = usePathname();
   const [showChatModal, setShowChatModal] = useState(false);
 
   const handleClose = () => {
@@ -68,26 +72,27 @@ const AlumniSidebar = ({ setIsOpen }) => {
 
         {/* NAV ITEMS */}
         <nav className="flex-1 p-5 space-y-2">
-          {navItems.map(({ to, icon, label }) => (
-            <NavLink
+          {navItems.map(({ to, icon, label }) => {
+            const isActive = pathname === to || pathname.startsWith(`${to}/`);
+            return (
+            <Link
               key={to}
-              to={to}
+              href={to}
               onClick={handleClose}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 p-3 rounded-xl transition-all duration-200
+              className={`group flex items-center gap-3 p-3 rounded-xl transition-all duration-200
                  ${
                    isActive
                      ? "bg-green-500/30 text-white border border-green-400 shadow-inner"
                      : "hover:bg-green-700/40 text-gray-100"
-                 }`
-              }
+                 }`}
             >
               <div className="text-lg group-hover:scale-110 transition">
                 {icon}
               </div>
               <span className="text-sm sm:text-base">{label}</span>
-            </NavLink>
-          ))}
+            </Link>
+            );
+          })}
         </nav>
       </motion.aside>
 

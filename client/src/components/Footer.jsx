@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   BiLogoFacebook,
@@ -79,7 +81,7 @@ const Footer = () => {
                 viewport={{ once: true }}
               >
                 <Link
-                  to={item.link}
+                  href={item.link}
                   className="text-gray-300 hover:text-green-300 transition-all duration-300 relative group"
                 >
                   {item.name}

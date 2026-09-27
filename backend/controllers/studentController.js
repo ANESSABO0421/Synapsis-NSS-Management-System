@@ -1,5 +1,5 @@
 import Student from "../models/Student.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import cloudinary from "../utils/cloudinary.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
@@ -9,15 +9,15 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import { count } from "console";
 import Institution from "../models/Institution.js";
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import { HfInference } from "@huggingface/inference";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 // Initialize AI Clients
-const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 // OTP generation (6 digits)
@@ -81,7 +81,7 @@ export const studentSignUp = async (req, res) => {
       $push: { students: student._id },
     });
 
-    await sendEmail(email, "Verify your NSS account", `Your OTP is ${otp}`);
+    sendEmail(email, "Verify your NSS account", `Your OTP is ${otp}`).catch(console.error);
 
     res.status(201).json({
       success: true,

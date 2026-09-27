@@ -1,18 +1,22 @@
+"use client";
+
+import { getToken } from "@/utils/auth";
+import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 const ChatSelectModal = ({ close }) => {
   const [chats, setChats] = useState([]);
-  const token = localStorage.getItem("token");
-  const navigate = useNavigate();
+  const token = getToken();
+  const navigate = useRouter();
 
   useEffect(() => {
     const loadMentorships = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/mentorshipmessage/allalumni",
+          `${API_URL}/api/mentorshipmessage/allalumni`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -50,7 +54,9 @@ const ChatSelectModal = ({ close }) => {
                 key={c._id}
                 className="p-3 bg-gray-100 rounded-xl cursor-pointer hover:bg-gray-200"
                 onClick={() => {
-                  navigate(`/alumnilayout/mentorshipchat/${c._id}`);
+                  navigate.push(
+                    `/alumnilayout/mentorshipchatlayout/mentorshipchat/${c._id}`
+                  );
                   close();
                 }}
               >

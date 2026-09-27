@@ -1,14 +1,14 @@
 import { HfInference } from "@huggingface/inference";
 const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import dotenv from "dotenv";
 dotenv.config();
 
 
 
 
-const openai = new OpenAI({
-  apiKey: process.env.OPEN_AI_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 export const generateAIInsight = async (req, res) => {
@@ -18,9 +18,12 @@ export const generateAIInsight = async (req, res) => {
     if (!prompt)
       return res.status(400).json({ success: false, message: "Prompt required" });
 
-    // Call OpenAI model
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Or "gpt-4o" for more advanced
+    console.log("GROQ_API_KEY exists:", !!process.env.GROQ_API_KEY);
+    console.log("Groq client initialized:", !!groq);
+
+    // Call Groq model
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile", // Groq model
       messages: [
         {
           role: "system",
@@ -37,8 +40,9 @@ export const generateAIInsight = async (req, res) => {
 
     res.json({ success: true, insight: aiResponse });
   } catch (error) {
-    console.error("AI Insight Error:", error);
-    res.status(500).json({ success: false, message: "AI generation failed" });
+    console.error("AI Insight Error:", error.message);
+    console.error("Full error:", error);
+    res.status(500).json({ success: false, message: "AI generation failed", error: error.message });
   }
 };
 

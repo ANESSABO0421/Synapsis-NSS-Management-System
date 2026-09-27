@@ -1,5 +1,9 @@
+"use client";
+
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { usePathname } from "next/navigation";
+import { logout } from "@/utils/auth";
+import Link from "next/link";
 import {
   FaChalkboardTeacher,
   FaUserCheck,
@@ -14,7 +18,7 @@ import { Megaphone } from "lucide-react";
 import { BsMegaphone, BsMegaphoneFill } from "react-icons/bs";
 
 const TeacherSidebar = ({ setIsOpen }) => {
-  const location = useLocation();
+  const pathname = usePathname();
 
   const links = [
     {
@@ -65,10 +69,7 @@ const TeacherSidebar = ({ setIsOpen }) => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("email");
-    window.location.href = "/login";
+    logout({ delay: 0 });
   };
 
   return (
@@ -83,10 +84,10 @@ const TeacherSidebar = ({ setIsOpen }) => {
         {links.map((link) => (
           <Link
             key={link.path}
-            to={link.path}
+            href={link.path}
             onClick={() => setIsOpen(false)}
             className={`flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              location.pathname === link.path
+              pathname === link.path
                 ? "bg-white/20 shadow-inner"
                 : "hover:bg-white/10"
             }`}

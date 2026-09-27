@@ -1,0 +1,158 @@
+"use client";
+
+import { getToken } from "@/utils/auth";
+import { API_URL } from "@/utils/config";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const ManageTestimonials = () => {
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const token = getToken();
+
+  const fetchTestimonials = async () => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/alumni/testimonials`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setTestimonials(res.data.testimonials || []);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load testimonials");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const updateVisibility = async (alumniId, testimonialId, visibility) => {
+    try {
+      await axios.put(
+        `${API_URL}/api/alumni/${alumniId}/testimonial/${testimonialId}/visibility`,
+        { visibility },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setTestimonials((prev) =>
+        prev.map((t) =>
+          t.testimonialId === testimonialId ? { ...t, visibility } : t
+        )
+      );
+
+      toast.success(`Testimonial ${visibility} successfully`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Error updating testimonial");
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="text-center mt-10 text-gray-600">
+        Loading testimonials...
+      </div>
+    );
+
+  return (
+    <div className="p-4 sm:p-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-900">
+        Manage Testimonials
+      </h1>
+
+      <div className="grid gap-4 sm:gap-6">
+        {testimonials.length === 0 ? (
+          <p className="text-center text-gray-500">No testimonials found</p>
+        ) : (
+          testimonials.map((t) => (
+            <div
+              key={t.testimonialId}
+              className="bg-white shadow-md rounded-2xl border p-4 sm:p-6 flex flex-col sm:flex-row gap-4"
+            >
+              {/* Profile Image */}
+              <div className="flex-shrink-0 flex justify-center sm:block">
+                <img
+                  src={t.profileImage || "/default-avatar.png"}
+                  alt="alumni"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border shadow"
+                />
+              </div>
+
+              {/* Content */}
+              <div className="flex-1">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                  {t.name}
+                </h2>
+
+                <p className="text-gray-600 text-sm">
+                  {t.department} • {t.graduationYear}
+                </p>
+
+                <p className="mt-3 text-gray-700 leading-relaxed text-sm sm:text-base">
+                  {t.message}
+                </p>
+
+                <p className="mt-2 text-sm">
+                  <span className="font-semibold">Status: </span>
+                  <span
+                    className={`font-semibold px-3 py-1 rounded-full text-xs sm:text-sm ${
+                      t.visibility === "approved"
+                        ? "bg-green-100 text-green-700"
+                        : t.visibility === "rejected"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {t.visibility}
+                  </span>
+                </p>
+
+                {/* Buttons */}
+                <div className="flex flex-wrap gap-3 mt-4">
+                  <button
+                    onClick={() =>
+                      updateVisibility(t.alumniId, t.testimonialId, "approved")
+                    }
+                    disabled={t.visibility === "approved"}
+                    className={`px-4 py-2 rounded-lg text-white text-sm sm:text-base ${
+                      t.visibility === "approved"
+                        ? "bg-green-300 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
+                  >
+                    Approve
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      updateVisibility(t.alumniId, t.testimonialId, "rejected")
+                    }
+                    disabled={t.visibility === "rejected"}
+                    className={`px-4 py-2 rounded-lg text-white text-sm sm:text-base ${
+                      t.visibility === "rejected"
+                        ? "bg-red-300 cursor-not-allowed"
+                        : "bg-red-600 hover:bg-red-700"
+                    }`}
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ManageTestimonials;

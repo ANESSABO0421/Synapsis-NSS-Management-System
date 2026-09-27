@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { IoMdCheckmarkCircle } from "react-icons/io";
 import {
   FaUser,
@@ -16,7 +19,8 @@ import { BsWechat } from "react-icons/bs";
 import { Camera, Menu } from "lucide-react";
 
 const StudentSidebar = ({ setIsOpen }) => {
-  const navigate = useNavigate();
+  const navigate = useRouter();
+  const pathname = usePathname();
 
   const handleClose = () => {
     if (setIsOpen) setIsOpen(false);
@@ -25,7 +29,7 @@ const StudentSidebar = ({ setIsOpen }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    navigate("/login");
+    navigate.push("/login");
   };
 
   const navItems = [
@@ -91,24 +95,25 @@ const StudentSidebar = ({ setIsOpen }) => {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-[4px] overflow-y-auto scrollbar-thin scrollbar-thumb-green-600/60">
-        {navItems.map(({ to, icon, label }) => (
-          <NavLink
+        {navItems.map(({ to, icon, label }) => {
+          const isActive = pathname === to || pathname.startsWith(`${to}/`);
+          return (
+          <Link
             key={to}
-            to={to}
+            href={to}
             onClick={handleClose}
-            className={({ isActive }) =>
-              `group flex items-center gap-3 p-2.5 rounded-lg text-sm transition-all
+            className={`group flex items-center gap-3 p-2.5 rounded-lg text-sm transition-all
               ${
                 isActive
                   ? "bg-green-500/30 text-white shadow-inner border border-green-400"
                   : "hover:bg-green-700/40 text-gray-100"
-              }`
-            }
+              }`}
           >
             <div className="text-lg">{icon}</div>
             <span>{label}</span>
-          </NavLink>
-        ))}
+          </Link>
+          );
+        })}
       </nav>
     </motion.aside>
   );

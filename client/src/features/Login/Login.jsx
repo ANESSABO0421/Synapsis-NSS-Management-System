@@ -1,0 +1,248 @@
+"use client";
+
+import { API_URL } from "@/utils/config";
+import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { FaGoogle } from "react-icons/fa";
+import { IoArrowBack } from "react-icons/io5";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const Login = () => {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const navigate = useRouter();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    const loginEndpoints = [
+      { role: "admin", url: `${API_URL}/api/admin/login` },
+      { role: "coordinator", url: `${API_URL}/api/coordinator/logincoordinator` },
+      { role: "student", url: `${API_URL}/api/students/studentlogin` },
+      { role: "teacher", url: `${API_URL}/api/teacher/login` },
+      { role: "alumni", url: `${API_URL}/api/alumni/login` },
+    ];
+
+    let loggedIn = false;
+
+    for (const { role, url } of loginEndpoints) {
+      try {
+        const res = await axios.post(url, form, {
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const { success, token } = res.data;
+
+        if (success && token) {
+          const userEmail =
+            res.data?.email ||
+            res.data?.user?.email ||
+            res.data?.teacher?.email ||
+            res.data?.student?.email ||
+            res.data?.coordinator?.email ||
+            res.data?.alumni?.email ||
+            res.data?.admin?.email ||
+            form.email;
+
+          localStorage.setItem("token", token);
+          localStorage.setItem("role", role);
+          localStorage.setItem("email", userEmail);
+
+          toast.success(`${role.toUpperCase()} login successful ✅`);
+          loggedIn = true;
+
+          setTimeout(() => {
+            if (role === "admin") window.location.href = "/adminpanel";
+            else if (role === "coordinator") window.location.href = "/coordinatorlayout";
+            else if (role === "teacher") window.location.href = "/teacherLayout";
+            else if (role === "student") window.location.href = "/studentlayout";
+            else if (role === "alumni") window.location.href = "/alumnilayout";
+          }, 1000);
+
+          break;
+        }
+      } catch (error) {
+        console.log(`${role} login failed`, error.response?.data || error);
+      }
+    }
+
+    if (!loggedIn) {
+      setMessage("Invalid credentials or account not found ❌");
+    }
+
+    setLoading(false);
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_URL}/api/auth/google`;
+  };
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) setMessage(error);
+  }, [searchParams]);
+
+  return (
+    <div className="flex min-h-screen relative">
+
+      {/* 🔙 BACK BUTTON */}
+      <button
+        onClick={() => navigate.push("/")}
+        className="absolute top-6 left-6 z-50 flex items-center gap-2 bg-white/80 backdrop-blur-xl px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 text-green-700 font-medium border border-green-200"
+      >
+        <IoArrowBack size={18} />
+        Home
+      </button>
+
+      {/* LEFT PANEL */}
+      <div className="hidden md:flex w-1/2 relative items-center justify-center overflow-hidden">
+        <video
+          src="/video/Login.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900/60 via-emerald-800/40 to-transparent"></div>
+        <div className="absolute bottom-10 left-10 text-white space-y-4">
+          <h1 className="text-4xl font-extrabold drop-shadow-xl">
+            Welcome to{" "}
+            <span className="text-lime-300">Synapsis NSS Portal</span>
+          </h1>
+          <p className="text-gray-200 text-sm max-w-xs">
+            “Empowering students to serve with purpose and make a difference.”
+          </p>
+        </div>
+      </div>
+
+      {/* RIGHT PANEL */}
+      <div className="flex w-full md:w-1/2 justify-center items-center bg-gradient-to-br from-white/80 to-emerald-50 backdrop-blur-md relative overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-green-300 rounded-full blur-3xl opacity-30"></div>
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-300 rounded-full blur-3xl opacity-30"></div>
+
+        <div className="relative bg-white/90 backdrop-blur-xl shadow-2xl rounded-3xl w-[90%] max-w-sm p-8 border border-green-100 transition-all duration-300 hover:scale-[1.02]">
+          <h2 className="text-3xl font-extrabold text-center text-green-800 mb-2">
+            Welcome Back 👋
+          </h2>
+          <p className="text-center text-gray-600 mb-6 text-sm">
+            Sign in to continue your journey with <b>Synapsis</b>
+          </p>
+
+          {message && (
+            <div
+              className={`text-center mb-4 py-2 rounded-xl font-medium text-sm ${
+                message.includes("successful")
+                  ? "bg-green-50 text-green-700"
+                  : "bg-red-50 text-red-600"
+              }`}
+            >
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Email Address
+              </label>
+              <input
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                value={form.email}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-200 focus:border-green-400 bg-white transition text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-200 focus:border-green-400 bg-white transition text-sm"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-2.5 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition duration-300 shadow-lg hover:shadow-emerald-200 text-sm flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <svg
+                  className="w-5 h-5 animate-spin text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+
+          <div className="flex items-center my-4">
+            <hr className="flex-grow border-gray-300" />
+            <span className="px-3 text-xs text-gray-400 uppercase tracking-wider">
+              or
+            </span>
+            <hr className="flex-grow border-gray-300" />
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 py-2.5 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition duration-300 shadow-sm hover:shadow-md text-sm"
+          >
+            <FaGoogle className="text-green-500 text-base" />
+            Continue with Google
+          </button>
+
+          <p className="text-center text-xs text-gray-500 mt-6">
+            Don’t have an account?{" "}
+            <Link
+              href={"/signup/student"}
+              className="text-green-700 font-semibold hover:underline"
+            >
+              Sign Up
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;

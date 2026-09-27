@@ -1,11 +1,15 @@
+"use client";
+
 import React from "react";
 import { BiComment, BiCommentAdd, BiCommentDots, BiLayout, BiTask, BiUser } from "react-icons/bi";
-import { NavLink } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { PiChalkboardTeacher, PiChalkboardTeacherBold, PiChalkboardTeacherDuotone, PiGraduationCap, PiStudent, PiStudentDuotone,PiUserBold } from "react-icons/pi";
 import { FaSchool } from 'react-icons/fa';
 import { RiUser2Fill } from "react-icons/ri";
 import { FaGoogleScholar, FaSchoolCircleExclamation } from 'react-icons/fa6';
 const Sidebar = () => {
+  const pathname = usePathname();
   const navLinks = [
     { name: "Dashboard", path: "/adminpanel", icon: <BiLayout size={18} /> },
     {
@@ -75,20 +79,18 @@ const Sidebar = () => {
         <h1 className="text-xl font-bold text-green-700 mb-8">Admin Panel</h1>
         <nav>
           {navLinks.map((link) => (
-            <NavLink
+            <Link
               key={link.name}
-              to={link.path}
-              end
-              className={({ isActive }) => `
-            flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
-              isActive
-                ? "bg-green-600 text-white"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
+              href={link.path}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
+                pathname === link.path
+                  ? "bg-green-600 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               {link.icon}
               {link.name}
-            </NavLink>
+            </Link>
           ))}
         </nav>
       </aside>
