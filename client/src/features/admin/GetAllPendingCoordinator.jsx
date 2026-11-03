@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -56,9 +57,10 @@ const GetAllPendingCoordinator = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     fetchCoordinator();
   }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">

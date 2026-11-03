@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -38,35 +39,6 @@ const CoordinatorDashboard = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const [insight, setInsight] = useState("");
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  // ---------- FETCH DASHBOARD DATA ----------
-  const fetchDashboard = async () => {
-    try {
-      const token = getToken();
-      if (!token) {
-        toast.error("Session expired. Please login again.");
-        return;
-      }
-
-      const res = await axios.get(
-        `${API_URL}/api/coordinator/coordinatordashboard`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setData(res.data.data);
-      generateAutoInsight(res.data.data);
-    } catch (error) {
-      console.error("Dashboard Error:", error);
-      toast.error("Failed to load dashboard data");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ---------- AUTO AI INSIGHT GENERATION ----------
   const generateAutoInsight = async (dashboardData) => {
@@ -94,12 +66,46 @@ const CoordinatorDashboard = () => {
 
       setInsight(res.data.insight);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to auto-generate insights");
+      // 503 = AI not configured on this server: hide the insight, don't alarm the user.
+      if (err.response?.status !== 503) {
+        console.warn("AI insight unavailable:", err.message);
+        toast.error("Failed to auto-generate insights");
+      }
     } finally {
       setAiLoading(false);
     }
   };
+
+  // ---------- FETCH DASHBOARD DATA ----------
+  const fetchDashboard = async () => {
+    try {
+      const token = getToken();
+      if (!token) {
+        toast.error("Session expired. Please login again.");
+        return;
+      }
+
+      const res = await axios.get(
+        `${API_URL}/api/coordinator/coordinatordashboard`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setData(res.data.data);
+      generateAutoInsight(res.data.data);
+    } catch (error) {
+      console.error("Dashboard Error:", error);
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useLoad(() => {
+    fetchDashboard();
+  }, []);
+
 
   if (loading)
     return (

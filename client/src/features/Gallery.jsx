@@ -1,6 +1,7 @@
 "use client";
 
 import { API_URL } from "@/utils/config";
+import useLoad from "@/hooks/useLoad";
 import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
@@ -28,9 +29,10 @@ const Gallery = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     getImages();
   }, []);
+
 
   useEffect(() => {
     if (!images.length) return;

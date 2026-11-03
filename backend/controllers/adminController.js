@@ -286,7 +286,8 @@ export const getDashboardStat = async (req, res) => {
     };
 
     // ======= Students =======
-    const totalStudents = await Student.countDocuments({ role: "student" });
+    // Volunteers are students too; "total" must include them (it was smaller than "active").
+    const totalStudents = await Student.countDocuments();
     const activeStudent = await Student.countDocuments({ status: "active" });
     const pendingStudent = await Student.countDocuments({ status: "pending" });
     const totalVolunteer = await Student.countDocuments({ role: "volunteer" });

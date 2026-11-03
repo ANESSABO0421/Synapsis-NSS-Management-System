@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
@@ -37,9 +38,10 @@ const MentorshipMeetingLinkModal = ({ mentorshipId, onClose }) => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     fetchLink();
   }, []);
+
 
   // ===========================
   // SAVE MEETING LINK

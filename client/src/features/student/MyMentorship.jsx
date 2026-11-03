@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -30,9 +31,10 @@ const MyMentorships = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     fetchMySessions();
   }, []);
+
 
   // Submit feedback
   const submitFeedback = async () => {
@@ -129,7 +131,7 @@ const MyMentorships = () => {
                   </div>
 
                   <p className="text-gray-700 text-sm italic">
-                    "{feedback.comment || "No comment"}"
+                    &ldquo;{feedback.comment || "No comment"}&rdquo;
                   </p>
                 </div>
               )}

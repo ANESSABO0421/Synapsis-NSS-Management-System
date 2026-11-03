@@ -1,6 +1,7 @@
 "use client";
 
 import { API_URL } from "@/utils/config";
+import useLoad from "@/hooks/useLoad";
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import gsap from "gsap";
@@ -23,9 +24,10 @@ const EventDisplay = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     getAllEvents();
   }, []);
+
 
   useEffect(() => {
     gsap.set(cardsRef.current, { opacity: 0, y: 50 });

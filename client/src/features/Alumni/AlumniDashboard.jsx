@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -18,10 +19,6 @@ const AlumniDashboard = () => {
 
   const token = getToken();
 
-  useEffect(() => {
-    fetchDashboard();
-    fetchFeedbacks();
-  }, []);
 
   const fetchDashboard = async () => {
     try {
@@ -48,6 +45,11 @@ const AlumniDashboard = () => {
     }
   };
 
+  useLoad(() => {
+    fetchDashboard();
+    fetchFeedbacks();
+  }, []);
+
   const renderStars = (count) =>
     [...Array(5)].map((_, i) => (
       <Star
@@ -70,6 +72,7 @@ const AlumniDashboard = () => {
       ======================================================== */}
       <div className="bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-6 border border-green-100">
         <img
+          alt="Profile photo"
           src={dashboard.profileImage?.url || "/default-user.png"}
           className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-lg ring-4 ring-green-500/50 mx-auto sm:mx-0"
         />

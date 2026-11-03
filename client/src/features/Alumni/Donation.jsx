@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 // src/pages/Donation.jsx
 import React, { useEffect, useState } from "react";
@@ -19,9 +20,9 @@ import {
 
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-);
+// Without a key, loadStripe throws at import time and breaks every alumni page.
+const STRIPE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = STRIPE_KEY ? loadStripe(STRIPE_KEY) : null;
 
 /* ===========================================
     PAYMENT MODAL (Responsive)
@@ -38,6 +39,10 @@ const PaymentModal = ({ event, onClose }) => {
   const token = getToken();
 
   const handlePay = async () => {
+    if (!stripePromise || !stripe || !elements) {
+      toast.error("Online donations are not available right now.");
+      return;
+    }
     if (!amount || Number(amount) < 50) {
       toast.error("Minimum donation amount is ₹50");
       return;
@@ -198,9 +203,10 @@ const Donation = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     fetchEvents();
   }, []);
+
 
   if (loading) return <p className="p-6 text-center">Loading events...</p>;
 

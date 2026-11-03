@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
@@ -64,10 +65,10 @@ const AlumniMentorshipChat = () => {
     }, 1500);
   };
 
-  useEffect(() => {
+  useLoad(() => {
     loadMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload history only when the conversation changes
   }, [mentorshipId]);
+
 
   useEffect(() => {
     if (!socket) return;

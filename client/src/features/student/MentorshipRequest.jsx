@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -29,9 +30,10 @@ const MentorshipRequest = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     fetchMentors();
   }, []);
+
 
   // Send mentorship request
   const sendRequest = async () => {
@@ -66,7 +68,7 @@ const MentorshipRequest = () => {
         Request a Mentorship
       </h1>
       <p className="text-gray-600 mb-8 sm:mb-10 text-sm sm:text-base">
-        Select an alumni mentor and tell them what you'd like to discuss.
+        Select an alumni mentor and tell them what you&apos;d like to discuss.
       </p>
 
       {/* MENTOR LIST */}

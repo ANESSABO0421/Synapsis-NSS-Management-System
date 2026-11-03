@@ -315,3 +315,12 @@ describe("mentorship messages (REST)", () => {
     assert.equal(res.body.newMessage.senderRole, "student");
   });
 });
+
+describe("admin dashboard stats", () => {
+  it("total students includes volunteers (never less than active)", async () => {
+    const res = await request(app).get("/api/admin/dashboardata").set(bearer(f.admin, "admin"));
+    assert.equal(res.status, 200);
+    const s = res.body.Data.student;
+    assert.ok(s.total >= s.active, `total ${s.total} < active ${s.active}`);
+  });
+});

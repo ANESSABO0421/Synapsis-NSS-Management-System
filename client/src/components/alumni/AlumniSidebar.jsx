@@ -14,7 +14,7 @@ import {
 } from "react-icons/fa";
 import { BiCommentDetail } from "react-icons/bi";
 import { MdFeedback } from "react-icons/md";
-import { Image } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 
 const AlumniSidebar = ({ setIsOpen }) => {
   const pathname = usePathname();
@@ -30,7 +30,7 @@ const AlumniSidebar = ({ setIsOpen }) => {
     { to: "/alumnilayout/testimonials", icon: <FaRegCommentDots />, label: "Testimonials" },
     { to: "/alumnilayout/donations", icon: <FaCalendarCheck />, label: "Donations" },
     { to: "/alumnilayout/feedback", icon: <MdFeedback />, label: "Feedback" },
-    { to: "/alumnilayout/gallery", icon: <Image />, label: "Gallery" },
+    { to: "/alumnilayout/gallery", icon: <ImageIcon />, label: "Gallery" },
     { to: "/alumnilayout/mentorshipchatlayout", icon: <BiCommentDetail />, label: "Mentorship Chat" },
     { to: "/alumnilayout/alumniprofile", icon: <FaUserGraduate />, label: "My Profile" },
   ];

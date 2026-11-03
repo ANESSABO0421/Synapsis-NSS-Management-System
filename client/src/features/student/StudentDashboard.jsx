@@ -90,6 +90,7 @@ const StudentDashboard = () => {
 
         {student.profileImage && (
           <img
+            alt="Profile photo"
             src={student.profileImage}
             className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-emerald-400 
             shadow-lg object-cover"

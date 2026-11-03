@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -67,9 +68,10 @@ const GetAllPendingAlumni = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     fetchPendingAlumni();
   }, []);
+
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">

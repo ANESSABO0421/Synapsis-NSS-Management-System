@@ -41,8 +41,11 @@ export const generateAIInsight = async (req, res) => {
 
     res.json({ success: true, insight: aiResponse });
   } catch (error) {
+    if (error.status === 503) {
+      return res.status(503).json({ success: false, message: "AI features are not configured" });
+    }
     console.error("AI Insight Error:", error);
-    res.status(500).json({ success: false, message: "AI generation failed" });
+    res.status(502).json({ success: false, message: "AI generation failed" });
   }
 };
 

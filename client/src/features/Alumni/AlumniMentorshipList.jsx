@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -27,10 +28,12 @@ const AlumniMentorshipList = () => {
     }
   };
 
+  useLoad(loadMentorships, []);
   useEffect(() => {
-    loadMentorships();
-    const interval = setInterval(loadMentorships, 2000);
+    // Poll for new requests; 10s is plenty for a list view (was 2s).
+    const interval = setInterval(loadMentorships, 10_000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadMentorships is recreated each render
   }, []);
 
   return (

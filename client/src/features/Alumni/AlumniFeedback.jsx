@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -28,9 +29,10 @@ const AlumniFeedback = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     loadFeedbacks();
   }, []);
+
 
   // ⭐ Render Stars
   const renderStars = (count) => {
@@ -66,7 +68,7 @@ const AlumniFeedback = () => {
           <MessageSquare size={50} className="mx-auto text-gray-300 mb-3" />
           <h2 className="text-xl font-semibold text-gray-700">No Feedback Yet</h2>
           <p className="text-gray-500 text-sm mt-2">
-            You don't have any student feedback yet.
+            You don&apos;t have any student feedback yet.
           </p>
         </div>
       </div>

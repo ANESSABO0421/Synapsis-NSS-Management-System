@@ -1,6 +1,7 @@
 "use client";
 
 import { API_URL } from "@/utils/config";
+import useLoad from "@/hooks/useLoad";
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import gsap from "gsap";
@@ -24,9 +25,10 @@ const Testimonials = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     getAllTestimonial();
   }, []);
+
 
   useEffect(() => {
     if (!data.length) return;

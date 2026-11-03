@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -61,9 +62,10 @@ const GetAllPendingTeacher = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     getAllPendingTeacher();
   }, []);
+
 
   if (loading) {
     return (

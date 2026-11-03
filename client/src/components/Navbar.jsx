@@ -54,6 +54,7 @@ const Navbar = () => {
         {/* LOGO */}
         <div className="flex items-center gap-2">
           <img
+            alt="Synapsis logo"
             src="/Synapsis-Logo-bgRemover.png"
             className="h-10 sm:h-12 drop-shadow-lg"
           />

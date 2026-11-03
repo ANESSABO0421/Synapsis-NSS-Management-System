@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
@@ -30,9 +31,10 @@ const AddMemoryPremium = () => {
     }
   };
 
-  useEffect(() => {
+  useLoad(() => {
     fetchEvents();
   }, []);
+
 
   const handleFiles = (files) => {
     const arr = Array.from(files);
@@ -163,6 +165,7 @@ const AddMemoryPremium = () => {
                   <div className="grid grid-cols-2 gap-2">
                     {event.images.slice(0, 4).map((img, i) => (
                       <img
+                        alt={img.caption || "Event memory"}
                         key={i}
                         src={img.url}
                         className="h-20 w-full object-cover rounded-xl shadow"
@@ -228,6 +231,7 @@ const AddMemoryPremium = () => {
                     {previewImages.map((src, idx) => (
                       <div key={idx} className="relative">
                         <img
+                          alt="Selected upload preview"
                           src={src}
                           className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl shadow"
                         />
@@ -318,6 +322,7 @@ const AddMemoryPremium = () => {
                         onClick={() => openLightbox(idx)}
                       >
                         <img
+                          alt={img.caption || "Event memory"}
                           src={img.url}
                           className="w-full object-cover group-hover:scale-105 transition"
                         />
@@ -349,6 +354,7 @@ const AddMemoryPremium = () => {
               className="relative max-w-4xl sm:max-w-5xl w-full"
             >
               <img
+                alt={selectedEvent.images[lightboxIndex].caption || selectedEvent.title}
                 src={selectedEvent.images[lightboxIndex].url}
                 className="w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
               />

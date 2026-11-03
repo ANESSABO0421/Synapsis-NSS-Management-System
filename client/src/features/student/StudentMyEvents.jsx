@@ -1,6 +1,7 @@
 "use client";
 
 import { getToken } from "@/utils/auth";
+import useLoad from "@/hooks/useLoad";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -55,9 +56,10 @@ const StudentMyEvents = () => {
   };
 
   // Initial Fetch
-  useEffect(() => {
+  useLoad(() => {
     fetchEvents();
   }, []);
+
 
   // Hide Scrollbar when Modal Open
   useEffect(() => {
@@ -112,9 +114,9 @@ const StudentMyEvents = () => {
           layout
           className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-8"
         >
-          {filteredEvents.map((event) => (
+          {filteredEvents.map((event, index) => (
             <motion.div
-              key={event._id || event.id || Math.random()}
+              key={event._id || event.id || index}
               whileHover={{ scale: 1.03 }}
               onClick={() => setSelectedEvent(event)}
               className="cursor-pointer bg-white/70 backdrop-blur-lg shadow-lg border border-green-100 rounded-3xl p-5 sm:p-6 transition-all hover:shadow-green-300 hover:border-green-300"

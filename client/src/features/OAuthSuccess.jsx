@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const OAuthSuccess = () => {
   const navigate = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -34,14 +33,13 @@ const OAuthSuccess = () => {
       navigate.push("/login");
     }
 
-    setLoading(false);
   }, [navigate]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 text-gray-800">
       <div className="p-6 bg-white shadow-lg rounded-2xl text-center">
         <h2 className="text-2xl font-semibold mb-2">
-          {loading ? "Logging you in..." : "Redirecting..."}
+          Logging you in...
         </h2>
         <p className="text-sm text-gray-500">
           Please wait while we complete your Google authentication.
