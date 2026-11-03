@@ -44,28 +44,33 @@ const StudentMessagePanel = ({ event, socket }) => {
 
   // Join socket room & listen for messages
   useEffect(() => {
-    socket.emit("join_event", event._id);
+    if (!socket) return;
+    const join = () => socket.emit("join_event", event._id);
+    join();
+    socket.on("connect", join); // re-join after reconnects
 
-    socket.on("receive_message", (msg) => {
+    const onMessage = (msg) => {
       if (msg.eventId === event._id) {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
         playNotificationSound();
         document.title = "🔔 New Message | NSS Chat";
         setTimeout(() => (document.title = "NSS Chat"), 3000);
       }
-    });
-
-    socket.on("user_typing", (data) => {
+    };
+    const onTyping = (data) => {
       if (data.eventId === event._id) {
         setTypingUser(data.name);
         setTimeout(() => setTypingUser(null), 2000);
       }
-    });
+    };
+    socket.on("receive_message", onMessage);
+    socket.on("user_typing", onTyping);
 
     return () => {
       socket.emit("leave_event", event._id);
-      socket.off("receive_message");
-      socket.off("user_typing");
+      socket.off("connect", join);
+      socket.off("receive_message", onMessage);
+      socket.off("user_typing", onTyping);
     };
   }, [socket, event]);
 
@@ -79,9 +84,9 @@ const StudentMessagePanel = ({ event, socket }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.success) {
-        const savedMsg = res.data.message;
-        setMessages((prev) => [...prev, savedMsg]);
-        socket.emit("send_message", savedMsg);
+        // Server persists and broadcasts; de-dupe in case the broadcast arrives first.
+        const msg = res.data.message;
+        setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
         setNewMsg("");
       }
     } catch (err) {
@@ -92,7 +97,7 @@ const StudentMessagePanel = ({ event, socket }) => {
   // Typing event
   const handleTyping = (e) => {
     setNewMsg(e.target.value);
-    socket.emit("typing", { eventId: event._id, name: "Student" });
+    socket?.emit("typing", { eventId: event._id }); // server attaches the real name
   };
 
   // Scroll to latest message

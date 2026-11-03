@@ -39,7 +39,9 @@ const AttendanceByTeacher = () => {
     setSelectedEvent(events.find((e) => e._id === eventId));
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/events/participantsofevents/${eventId}`);
+      const res = await axios.get(`${API_BASE}/events/participantsofevents/${eventId}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       if (res.data.success) {
         const participants = res.data.participants || [];
         setStudents(participants);

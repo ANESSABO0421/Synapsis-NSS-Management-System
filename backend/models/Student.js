@@ -1,4 +1,5 @@
 // import mongoose from "mongoose";
+import stripSecrets from "../utils/stripSecrets.js";
 
 // const StudentSchema = new mongoose.Schema(
 //   {
@@ -155,4 +156,6 @@ StudentSchema.pre("save", function (next) {
   next();
 });
 
-export default mongoose.model("student", StudentSchema);
+StudentSchema.plugin(stripSecrets);
+
+export default mongoose.model("Student", StudentSchema);

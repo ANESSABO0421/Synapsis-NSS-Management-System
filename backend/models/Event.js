@@ -7,7 +7,7 @@ const eventSchema = new mongoose.Schema(
     date: { type: Date, required: true },
     location: { type: String, required: true },
     hours: { type: Number, default: 0, min: [0, "Hours cannot be negative"] },
-    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "student" }],
+    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "Student" }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin" },
     assignedTeacher: [{ type: mongoose.Schema.Types.ObjectId, ref: "Teacher" }],
     assignedCoordinators: {
@@ -37,7 +37,7 @@ const eventSchema = new mongoose.Schema(
 
     attendance: [
       {
-        student: { type: mongoose.Schema.Types.ObjectId, ref: "student" },
+        student: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
         status: {
           type: String,
           enum: ["Present", "Absent"],

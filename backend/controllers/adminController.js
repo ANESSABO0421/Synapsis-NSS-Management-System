@@ -16,10 +16,10 @@ const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // token genration
-const generateToken = (id) => {
-  // three part id,token and expire
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-};
+const generateToken = (admin) =>
+  jwt.sign({ id: admin._id, role: admin.role }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 
 // otp genration
 const otpGeneration = () => {
@@ -80,16 +80,31 @@ export const signUp = async (req, res) => {
 export const updateAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const isSuperadmin = req.admin.role === "superadmin";
 
-    // prevent from changing status and role
-    if (req.admin.role !== "superadmin") {
-      delete updates.role;
-      delete updates.status;
+    // Regular admins may only edit themselves.
+    if (!isSuperadmin && String(req.admin._id) !== String(id)) {
+      return res
+        .status(403)
+        .json({ success: false, message: "You can only update your own account" });
     }
 
-    // password updation and hash
+    // Whitelist: never pass req.body straight into the update.
+    const allowed = ["name", "phoneNumber", "department", "password"];
+    if (isSuperadmin) allowed.push("role", "status");
+    const updates = {};
+    for (const field of allowed) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
     if (updates.password) {
+      if (!passwordRegex.test(updates.password)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Password must be 8+ chars, include uppercase, lowercase, number, special characters",
+        });
+      }
       updates.password = await bcrypt.hash(updates.password, 10);
     }
 
@@ -148,7 +163,7 @@ export const verifyOTP = async (req, res) => {
     admin.otpExpiry = null;
     await admin.save();
 
-    const token = generateToken(admin._id);
+    const token = generateToken(admin);
     res
       .status(201)
       .json({ success: true, message: "successfully verified", token, admin });
@@ -182,7 +197,7 @@ export const login = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid credentials" });
 
-    const token = generateToken(admin._id);
+    const token = generateToken(admin);
 
     res.status(200).json({
       success: true,
@@ -208,7 +223,7 @@ export const googleCallback = async (req, res) => {
       await admin.save();
     }
 
-    const token = generateToken(admin._id);
+    const token = generateToken(admin);
     res.json({ message: "Google login success", token, admin });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -27,6 +27,7 @@ import {
   getParticipantsOfEvent,
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
+import { requireEventAccess } from "../utils/eventAccess.js";
 import {
   adminOnly,
   coordinatorOnly,
@@ -61,15 +62,30 @@ teacherRoute.get(
 );
 
 // Grace marks
-teacherRoute.post("/grace-marks", protect, teacherOnly, assignGraceMark);
+// Teacher must be assigned to the event they grade.
+const gradesEvent = (opts) => requireEventAccess({ allowTeacher: true, ...opts });
 
-// gracemark update
-// teacherRoute.put("/grace-marks/:studentId", updateGraceMark);
-teacherRoute.put("/update/:studentId/:eventId", updateGraceMark);
-
-// grace mark delete
-// teacherRoute.delete("/grace-marks/:studentId", deleteGraceMark);
-teacherRoute.delete("/delete/:studentId/:eventId", deleteGraceMark);
+teacherRoute.post(
+  "/grace-marks",
+  protect,
+  teacherOnly,
+  gradesEvent({ param: "eventId", from: "body" }),
+  assignGraceMark
+);
+teacherRoute.put(
+  "/update/:studentId/:eventId",
+  protect,
+  teacherOnly,
+  gradesEvent({ param: "eventId" }),
+  updateGraceMark
+);
+teacherRoute.delete(
+  "/delete/:studentId/:eventId",
+  protect,
+  teacherOnly,
+  gradesEvent({ param: "eventId" }),
+  deleteGraceMark
+);
 
 
 teacherRoute.get(
@@ -128,9 +144,9 @@ teacherRoute.get("/teachermyevents", protect, teacherOnly, getMyEvents);
 // Image upload route
 teacherRoute.post(
   "/:id/uploadimages",
-  upload.array("images", 10),
   protect,
   teacherOnly,
+  upload.array("images", 10),
   uploadEventImages
 );
 

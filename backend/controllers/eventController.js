@@ -1,4 +1,3 @@
-// import Alumni from "../models/Alumni.js";
 import Alumni from "../models/Alumni.js";
 import Event from "../models/Event.js";
 import Student from "../models/Student.js";
@@ -35,12 +34,10 @@ export const getEvents = async (req, res) => {
 // get all events on the table
 export const getAllevents = async (req, res) => {
   try {
-    const events = await Event.find();
-    if (events.length == 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "no events are found" });
-    }
+    const events = await Event.find()
+      .select("title description date location hours status images institution donationOpen")
+      .sort({ date: -1 })
+      .lean();
     res.status(200).json({ success: true, events });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -67,7 +64,7 @@ export const getAllEventsAlumniInstituition = async (req, res) => {
 // get events by id
 export const getEventById = async (req, res) => {
   try {
-    const events = await Event.findById(req.params.id, req.body, { new: true });
+    const events = await Event.findById(req.params.id).select("-attendance");
     if (!events) {
       return res
         .status(404)
@@ -82,13 +79,12 @@ export const getEventById = async (req, res) => {
 // delete Event
 export const deleteEvent = async (req, res) => {
   try {
-    const deleteEvent = await Event.findByIdAndDelete(req.params.id);
-    if (!deleteEvent) {
-      return res.status(404).json({
-        success: false,
-        message: "event not found",
-      });
-    }
+    const event = req.event;
+    await Student.updateMany(
+      { assignedEvents: event._id },
+      { $pull: { assignedEvents: event._id } }
+    );
+    await event.deleteOne();
     res.json({ success: true, message: "event deleted successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -99,17 +95,18 @@ export const deleteEvent = async (req, res) => {
 export const assignStudentToEvent = async (req, res) => {
   try {
     const { studentId } = req.body;
-    const events = await Event.findById(req.params.id);
-    if (!events) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
-    }
+    const events = req.event;
     const student = await Student.findById(studentId);
     if (!student) {
       return res
         .status(404)
         .json({ success: false, message: "student not found" });
+    }
+    if (String(student.institution) !== String(events.institution)) {
+      return res.status(400).json({
+        success: false,
+        message: "Student belongs to a different institution",
+      });
     }
 
     // adding students to participants
@@ -138,24 +135,11 @@ export const assignStudentToEvent = async (req, res) => {
 // update event section
 export const updateEvent = async (req, res) => {
   try {
-    const { title, description, date, location, hours } = req.body;
-    const events = await Event.findById(req.params.id);
-    if (!events) {
-      return res
-        .status(404)
-        .json({ success: false, message: "events is not found" });
-    }
-    if (title) {
-      events.title = title || title;
-    }
-    if (description) {
-      events.description = description || description;
-    }
-    if (date) {
-      events.date = date || date;
-    }
-    if (hours) {
-      events.hours = hours || hours;
+    const events = req.event;
+    for (const field of ["title", "description", "date", "location", "hours"]) {
+      if (req.body[field] !== undefined && req.body[field] !== "") {
+        events[field] = req.body[field];
+      }
     }
 
     await events.save();
@@ -169,15 +153,7 @@ export const updateEvent = async (req, res) => {
 // get event participants
 export const getEventParticipants = async (req, res) => {
   try {
-    const events = await Event.findById(req.params.id).populate(
-      "participants",
-      "name email department"
-    );
-    if (!events) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
-    }
+    const events = await req.event.populate("participants", "name email department");
     res.json({ success: true, participants: events.participants });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -187,12 +163,7 @@ export const getEventParticipants = async (req, res) => {
 // upload images
 export const uploadEventImages = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
-    if (!event) {
-      return res
-        .status(404)
-        .json({ success: false, message: "event not found" });
-    }
+    const event = req.event;
     if (!req.files || req.files.length === 0) {
       return res
         .status(400)
@@ -236,13 +207,8 @@ export const getEventImages = async (req, res) => {
 // delete image
 export const deleteEventImage = async (req, res) => {
   try {
-    const { id, imageId } = req.params;
-    const events = await Event.findById(id);
-    if (!events) {
-      return res
-        .status(404)
-        .json({ success: false, message: "event is not found" });
-    }
+    const { imageId } = req.params;
+    const events = req.event;
     const image = events.images.id(imageId);
     if (!image) {
       return res
@@ -254,7 +220,7 @@ export const deleteEventImage = async (req, res) => {
       await cloudinary.uploader.destroy(image.public_id);
     }
 
-    image.remove();
+    image.deleteOne();
     await events.save();
     res.status(200).json({ success: true, events });
   } catch (error) {
@@ -265,12 +231,9 @@ export const deleteEventImage = async (req, res) => {
 // get all event images (show case on the main website)
 export const getAllEventImages = async (req, res) => {
   try {
-    const events = await Event.find().select("title date images");
-    if (!events || events.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "event not found" });
-    }
+    const events = await Event.find({ "images.0": { $exists: true } }).select(
+      "title date images"
+    );
     // get all images to string in an single array of object using flatMap
     const getAllImages = events.flatMap((event) =>
       event.images.map((img) => ({
@@ -293,13 +256,7 @@ export const getAllEventImages = async (req, res) => {
 // Start Event
 export const startEvent = async (req, res) => {
   try {
-    const eventId = req.params.id;
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
-    }
+    const event = req.event;
 
     if (event.status !== "Upcoming") {
       return res.status(400).json({
@@ -324,16 +281,19 @@ export const startEvent = async (req, res) => {
   }
 };
 
-// Complete Event
+// Volunteer levels: [minimum hours, level]. Highest first.
+const LEVELS = [
+  [50, "Platinum"],
+  [26, "Gold"],
+  [11, "Silver"],
+  [0, "Bronze"],
+];
+const levelFor = (hours) => LEVELS.find(([min]) => hours >= min)[1];
+
+// Complete Event: credits hours to present students and awards level-ups once.
 export const completeEvent = async (req, res) => {
   try {
-    const eventId = req.params.id;
-    const event = await Event.findById(eventId).populate("attendance.student");
-    if (!event) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event not found" });
-    }
+    const event = req.event;
 
     if (event.status !== "Ongoing") {
       return res.status(400).json({
@@ -342,55 +302,32 @@ export const completeEvent = async (req, res) => {
       });
     }
 
-    // Mark event as completed
     event.status = "Completed";
     event.endTime = new Date();
 
-    // Calculate event hours (in hours)
     const start = event.startTime || event.date;
-    event.calculatedHours = (
-      (event.endTime - start) /
-      (1000 * 60 * 60)
-    ).toFixed(2);
+    const hours = Math.max(0, Number(((event.endTime - start) / 3_600_000).toFixed(2)));
+    event.calculatedHours = hours;
 
-    // Update volunteer students
-    for (const att of event.attendance) {
-      if (att.status === "Present") {
-        const student = await Student.findById(att.student._id);
-        if (student) {
-          student.totalVolunteerHours += parseFloat(event.calculatedHours);
+    const presentIds = event.attendance
+      .filter((a) => a.status === "Present")
+      .map((a) => a.student);
+    const students = await Student.find({ _id: { $in: presentIds } });
 
-          // Assign awards/levels
-          const hours = student.totalVolunteerHours;
-          if (hours >= 50) {
-            student.level = "Platinum";
-            student.awards.push({
-              title: "Platinum Volunteer",
-              description: "Completed 50 hours",
-            });
-          } else if (hours >= 26) {
-            student.level = "Gold";
-            student.awards.push({
-              title: "Gold Volunteer",
-              description: "Completed 26 hours",
-            });
-          } else if (hours >= 11) {
-            student.level = "Silver";
-            student.awards.push({
-              title: "Silver Volunteer",
-              description: "Completed 11 hours",
-            });
-          } else if (hours > 0) {
-            student.level = "Bronze";
-            student.awards.push({
-              title: "Bronze Volunteer",
-              description: "Started volunteering",
-            });
-          }
-
-          await student.save();
-        }
+    for (const student of students) {
+      student.totalVolunteerHours = Number(
+        (student.totalVolunteerHours + hours).toFixed(2)
+      );
+      const level = levelFor(student.totalVolunteerHours);
+      student.level = level;
+      // One award per level, ever — previously this pushed a duplicate every event.
+      if (!student.awards.some((a) => a.title === `${level} Volunteer`)) {
+        student.awards.push({
+          title: `${level} Volunteer`,
+          description: `Reached ${student.totalVolunteerHours} volunteer hours`,
+        });
       }
+      await student.save();
     }
 
     await event.save();

@@ -2,38 +2,46 @@ import jwt from "jsonwebtoken";
 import Student from "../models/Student.js";
 import Teacher from "../models/Teacher.js";
 import Coordinator from "../models/Coordinator.js";
-import Alumni from "../models/Alumni.js"
+import Alumni from "../models/Alumni.js";
+import Admin from "../models/Admin.js";
+
+const MODELS = {
+  student: Student,
+  volunteer: Student,
+  teacher: Teacher,
+  coordinator: Coordinator,
+  alumni: Alumni,
+  admin: Admin,
+  superadmin: Admin,
+};
 
 export const socketAuth = async (socket, next) => {
   try {
-    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+    const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("No token provided"));
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const Model = MODELS[decoded.role];
+    if (!Model) return next(new Error("Unsupported role"));
 
-    let user = null;
-    if (decoded.role === "student")
-      user = await Student.findById(decoded.id).select("name institution");
-    else if (decoded.role === "teacher")
-      user = await Teacher.findById(decoded.id).select("name institution");
-    else if (decoded.role === "coordinator")
-      user = await Coordinator.findById(decoded.id).select("name institution");
-    else if (decoded.role === "alumni") {
-      user = await Alumni.findById(decoded.id).select("name");
+    const user = await Model.findById(decoded.id).select("name institution role status");
+    if (!user) return next(new Error("User not found"));
+    if (["rejected", "inactive"].includes(user.status)) {
+      return next(new Error("Account is not active"));
     }
 
-    if (!user) return next(new Error("User not found"));
+    // Student/Admin docs carry their real role (volunteer, superadmin, ...).
+    const role = Model === Student || Model === Admin ? user.role : decoded.role;
 
     socket.user = {
       id: user._id.toString(),
+      _id: user._id,
       name: user.name,
-      role: decoded.role,
+      role,
       institution: user.institution?.toString?.() || "",
     };
-
     next();
   } catch (err) {
-    console.error("Socket authentication failed:", err.message);
     next(new Error("Authentication error"));
   }
 };

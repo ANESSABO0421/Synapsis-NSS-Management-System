@@ -50,13 +50,12 @@ coordinatorRoute.post(
   coordinatorSignup
 );
 coordinatorRoute.post("/verifyotp", verifyOtp);
-coordinatorRoute.post("/approvecoordinator", approveCoordinator);
 coordinatorRoute.post("/logincoordinator", Login);
 coordinatorRoute.post(
   "/createevents",
-  upload.single("images"),
   protect,
   coordinatorOnly,
+  upload.single("images"),
   createEvent
 );
 coordinatorRoute.post(
@@ -153,20 +152,21 @@ coordinatorRoute.get(
 );
 
 // managestsudents
-coordinatorRoute.get("/students", protect, getAllStudentsByCoordinator);
-coordinatorRoute.get("/students/:id", protect, getStudentById);
-coordinatorRoute.get(
+coordinatorRoute.get("/students", protect, coordinatorOnly, getAllStudentsByCoordinator);
+coordinatorRoute.get("/students/:id", protect, coordinatorOnly, getStudentById);
+coordinatorRoute.put(
   "/updatestudents/:id",
   protect,
+  coordinatorOnly,
   updateStudentByCoordinator
 );
 
 coordinatorRoute.get("/my-events", protect, coordinatorOnly, getMyEvents);
 coordinatorRoute.put(
   "/events/:eventId",
-  upload.single("image"),
   protect,
   coordinatorOnly,
+  upload.single("image"),
   editEvent
 );
 

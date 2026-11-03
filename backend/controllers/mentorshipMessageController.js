@@ -108,7 +108,6 @@ export const getStudentMessages = async (req, res) => {
 export const sendStudentMessage = async (req, res) => {
   try {
     const userId = req.user.id;
-    const role = req.user.role;
     const mentorshipId = req.params.mentorshipId;
     const { message } = req.body;
 
@@ -125,7 +124,7 @@ export const sendStudentMessage = async (req, res) => {
     const newMessage = await MentorshipMessage.create({
       mentorship: mentorshipId,
       senderId: userId,
-      senderRole: role, // student or volunteer
+      senderRole: "student", // volunteers are students; schema enum is student|alumni
       message,
     });
 

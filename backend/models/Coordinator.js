@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import stripSecrets from "../utils/stripSecrets.js";
 
 const coordinatorSchema = new mongoose.Schema(
   {
@@ -60,5 +61,7 @@ const coordinatorSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+coordinatorSchema.plugin(stripSecrets);
 
 export default mongoose.model("Coordinator", coordinatorSchema);

@@ -12,7 +12,7 @@ const donationSchema = new mongoose.Schema({
     required: true,
   },
   amount: { type: Number, required: true },
-  paymentId: { type: String, required: true },
+  paymentId: { type: String, required: true, unique: true },
   message: { type: String, default: "" },
   status: { type: String, default: "succeeded" },
   createdAt: { type: Date, default: Date.now },

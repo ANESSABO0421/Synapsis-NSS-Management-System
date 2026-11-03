@@ -189,17 +189,22 @@ const TeacherMessagePanel = ({ event, socket }) => {
 
   // 🟢 Handle socket join + new messages
   useEffect(() => {
-    socket.emit("joinEvent", event._id);
+    if (!socket) return;
+    const join = () => socket.emit("join_event", event._id);
+    join();
+    socket.on("connect", join); // re-join after reconnects
 
-    socket.on("receiveMessage", (msg) => {
+    const onMessage = (msg) => {
       if (msg.eventId === event._id) {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
       }
-    });
+    };
+    socket.on("receive_message", onMessage);
 
     return () => {
-      socket.emit("leaveEvent", event._id);
-      socket.off("receiveMessage");
+      socket.emit("leave_event", event._id);
+      socket.off("connect", join);
+      socket.off("receive_message", onMessage);
     };
   }, [socket, event]);
 
@@ -222,9 +227,9 @@ const TeacherMessagePanel = ({ event, socket }) => {
       );
 
       if (res.data?.message) {
-        const newMsg = res.data.message;
-        setMessages((prev) => [...prev, newMsg]);
-        socket.emit("sendMessage", newMsg);
+        // Server persists and broadcasts; de-dupe in case the broadcast arrives first.
+        const msg = res.data.message;
+        setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
         setInput("");
       }
     } catch (err) {

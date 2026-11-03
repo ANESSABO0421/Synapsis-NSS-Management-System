@@ -24,7 +24,7 @@ const router = express.Router();
 router.post("/signup", signUp);
 router.post("/verify-otp", verifyOTP);
 router.post("/login", login);
-router.put("/updateadmin/:id", protect, updateAdmin);
+router.put("/updateadmin/:id", protect, adminOnly, updateAdmin);
 router.delete("/deleteadmin/:id", protect, superAdminOnly, deleteAdmin);
 
 // dashboard data

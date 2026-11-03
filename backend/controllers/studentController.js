@@ -9,16 +9,13 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import { count } from "console";
 import Institution from "../models/Institution.js";
-import Groq from "groq-sdk";
+import { groq } from "../utils/ai.js";
 import { HfInference } from "@huggingface/inference";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 // Initialize AI Clients
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
 
 // OTP generation (6 digits)
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
@@ -172,8 +169,14 @@ export const studentLogin = async (req, res) => {
 // Admin Create Student
 export const adminCreateStudent = async (req, res) => {
   try {
-    const { name, email, phoneNumber, department, talents, password } =
+    const { name, email, phoneNumber, department, talents, password, institution } =
       req.body;
+
+    if (!institution) {
+      return res
+        .status(400)
+        .json({ success: false, message: "institution is required" });
+    }
 
     const existing = await Student.findOne({ email });
     if (existing) {
@@ -199,6 +202,7 @@ export const adminCreateStudent = async (req, res) => {
       department,
       talents,
       password: hashedPassword,
+      institution,
       status: "active", // directly active when created by admin
       profileImage,
     });
@@ -249,6 +253,9 @@ export const studentUpdate = async (req, res) => {
     }
 
     const { name, phoneNumber, department, talents, status } = req.body;
+    if (status && !["pending", "active", "rejected"].includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
+    }
 
     if (name) student.name = name;
     if (phoneNumber) student.phoneNumber = phoneNumber;
@@ -326,10 +333,11 @@ export const getStudentEvents = async (req, res) => {
 // Remove Student from Event
 export const removeStudentFromEvent = async (req, res) => {
   try {
-    const { studentId, eventId } = req.params;
+    const { studentId } = req.params;
+    const eventId = String(req.event._id);
 
     const student = await Student.findById(studentId);
-    const event = await Event.findById(eventId);
+    const event = req.event;
 
     if (!student || !event) {
       return res

@@ -7,14 +7,10 @@ import axios from "axios";
 import { Send, Smile } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import { useParams } from "next/navigation";
-import io from "socket.io-client";
-
-const socket = io(`${API_URL}/mentorship-chat`, {
-  transports: ["websocket"],
-  auth: { token: getToken() },
-});
+import { useNamespaceSocket } from "@/context/SocketContext";
 
 const StudentMentorshipChat = () => {
+  const socket = useNamespaceSocket("/mentorship-chat");
   const { mentorshipId } = useParams();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -47,6 +43,7 @@ const StudentMentorshipChat = () => {
   const sendMessage = () => {
     if (!input.trim()) return;
 
+    if (!socket) return;
     socket.emit("sendMentorMessage", {
       mentorshipId,
       message: input,
@@ -60,36 +57,45 @@ const StudentMentorshipChat = () => {
   const handleTyping = (e) => {
     setInput(e.target.value);
 
-    socket.emit("typing", { mentorshipId });
+    socket?.emit("typing", { mentorshipId });
 
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => {
-      socket.emit("stopTyping", { mentorshipId });
+      socket?.emit("stopTyping", { mentorshipId });
     }, 1500);
   };
 
   /* Socket listeners */
   useEffect(() => {
     loadMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload history only when the conversation changes
+  }, [mentorshipId]);
 
-    socket.emit("joinMentorship", { mentorshipId });
+  useEffect(() => {
+    if (!socket) return;
+    const join = () => socket.emit("joinMentorship", { mentorshipId });
+    join();
+    socket.on("connect", join); // re-join after reconnects
 
-    socket.on("newMentorMessage", (msg) => {
+    const onMessage = (msg) => {
       if (msg.mentorship === mentorshipId) {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       }
-    });
-
-    socket.on("typing", () => setIsTyping(true));
-    socket.on("stopTyping", () => setIsTyping(false));
+    };
+    const onTyping = () => setIsTyping(true);
+    const onStopTyping = () => setIsTyping(false);
+    socket.on("newMentorMessage", onMessage);
+    socket.on("typing", onTyping);
+    socket.on("stopTyping", onStopTyping);
 
     return () => {
-      socket.off("newMentorMessage");
-      socket.off("typing");
-      socket.off("stopTyping");
+      socket.off("connect", join);
+      socket.off("newMentorMessage", onMessage);
+      socket.off("typing", onTyping);
+      socket.off("stopTyping", onStopTyping);
     };
-  }, [mentorshipId]);
+  }, [mentorshipId, socket]);
 
   /* Close emoji when clicking outside */
   useEffect(() => {

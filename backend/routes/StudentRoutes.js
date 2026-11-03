@@ -27,9 +27,11 @@ import {
 } from "../controllers/studentController.js";
 import {
   adminOnly,
+  authorize,
   protect,
   volunteerOnly,
 } from "../middleware/authMiddleware.js";
+import { requireEventAccess } from "../utils/eventAccess.js";
 
 const studentRouter = express.Router();
 
@@ -41,25 +43,36 @@ studentRouter.post(
 studentRouter.post("/student-verify-otp", verifyOtp);
 studentRouter.post("/studentlogin", studentLogin);
 
+// Admin student management (auth runs before multer)
 studentRouter.post(
   "/admin-student-create",
+  protect,
+  adminOnly,
   upload.single("profileImage"),
   adminCreateStudent
 );
-studentRouter.put("/approve-student/:id", approveStudent);
-
-// profile
+studentRouter.put("/approve-student/:id", protect, adminOnly, approveStudent);
 studentRouter.put(
   "/update-student/:id",
+  protect,
+  adminOnly,
   upload.single("profileImage"),
   studentUpdate
 );
-studentRouter.delete("/delete-student/:id", deleteStudent);
+studentRouter.delete("/delete-student/:id", protect, adminOnly, deleteStudent);
 
 // events
-studentRouter.get("/student-events/:id", getStudentEvents);
+studentRouter.get(
+  "/student-events/:id",
+  protect,
+  authorize("admin", "coordinator"),
+  getStudentEvents
+);
 studentRouter.delete(
   "/remove-student-event/:studentId/:eventId",
+  protect,
+  authorize("admin", "coordinator"),
+  requireEventAccess({ param: "eventId" }),
   removeStudentFromEvent
 );
 
@@ -131,9 +144,9 @@ studentRouter.get(
 
 studentRouter.post(
   "/:id/uploadimagesbystudent",
-  upload.array("images", 10),
   protect,
   volunteerOnly,
+  upload.array("images", 10),
   uploadEventImages
 );
 

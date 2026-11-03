@@ -12,10 +12,7 @@ import Teacher from "../models/Teacher.js";
 import Institution from "../models/Institution.js";
 import { HfInference } from "@huggingface/inference";
 import Notification from "../models/Notification.js";
-import Groq from "groq-sdk";
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+import { groq } from "../utils/ai.js";
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 const generateToken = (id) =>
@@ -2052,7 +2049,7 @@ export const updateStudentByCoordinator = async (req, res) => {
     const student = await Student.findOneAndUpdate(
       { _id: id, institution: coordinator.institution },
       { department, status },
-      { new: true }
+      { new: true, runValidators: true }
     ).select("-password");
 
     if (!student) {

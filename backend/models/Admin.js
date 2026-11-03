@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import stripSecrets from "../utils/stripSecrets.js";
 
 const adminSchema = new mongoose.Schema(
   {
@@ -25,5 +26,7 @@ const adminSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+adminSchema.plugin(stripSecrets);
 
 export default mongoose.model("Admin", adminSchema);

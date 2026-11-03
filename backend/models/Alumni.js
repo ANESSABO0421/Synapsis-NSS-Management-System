@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import stripSecrets from "../utils/stripSecrets.js";
 
 const alumniSchema = new mongoose.Schema(
   {
@@ -81,5 +82,7 @@ const alumniSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+alumniSchema.plugin(stripSecrets);
 
 export default mongoose.model("Alumni", alumniSchema);

@@ -11,7 +11,7 @@ import {
 } from "../middleware/authMiddleware.js";
 
 const messagerouter = express.Router();
-messagerouter.get("/events/:eventId/messages", getMessagesForEvent);
+messagerouter.get("/events/:eventId/messages", protect, getMessagesForEvent);
 messagerouter.post("/coordinator/send", protect, coordinatorOnly, sendMessage);
 messagerouter.post("/teacher/send", protect, teacherOnly, sendMessage);
 messagerouter.post("/student/send", protect, volunteerOnly, sendMessage);

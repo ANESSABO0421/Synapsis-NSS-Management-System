@@ -11,7 +11,7 @@ import Event from "../models/Event.js";
 import Institution from "../models/Institution.js";
 import Coordinator from "../models/Coordinator.js";
 import { HfInference } from "@huggingface/inference";
-import Groq from "groq-sdk";
+import { groq } from "../utils/ai.js";
 
 const generateToken = (id) =>
   jwt.sign({ id, role: "teacher" }, process.env.JWT_SECRET, {
@@ -20,9 +20,6 @@ const generateToken = (id) =>
 
 const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000);
 
@@ -783,18 +780,42 @@ Focus on social impact, volunteer engagement, and community value.`,
 // };
 
 // test
+const MAX_GRACE_MARKS = 100;
+
+// Shared checks for grace-mark writes. req.event is set by requireEventAccess.
+const loadGraceTarget = async (req, res, studentId, marks, { requireMarks = true } = {}) => {
+  if (requireMarks) {
+    const n = Number(marks);
+    if (!Number.isFinite(n) || n < 0 || n > MAX_GRACE_MARKS) {
+      res.status(400).json({
+        success: false,
+        message: `Marks must be a number between 0 and ${MAX_GRACE_MARKS}`,
+      });
+      return null;
+    }
+  }
+  const student = await Student.findById(studentId);
+  if (!student) {
+    res.status(404).json({ success: false, message: "Student not found" });
+    return null;
+  }
+  const participated = req.event.participants.some((p) => String(p) === String(student._id));
+  if (!participated) {
+    res.status(400).json({ success: false, message: "Student did not participate in this event" });
+    return null;
+  }
+  return student;
+};
+
 export const assignGraceMark = async (req, res) => {
   try {
     const { studentId, eventId, marks } = req.body;
 
-    const student = await Student.findById(studentId);
-    if (!student)
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
+    const student = await loadGraceTarget(req, res, studentId, marks);
+    if (!student) return;
 
     const exists = student.graceHistory.some(
-      (h) => h.eventId.toString() === eventId
+      (h) => String(h.eventId) === String(eventId)
     );
 
     if (exists) {
@@ -823,14 +844,11 @@ export const updateGraceMark = async (req, res) => {
     const { studentId, eventId } = req.params;
     const { marks } = req.body;
 
-    const student = await Student.findById(studentId);
-    if (!student)
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
+    const student = await loadGraceTarget(req, res, studentId, marks);
+    if (!student) return;
 
     const record = student.graceHistory.find(
-      (h) => h.eventId.toString() === eventId
+      (h) => String(h.eventId) === String(eventId)
     );
 
     if (!record)
@@ -853,14 +871,11 @@ export const deleteGraceMark = async (req, res) => {
   try {
     const { studentId, eventId } = req.params;
 
-    const student = await Student.findById(studentId);
-    if (!student)
-      return res
-        .status(404)
-        .json({ success: false, message: "Student not found" });
+    const student = await loadGraceTarget(req, res, studentId, null, { requireMarks: false });
+    if (!student) return;
 
     student.graceHistory = student.graceHistory.filter(
-      (h) => h.eventId.toString() !== eventId
+      (h) => String(h.eventId) !== String(eventId)
     );
 
     await student.save(); // auto recalculates

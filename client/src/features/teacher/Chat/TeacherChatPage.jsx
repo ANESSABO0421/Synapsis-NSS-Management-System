@@ -4,17 +4,15 @@ import { getToken } from "@/utils/auth";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { io } from "socket.io-client";
+import { useSocket } from "@/context/SocketContext";
 import TeacherEventList from "./TeacherEventList";
 import TeacherMessagePanel from "./TeacherMessagePanel";
 import { MessageSquare, Loader2, PanelLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const socket = io(`${API_URL}`, {
-  transports: ["websocket", "polling"],
-});
-
 const TeacherChatPage = () => {
+  // Shared, authenticated socket (a module-level io() here had no token and was rejected).
+  const socket = useSocket();
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);

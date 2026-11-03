@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import stripSecrets from "../utils/stripSecrets.js";
 
 const TeacherSchema = new mongoose.Schema(
   {
@@ -37,11 +38,13 @@ const TeacherSchema = new mongoose.Schema(
       default: "pending",
     },
 
-    assignedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Events" }],
+    assignedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
 
     verifiedByAdmin: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
+
+TeacherSchema.plugin(stripSecrets);
 
 export default mongoose.model("Teacher", TeacherSchema);

@@ -1,29 +1,30 @@
 import { HfInference } from "@huggingface/inference";
 const hf = new HfInference(process.env.HUGGINGFACE_TOKEN);
-import Groq from "groq-sdk";
+import { groq } from "../utils/ai.js";
 import dotenv from "dotenv";
 dotenv.config();
 
 
 
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+
+const MAX_PROMPT_CHARS = 4000;
 
 export const generateAIInsight = async (req, res) => {
   try {
     const { prompt } = req.body;
 
-    if (!prompt)
+    if (typeof prompt !== "string" || !prompt.trim())
       return res.status(400).json({ success: false, message: "Prompt required" });
-
-    console.log("GROQ_API_KEY exists:", !!process.env.GROQ_API_KEY);
-    console.log("Groq client initialized:", !!groq);
+    if (prompt.length > MAX_PROMPT_CHARS)
+      return res
+        .status(400)
+        .json({ success: false, message: `Prompt must be under ${MAX_PROMPT_CHARS} characters` });
 
     // Call Groq model
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile", // Groq model
+      max_tokens: 600,
       messages: [
         {
           role: "system",
@@ -40,9 +41,8 @@ export const generateAIInsight = async (req, res) => {
 
     res.json({ success: true, insight: aiResponse });
   } catch (error) {
-    console.error("AI Insight Error:", error.message);
-    console.error("Full error:", error);
-    res.status(500).json({ success: false, message: "AI generation failed", error: error.message });
+    console.error("AI Insight Error:", error);
+    res.status(500).json({ success: false, message: "AI generation failed" });
   }
 };
 
@@ -59,7 +59,7 @@ export const generateEventSummary = async (req, res) => {
       Description: ${description}
       Location: ${location}
       Duration: ${hours} hours
-      Participants: ${participants.join(", ")}
+      Participants: ${Array.isArray(participants) ? participants.slice(0, 200).join(", ") : ""}
       Generate a short, professional event summary for NSS.
     `;
 

@@ -86,9 +86,11 @@ const CoordinatorDashboard = () => {
         Provide 3-4 short insights about performance, engagement, and suggestions.
       `;
 
-      const res = await axios.post(`${API_URL}/api/ai/generate`, {
-        prompt,
-      });
+      const res = await axios.post(
+        `${API_URL}/api/ai/generate`,
+        { prompt },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
 
       setInsight(res.data.insight);
     } catch (err) {

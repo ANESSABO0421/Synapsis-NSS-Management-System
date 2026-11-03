@@ -15,47 +15,55 @@ import {
   updateEvent,
   uploadEventImages,
 } from "../controllers/eventController.js";
-import {
-  coordinatorOnly,
-  protect,
-  teacherOnly,
-} from "../middleware/authMiddleware.js";
+import { adminOnly, authorize, protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
+import { requireEventAccess } from "../utils/eventAccess.js";
 
 const eventRouter = express.Router();
 
-eventRouter.post("/addevent", protect, createEvents);
+const manager = authorize("admin", "coordinator");
+const managerOrTeacher = authorize("admin", "coordinator", "teacher");
 
-eventRouter.get("/getevents", getEvents);
-
+// Public (landing page / gallery)
 eventRouter.get("/getallevent", getAllevents);
-
-eventRouter.get("/geteventsbyid/:id", getEventById);
-
-eventRouter.delete("/deleteevent/:id", deleteEvent);
-
-eventRouter.post("/assigntoevent/:id", assignStudentToEvent);
-
-eventRouter.get("/participantsofevents/:id", getEventParticipants);
-
-eventRouter.put("/updateevent/:id", updateEvent);
-
-eventRouter.post(
-  "/:id/uploadimages",
-  upload.array("images", 10),
-  protect,
-  teacherOnly,
-  uploadEventImages
-);
-
+eventRouter.get("/getalleventimage", getAllEventImages);
 eventRouter.get("/:id/images", getEventImages);
 
-eventRouter.delete("/:id/images/:imageId", deleteEventImage);
+// Authenticated
+eventRouter.post("/addevent", protect, adminOnly, createEvents);
+eventRouter.get("/getevents", protect, manager, getEvents);
+eventRouter.get("/geteventsbyid/:id", protect, getEventById);
 
-eventRouter.get("/getalleventimage", getAllEventImages);
+eventRouter.put("/updateevent/:id", protect, manager, requireEventAccess(), updateEvent);
+eventRouter.delete("/deleteevent/:id", protect, manager, requireEventAccess(), deleteEvent);
+eventRouter.post("/assigntoevent/:id", protect, manager, requireEventAccess(), assignStudentToEvent);
 
-eventRouter.put("/:id/start", protect, coordinatorOnly, startEvent);
+eventRouter.get(
+  "/participantsofevents/:id",
+  protect,
+  managerOrTeacher,
+  requireEventAccess({ allowTeacher: true }),
+  getEventParticipants
+);
 
-eventRouter.put("/:id/complete", protect, coordinatorOnly, completeEvent);
+// Auth runs BEFORE multer so anonymous requests never reach Cloudinary.
+eventRouter.post(
+  "/:id/uploadimages",
+  protect,
+  managerOrTeacher,
+  requireEventAccess({ allowTeacher: true }),
+  upload.array("images", 10),
+  uploadEventImages
+);
+eventRouter.delete(
+  "/:id/images/:imageId",
+  protect,
+  managerOrTeacher,
+  requireEventAccess({ allowTeacher: true }),
+  deleteEventImage
+);
+
+eventRouter.put("/:id/start", protect, authorize("coordinator"), requireEventAccess(), startEvent);
+eventRouter.put("/:id/complete", protect, authorize("coordinator"), requireEventAccess(), completeEvent);
 
 export default eventRouter;

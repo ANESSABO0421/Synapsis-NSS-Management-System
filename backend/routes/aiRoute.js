@@ -1,6 +1,6 @@
 import express from "express";
 import { generateAIInsight, generateEventSummary } from "../controllers/aiController.js";
-import { protect, coordinatorOnly } from "../middleware/authMiddleware.js";
+import { protect, coordinatorOnly, authorize } from "../middleware/authMiddleware.js";
 
 const airouter = express.Router();
 
@@ -11,6 +11,6 @@ airouter.post(
   generateEventSummary
 );
 
-airouter.post("/generate", generateAIInsight);
+airouter.post("/generate", protect, authorize("admin", "coordinator", "teacher"), generateAIInsight);
 
 export default airouter;

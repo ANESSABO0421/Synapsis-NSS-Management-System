@@ -33,17 +33,22 @@ const MessagePanel = ({ event, socket }) => {
 
   // Socket listeners
   useEffect(() => {
-    socket.emit("join_event", event._id);
+    if (!socket) return;
+    const join = () => socket.emit("join_event", event._id);
+    join();
+    socket.on("connect", join); // re-join after reconnects
 
-    socket.on("receive_message", (msg) => {
+    const onMessage = (msg) => {
       if (msg.eventId === event._id) {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
       }
-    });
+    };
+    socket.on("receive_message", onMessage);
 
     return () => {
       socket.emit("leave_event", event._id);
-      socket.off("receive_message");
+      socket.off("connect", join);
+      socket.off("receive_message", onMessage);
     };
   }, [socket, event]);
 
@@ -61,9 +66,9 @@ const MessagePanel = ({ event, socket }) => {
       );
 
       if (res.data.success) {
-        const savedMsg = res.data.message;
-        setMessages((prev) => [...prev, savedMsg]);
-        socket.emit("send_message", savedMsg);
+        // Server persists and broadcasts; de-dupe in case the broadcast arrives first.
+        const msg = res.data.message;
+        setMessages((prev) => (prev.some((m) => m._id === msg._id) ? prev : [...prev, msg]));
         setInput("");
       }
     } catch (err) {
