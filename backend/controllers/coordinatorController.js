@@ -180,9 +180,26 @@ export const Login = async (req, res) => {
 };
 
 // create event
+const CATEGORIES = ["regular", "special_camp"];
+
+// Ongoing/Completed must go through PUT /api/events/:id/start|complete, which
+// record times and credit volunteer hours. Edits may only cancel or reinstate.
+const ALLOWED_MANUAL_STATUS = {
+  Upcoming: ["Cancelled"],
+  Ongoing: ["Cancelled"],
+  Cancelled: ["Upcoming"],
+  Completed: [],
+};
+const statusChangeError = (event, status) => {
+  if (!status || status === event.status) return null;
+  if ((ALLOWED_MANUAL_STATUS[event.status] || []).includes(status)) return null;
+  return `Cannot change status from ${event.status} to ${status} here. Use the Start / Complete actions.`;
+};
+
 export const createEvent = async (req, res) => {
   try {
     const { title, description, location, date, hours } = req.body;
+    const category = CATEGORIES.includes(req.body.category) ? req.body.category : "regular";
     if (!title || !description || !location || !date || !hours) {
       return res
         .status(400)
@@ -234,6 +251,7 @@ export const createEvent = async (req, res) => {
       location,
       date,
       hours: hours || 0,
+      category,
       assignedCoordinators: req.user._id,
       institution: institutionId,
       createdBy: req.user._id,
@@ -933,6 +951,10 @@ export const updateEventStatus = async (req, res) => {
       });
     }
 
+    const statusError = statusChangeError(event, status);
+    if (statusError) {
+      return res.status(400).json({ success: false, message: statusError });
+    }
     event.status = status;
     await event.save();
 
@@ -1338,7 +1360,12 @@ export const editEvent = async (req, res) => {
     event.location = location || event.location;
     event.date = date || event.date;
     event.hours = hours || event.hours;
+    const statusError = statusChangeError(event, status);
+    if (statusError) {
+      return res.status(400).json({ success: false, message: statusError });
+    }
     event.status = status || event.status;
+    if (CATEGORIES.includes(req.body.category)) event.category = req.body.category;
     event.images = updatedImage;
 
     await event.save();

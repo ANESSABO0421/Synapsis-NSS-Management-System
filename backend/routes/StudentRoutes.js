@@ -7,8 +7,6 @@ import {
   approveStudent,
   deleteStudent,
   editStudentProfile,
-  generateAICertificate,
-  generateOwnCertificate,
   getAllStudents,
   getFilteredStudentEvents,
   getMyEvents,
@@ -33,6 +31,12 @@ import {
   volunteerOnly,
 } from "../middleware/authMiddleware.js";
 import { requireEventAccess } from "../utils/eventAccess.js";
+import {
+  downloadCompletionCertificate,
+  downloadEventCertificate,
+  getMyProgress,
+  listMyCertificates,
+} from "../controllers/certificateController.js";
 
 const studentRouter = express.Router();
 
@@ -122,12 +126,11 @@ studentRouter.get(
 
 studentRouter.get("/my-events", protect, volunteerOnly, getMyEvents);
 
-studentRouter.get(
-  "/generate/:eventId",
-  protect,
-  volunteerOnly,
-  generateAICertificate
-);
+// Verifiable participation certificate (replaces the unverifiable AI one).
+studentRouter.get("/generate/:eventId", protect, volunteerOnly, downloadEventCertificate);
+studentRouter.get("/nss-progress", protect, volunteerOnly, getMyProgress);
+studentRouter.get("/certificates", protect, volunteerOnly, listMyCertificates);
+studentRouter.get("/nss-certificate", protect, volunteerOnly, downloadCompletionCertificate);
 
 studentRouter.get(
   "/event/:eventId/attendance",

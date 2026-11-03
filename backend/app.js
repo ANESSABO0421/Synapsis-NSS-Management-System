@@ -29,6 +29,8 @@ import notificationRoute from "./routes/notificationRoutes.js";
 import donationRouter from "./routes/donationRoutes.js";
 import mentorshipRouter from "./routes/mentorshipRoutes.js";
 import mentorshipMessage from "./routes/mentorshipMessageRoutes.js";
+import certificateRouter from "./routes/certificateRoutes.js";
+import reportRouter from "./routes/reportRoutes.js";
 
 const app = express();
 app.set("trust proxy", 1); // behind Render/Vercel proxy: needed for correct client IPs in rate limiting
@@ -78,6 +80,8 @@ app.use(
   authLimiter
 );
 app.use("/api/ai", aiLimiter);
+// Reports only hit the LLM when ?ai=1.
+app.use("/api/reports", (req, res, next) => (req.query.ai ? aiLimiter(req, res, next) : next()));
 
 // ---------- Health ----------
 app.get("/health", (_req, res) => {
@@ -101,6 +105,8 @@ app.use("/api/notification", notificationRoute);
 app.use("/api/donations", donationRouter);
 app.use("/api/mentorship", mentorshipRouter);
 app.use("/api/mentorshipmessage", mentorshipMessage);
+app.use("/api/certificates", certificateRouter);
+app.use("/api/reports", reportRouter);
 
 app.use(notFound);
 app.use(errorHandler);

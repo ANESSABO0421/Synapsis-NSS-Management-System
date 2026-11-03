@@ -14,6 +14,7 @@ import {
   FaUser,
 } from "react-icons/fa";
 import { MdEvent, MdLogout } from "react-icons/md";
+import { FaQrcode } from "react-icons/fa";
 import { Megaphone } from "lucide-react";
 import { BsMegaphone, BsMegaphoneFill } from "react-icons/bs";
 
@@ -35,6 +36,11 @@ const TeacherSidebar = ({ setIsOpen }) => {
       path: "/teacherLayout/attendanceByTeacher",
       label: "Attendance",
       icon: <FaUserCheck />,
+    },
+    {
+      path: "/teacherLayout/qrattendance",
+      label: "QR Attendance",
+      icon: <FaQrcode />,
     },
     {
       path: "/teacherLayout/attendancepdf",

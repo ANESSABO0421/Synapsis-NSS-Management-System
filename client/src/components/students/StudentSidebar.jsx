@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { BiComment } from "react-icons/bi";
+import { FaChartLine } from "react-icons/fa";
 import { BsMegaphoneFill } from "react-icons/bs";
 import { MdFeedback, MdRecentActors } from "react-icons/md";
 import { BsWechat } from "react-icons/bs";
@@ -38,6 +39,11 @@ const StudentSidebar = ({ setIsOpen }) => {
       to: "/studentlayout/studentevents",
       icon: <FaCalendarCheck />,
       label: "My Events",
+    },
+    {
+      to: "/studentlayout/nssprogress",
+      icon: <FaChartLine />,
+      label: "NSS Progress",
     },
     {
       to: "/studentlayout/certificates",

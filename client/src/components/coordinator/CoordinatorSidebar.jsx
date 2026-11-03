@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 import { BsFillCalendar2EventFill } from "react-icons/bs";
 import { RiUserStarFill } from "react-icons/ri";
+import { FaQrcode, FaChartLine } from "react-icons/fa";
 import { GiTeacher } from "react-icons/gi";
 import { MdOutlineVolunteerActivism, MdRecommend } from "react-icons/md";
 import { File } from "lucide-react";
@@ -55,9 +56,19 @@ const CoordinatorSidebar = () => {
       icon: <MdOutlineVolunteerActivism size={18} />,
     },
     {
+      name: "QR Attendance",
+      path: "/coordinatorlayout/qrattendance",
+      icon: <FaQrcode size={18} />,
+    },
+    {
       name: "Event Report",
       path: "/coordinatorlayout/eventreport",
       icon: <File size={18} />,
+    },
+    {
+      name: "Annual Report",
+      path: "/coordinatorlayout/annualreport",
+      icon: <FaChartLine size={18} />,
     },
     {
       name: "Manage Donation",

@@ -17,6 +17,7 @@ const CreateEvent = () => {
     location: "",
     hours: "",
     caption: "",
+    category: "regular",
   });
 
   const [image, setImage] = useState(null);
@@ -92,6 +93,7 @@ const CreateEvent = () => {
         location: "",
         hours: "",
         caption: "",
+        category: "regular",
       });
       setImage(null);
     } catch (error) {
@@ -163,6 +165,19 @@ const CreateEvent = () => {
               required={input.name !== "caption"}
             />
           ))}
+
+          <label className="flex flex-col gap-1 text-sm text-gray-700">
+            Event type
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full border border-emerald-300 bg-white/70 p-3 rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-emerald-400 outline-none"
+            >
+              <option value="regular">Regular activity</option>
+              <option value="special_camp">Special camp (7-day residential)</option>
+            </select>
+          </label>
 
           <motion.textarea
             name="description"

@@ -25,6 +25,8 @@ const DEFAULT_ORIGINS = [
 
 export const config = {
   port: Number(process.env.PORT) || 5000,
+  // Public frontend URL, used in QR codes and certificate verification links.
+  frontendUrl: (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, ""),
   isProduction: process.env.NODE_ENV === "production",
   // Comma-separated override, e.g. CORS_ORIGINS=https://a.app,https://b.app
   corsOrigins: process.env.CORS_ORIGINS

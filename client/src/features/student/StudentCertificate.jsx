@@ -4,7 +4,11 @@ import { getToken } from "@/utils/auth";
 import { API_URL } from "@/utils/config";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { api } from "@/utils/api";
+import { downloadFile } from "@/utils/download";
 import {
   FaCertificate,
   FaCalendarAlt,
@@ -17,6 +21,17 @@ const StudentCertificate = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState(null);
+  const [issued, setIssued] = useState([]);
+
+  const loadIssued = () =>
+    api
+      .get("/api/students/certificates")
+      .then((res) => setIssued(res.data.certificates || []))
+      .catch(() => {});
+
+  useEffect(() => {
+    loadIssued();
+  }, []);
 
   useEffect(() => {
     const fetchMyEvents = async () => {
@@ -39,28 +54,13 @@ const StudentCertificate = () => {
   }, []);
 
   const handleGenerateCertificate = async (eventId) => {
+    setDownloadingId(eventId);
     try {
-      setDownloadingId(eventId);
-      const token = getToken();
-
-      const response = await axios.get(
-        `${API_URL}/api/students/generate/${eventId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob",
-        }
-      );
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `certificate_${eventId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      await downloadFile(`/api/students/generate/${eventId}`, `NSS_Certificate_${eventId}.pdf`);
+      loadIssued();
     } catch (err) {
-      console.error("Certificate generation failed:", err);
-      alert("Unable to generate certificate. Please ensure the event is completed.");
+      // Server explains why (not completed, not marked present, ...).
+      toast.error(err.message);
     } finally {
       setDownloadingId(null);
     }
@@ -182,6 +182,31 @@ const StudentCertificate = () => {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {issued.length > 0 && (
+        <section className="mt-10 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="px-5 pt-5">
+            <h2 className="text-lg font-semibold text-gray-900">Issued certificates</h2>
+            <p className="text-xs text-gray-500">
+              Share the code or link: anyone can confirm a certificate is genuine at{" "}
+              <Link href="/verify" className="text-green-700 hover:underline">/verify</Link>.
+            </p>
+          </div>
+          <ul className="mt-3 divide-y divide-gray-100 text-sm">
+            {issued.map((c) => (
+              <li key={c.code} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
+                <span className="text-gray-900">
+                  {c.type === "nss_completion" ? "NSS completion" : c.eventTitle}
+                  {c.revoked && <span className="ml-2 text-xs font-medium text-red-700">(revoked)</span>}
+                </span>
+                <Link href={`/verify/${c.code}`} className="font-mono text-green-700 hover:underline">
+                  {c.code}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

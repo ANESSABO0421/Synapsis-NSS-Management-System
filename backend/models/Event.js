@@ -45,6 +45,13 @@ const eventSchema = new mongoose.Schema(
         },
         markedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Teacher" },
         date: { type: Date, default: Date.now },
+        markedAt: { type: Date },
+        // QR self check-in/out. Manual "Present" without times earns the full event duration.
+        method: { type: String, enum: ["manual", "qr"], default: "manual" },
+        checkInAt: { type: Date },
+        checkOutAt: { type: Date },
+        // Hours credited to this student when the event was completed.
+        hours: { type: Number, min: 0 },
       },
     ],
     images: [
@@ -60,8 +67,17 @@ const eventSchema = new mongoose.Schema(
       enum: ["Upcoming", "Ongoing", "Completed", "Cancelled"],
       default: "Upcoming",
     },
+    // NSS distinguishes regular activities from the residential special camp.
+    category: {
+      type: String,
+      enum: ["regular", "special_camp"],
+      default: "regular",
+    },
   },
   { timestamps: true }
 );
+
+eventSchema.index({ institution: 1, status: 1, date: -1 });
+eventSchema.index({ "attendance.student": 1, status: 1 });
 
 export default mongoose.model("Event", eventSchema);

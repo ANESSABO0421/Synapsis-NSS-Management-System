@@ -34,6 +34,7 @@ import {
   volunteerTostudent,
 } from "../controllers/coordinatorController.js";
 import upload from "../middleware/uploadMiddleware.js";
+import { getVolunteerProgress } from "../controllers/certificateController.js";
 import {
   coordinatorOnly,
   protect,
@@ -206,6 +207,7 @@ coordinatorRoute.post(
 
 // Get all volunteers of institution
 coordinatorRoute.get("/volunteers", protect, coordinatorOnly, getAllVolunteers);
+coordinatorRoute.get("/nss-progress", protect, coordinatorOnly, getVolunteerProgress);
 
 coordinatorRoute.get(
   "/profile",

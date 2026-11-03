@@ -24,7 +24,7 @@ const ManageEvents = () => {
     location: "",
     date: "",
     hours: "",
-    status: "",
+    category: "regular",
   });
 
   const token = getToken();
@@ -81,7 +81,7 @@ const ManageEvents = () => {
       location: event.location,
       date: event.date?.split("T")[0] || "",
       hours: event.hours,
-      status: event.status,
+      category: event.category || "regular",
     });
   };
 
@@ -277,15 +277,16 @@ const ManageEvents = () => {
                     className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
                   />
 
+                  {/* Status changes go through Start / Complete so hours are credited. */}
                   <select
-                    name="status"
-                    value={formData.status}
+                    name="category"
+                    value={formData.category}
                     onChange={handleChange}
+                    aria-label="Event type"
                     className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
                   >
-                    <option value="Upcoming">Upcoming</option>
-                    <option value="Ongoing">Ongoing</option>
-                    <option value="Completed">Completed</option>
+                    <option value="regular">Regular activity</option>
+                    <option value="special_camp">Special camp</option>
                   </select>
 
                   <div className="flex justify-end gap-3 pt-4">

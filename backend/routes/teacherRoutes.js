@@ -5,7 +5,6 @@ import {
   teacherLogin,
   teacherSignUp,
   verifyOtp,
-  markAttendance,
   assignGraceMark,
   generateAttendancePdf,
   approveRecommendedGraceMark,
@@ -29,6 +28,7 @@ import {
 } from "../controllers/teacherController.js";
 import upload from "../middleware/uploadMiddleware.js";
 import { requireEventAccess } from "../utils/eventAccess.js";
+import { markAttendance } from "../controllers/attendanceController.js";
 import {
   adminOnly,
   coordinatorOnly,
@@ -54,7 +54,13 @@ teacherRoute.post("/login", validate(loginSchema), teacherLogin);
 teacherRoute.post("/assign-event", protect, adminOnly, assignTeacherToEvent);
 
 // Attendance
-teacherRoute.post("/attendance/:eventId", protect, teacherOnly, markAttendance);
+teacherRoute.post(
+  "/attendance/:eventId",
+  protect,
+  teacherOnly,
+  requireEventAccess({ param: "eventId", allowTeacher: true }),
+  markAttendance
+);
 teacherRoute.get(
   "/attendance/pdf/:eventId",
   protect,

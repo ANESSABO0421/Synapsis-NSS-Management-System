@@ -206,48 +206,7 @@ export const assignTeacherToEvent = async (req, res) => {
 };
 
 // attendance
-export const markAttendance = async (req, res) => {
-  try {
-    const { eventId } = req.params;
-    const { attendanceList } = req.body;
-
-    const event = await Event.findById(eventId);
-    if (!event) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Event Not found" });
-    }
-
-    attendanceList.forEach(({ studentId, status }) => {
-      const record = event.attendance.find(
-        (a) => a.student.toString() === studentId
-      );
-      if (record) {
-        record.status = status;
-        record.markedAt = new Date();
-      } else {
-        event.attendance.push({
-          student: studentId,
-          status,
-          markedBy: req.user?._id,
-        });
-      }
-    });
-
-    await event.save();
-    res.json({
-      success: true,
-      message: "Attendance updated",
-      attendance: event.attendance,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-//     if (!fs.existsSync("uploads")) fs.mkdirSync("uploads");
-
-//     doc.end();
+// markAttendance moved to controllers/attendanceController.js (adds ownership + participant checks)
 
 export const generateAttendancePdf = async (req, res) => {
   try {

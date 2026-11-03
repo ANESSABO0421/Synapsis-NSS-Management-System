@@ -2,6 +2,7 @@ import Alumni from "../models/Alumni.js";
 import Event from "../models/Event.js";
 import Student from "../models/Student.js";
 import cloudinary from "../utils/cloudinary.js";
+import { hoursForAttendance } from "../services/nssProgress.js";
 
 // create events
 export const createEvents = async (req, res) => {
@@ -309,14 +310,18 @@ export const completeEvent = async (req, res) => {
     const hours = Math.max(0, Number(((event.endTime - start) / 3_600_000).toFixed(2)));
     event.calculatedHours = hours;
 
-    const presentIds = event.attendance
-      .filter((a) => a.status === "Present")
-      .map((a) => a.student);
-    const students = await Student.find({ _id: { $in: presentIds } });
+    // Each student is credited for the time they were actually present
+    // (QR check-in/out), or the full duration when marked present manually.
+    const earned = new Map();
+    for (const att of event.attendance) {
+      att.hours = hoursForAttendance(event, att);
+      if (att.hours > 0) earned.set(String(att.student), att.hours);
+    }
+    const students = await Student.find({ _id: { $in: [...earned.keys()] } });
 
     for (const student of students) {
       student.totalVolunteerHours = Number(
-        (student.totalVolunteerHours + hours).toFixed(2)
+        (student.totalVolunteerHours + earned.get(String(student._id))).toFixed(2)
       );
       const level = levelFor(student.totalVolunteerHours);
       student.level = level;

@@ -18,6 +18,7 @@ import {
 import { adminOnly, authorize, protect } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
 import { requireEventAccess } from "../utils/eventAccess.js";
+import { getQrToken, qrCheckIn } from "../controllers/attendanceController.js";
 
 const eventRouter = express.Router();
 
@@ -62,6 +63,16 @@ eventRouter.delete(
   requireEventAccess({ allowTeacher: true }),
   deleteEventImage
 );
+
+// QR attendance: rotating code shown by staff, scanned by participants.
+eventRouter.get(
+  "/:id/qr",
+  protect,
+  managerOrTeacher,
+  requireEventAccess({ allowTeacher: true }),
+  getQrToken
+);
+eventRouter.post("/checkin", protect, authorize("student"), qrCheckIn);
 
 eventRouter.put("/:id/start", protect, authorize("coordinator"), requireEventAccess(), startEvent);
 eventRouter.put("/:id/complete", protect, authorize("coordinator"), requireEventAccess(), completeEvent);

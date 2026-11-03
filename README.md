@@ -6,6 +6,13 @@ A web platform for running a college **National Service Scheme (NSS)** unit: eve
 - **Backend:** Node 20, Express 5, MongoDB (Mongoose 8), Socket.IO
 - **Integrations:** Cloudinary (uploads), Stripe (donations), Groq (AI insights), Google OAuth, Nodemailer (OTP)
 
+## NSS features
+
+- **Progress toward the NSS certificate.** Each volunteer sees their hours toward 240 in total and 120 per academic year (June to May), plus whether the special camp is done. Coordinators see every volunteer marked *Completed*, *On track* or *Behind*. The rules live in [backend/configs/nss.js](backend/configs/nss.js).
+- **QR check-in and check-out.** Staff show a QR code that changes every 30 seconds and expires after 45. Volunteers scan it on arrival and again when leaving, and are credited for the time they were actually present. Volunteers marked present by hand get the full event duration.
+- **Certificates anyone can verify.** Participation certificates go only to volunteers marked present. Completion certificates require meeting the NSS rules. Every PDF has a QR code and a code linking to the public page `/verify/<code>`. Admins and coordinators can revoke a certificate.
+- **Annual report.** Totals for an institution and academic year, an events table and top volunteers, downloadable as PDF or CSV (opens in Excel), with an optional AI-written overview.
+
 ## Roles
 
 | Role | What they do |
@@ -52,7 +59,7 @@ The seed only creates or replaces records with `@demo.synapsis.test` emails, and
 
 ## Environment variables
 
-Only `MONGODB_URL` and `JWT_SECRET` are required. The server exits at startup if either is missing. Optional integrations turn off the matching feature when their keys are absent, and the server still starts. The full list is in [backend/.env.example](backend/.env.example) and [client/.env.example](client/.env.example).
+Only `MONGODB_URL` and `JWT_SECRET` are required. Set `FRONTEND_URL` in production so QR codes and certificate links point to your live site. The server exits at startup if either is missing. Optional integrations turn off the matching feature when their keys are absent, and the server still starts. The full list is in [backend/.env.example](backend/.env.example) and [client/.env.example](client/.env.example).
 
 ## Testing
 
@@ -67,6 +74,7 @@ These are integration tests (Node's built-in `node:test`, Supertest and an in-me
 - event ownership: coordinators and teachers can only manage their own events
 - donation integrity: amounts come from Stripe, and replayed payments are ignored
 - grace-mark rules: approvals count once, rejections never count
+- hours and NSS eligibility rules, the QR check-in flow, certificate issuing, verification and revocation, and the annual report
 - chat and mentorship socket permissions
 - NoSQL-injection and input validation
 
