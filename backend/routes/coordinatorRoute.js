@@ -1,4 +1,5 @@
 import express from "express";
+import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
 import {
   approveCoordinator,
   assignTeacherToEvent,
@@ -49,8 +50,8 @@ coordinatorRoute.post(
   ]),
   coordinatorSignup
 );
-coordinatorRoute.post("/verifyotp", verifyOtp);
-coordinatorRoute.post("/logincoordinator", Login);
+coordinatorRoute.post("/verifyotp", validate(otpSchema("email")), verifyOtp);
+coordinatorRoute.post("/logincoordinator", validate(loginSchema), Login);
 coordinatorRoute.post(
   "/createevents",
   protect,

@@ -1,4 +1,5 @@
 import express from "express";
+import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
 import {
   assignTeacherToEvent,
   teacherLogin,
@@ -46,8 +47,8 @@ teacherRoute.post(
   ]),
   teacherSignUp
 );
-teacherRoute.post("/verify-otp", verifyOtp);
-teacherRoute.post("/login", teacherLogin);
+teacherRoute.post("/verify-otp", validate(otpSchema("teacherId")), verifyOtp);
+teacherRoute.post("/login", validate(loginSchema), teacherLogin);
 
 // Admin actions
 teacherRoute.post("/assign-event", protect, adminOnly, assignTeacherToEvent);

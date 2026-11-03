@@ -1,7 +1,7 @@
 "use client";
 
 import { API_URL } from "@/utils/config";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FaGoogle } from "react-icons/fa";
@@ -25,59 +25,37 @@ const Login = () => {
     setLoading(true);
     setMessage("");
 
-    const loginEndpoints = [
-      { role: "admin", url: `${API_URL}/api/admin/login` },
-      { role: "coordinator", url: `${API_URL}/api/coordinator/logincoordinator` },
-      { role: "student", url: `${API_URL}/api/students/studentlogin` },
-      { role: "teacher", url: `${API_URL}/api/teacher/login` },
-      { role: "alumni", url: `${API_URL}/api/alumni/login` },
-    ];
+    try {
+      // One request: the backend figures out which kind of account this is.
+      const res = await axios.post(`${API_URL}/api/auth/login`, form);
+      const { token, role, user } = res.data;
 
-    let loggedIn = false;
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      localStorage.setItem("email", user?.email || form.email);
+      if (user?.name) localStorage.setItem("name", user.name);
+      if (user?.id) localStorage.setItem("id", user.id);
 
-    for (const { role, url } of loginEndpoints) {
-      try {
-        const res = await axios.post(url, form, {
-          headers: { "Content-Type": "application/json" },
-        });
+      toast.success(`${role.toUpperCase()} login successful ✅`);
 
-        const { success, token } = res.data;
-
-        if (success && token) {
-          const userEmail =
-            res.data?.email ||
-            res.data?.user?.email ||
-            res.data?.teacher?.email ||
-            res.data?.student?.email ||
-            res.data?.coordinator?.email ||
-            res.data?.alumni?.email ||
-            res.data?.admin?.email ||
-            form.email;
-
-          localStorage.setItem("token", token);
-          localStorage.setItem("role", role);
-          localStorage.setItem("email", userEmail);
-
-          toast.success(`${role.toUpperCase()} login successful ✅`);
-          loggedIn = true;
-
-          setTimeout(() => {
-            if (role === "admin") window.location.href = "/adminpanel";
-            else if (role === "coordinator") window.location.href = "/coordinatorlayout";
-            else if (role === "teacher") window.location.href = "/teacherLayout";
-            else if (role === "student") window.location.href = "/studentlayout";
-            else if (role === "alumni") window.location.href = "/alumnilayout";
-          }, 1000);
-
-          break;
-        }
-      } catch (error) {
-        console.log(`${role} login failed`, error.response?.data || error);
-      }
-    }
-
-    if (!loggedIn) {
-      setMessage("Invalid credentials or account not found ❌");
+      const home = {
+        admin: "/adminpanel",
+        coordinator: "/coordinatorlayout",
+        teacher: "/teacherLayout",
+        student: "/studentlayout",
+        alumni: "/alumnilayout",
+      };
+      // Full reload so SocketProvider re-mounts with the new token.
+      setTimeout(() => {
+        window.location.href = home[role] || "/";
+      }, 1000);
+    } catch (error) {
+      const data = error.response?.data;
+      setMessage(
+        data?.errors?.[0]?.message ||
+          data?.message ||
+          "Unable to reach the server. Please try again."
+      );
     }
 
     setLoading(false);
@@ -87,10 +65,8 @@ const Login = () => {
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
-  useEffect(() => {
-    const error = searchParams.get("error");
-    if (error) setMessage(error);
-  }, [searchParams]);
+  // Errors passed via ?error=... (OAuth failure, expired session) show until the user submits.
+  const shownMessage = message || searchParams.get("error") || "";
 
   return (
     <div className="flex min-h-screen relative">
@@ -139,15 +115,15 @@ const Login = () => {
             Sign in to continue your journey with <b>Synapsis</b>
           </p>
 
-          {message && (
+          {shownMessage && (
             <div
               className={`text-center mb-4 py-2 rounded-xl font-medium text-sm ${
-                message.includes("successful")
+                shownMessage.includes("successful")
                   ? "bg-green-50 text-green-700"
                   : "bg-red-50 text-red-600"
               }`}
             >
-              {message}
+              {shownMessage}
             </div>
           )}
 

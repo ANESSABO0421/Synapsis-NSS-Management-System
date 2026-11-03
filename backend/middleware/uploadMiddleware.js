@@ -1,6 +1,7 @@
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../utils/cloudinary.js";
+import { sanitizeInput } from "./sanitize.js";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const DOCUMENT_TYPES = ["application/pdf"];
@@ -39,10 +40,22 @@ const fileFilter = (_req, file, cb) => {
   cb(err);
 };
 
-const upload = multer({
+const multerUpload = multer({
   storage,
   fileFilter,
   limits: { fileSize: MAX_FILE_SIZE, files: 10 },
 });
+
+// Multipart bodies are parsed here (after the global sanitizer ran), and multer
+// expands names like `email[$ne]` into objects — so sanitize again afterwards.
+const thenSanitize = (mw) => (req, res, next) =>
+  mw(req, res, (err) => (err ? next(err) : sanitizeInput(req, res, next)));
+
+const upload = {
+  single: (...args) => thenSanitize(multerUpload.single(...args)),
+  array: (...args) => thenSanitize(multerUpload.array(...args)),
+  fields: (...args) => thenSanitize(multerUpload.fields(...args)),
+  none: () => thenSanitize(multerUpload.none()),
+};
 
 export default upload;

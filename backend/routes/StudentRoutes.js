@@ -1,4 +1,5 @@
 import express from "express";
+import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
   adminCreateStudent,
@@ -40,8 +41,8 @@ studentRouter.post(
   upload.single("profileImage"),
   studentSignUp
 );
-studentRouter.post("/student-verify-otp", verifyOtp);
-studentRouter.post("/studentlogin", studentLogin);
+studentRouter.post("/student-verify-otp", validate(otpSchema("studentId")), verifyOtp);
+studentRouter.post("/studentlogin", validate(loginSchema), studentLogin);
 
 // Admin student management (auth runs before multer)
 studentRouter.post(
@@ -75,13 +76,6 @@ studentRouter.delete(
   requireEventAccess({ param: "eventId" }),
   removeStudentFromEvent
 );
-
-// studentRouter.get(
-//   "/eventcerificate/:eventId",
-//   protect,
-//   volunteerOnly,
-//   generateOwnCertificate
-// );
 
 //dashboard(admin)
 studentRouter.get(

@@ -63,12 +63,6 @@ const alumniSchema = new mongoose.Schema(
       },
     ],
 
-    // mentorshipStats: {
-    //   totalMentees: { type: Number, default: 0 },
-    //   activeSessions: { type: Number, default: 0 },
-    //   completedSessions: { type: Number, default: 0 },
-    // },
-
     mentorshipAvailability: {
       isAvailable: { type: Boolean, default: true },
       preferredTopics: [{ type: String }],

@@ -1,53 +1,6 @@
-// import express from "express";
-// import {
-//   addAchievement,
-//   addTestimonial,
-//   approveAlumni,
-//   deleteAlumni,
-//   Login,
-//   Signup,
-//   updateAlumni,
-//   verifyOtp,
-//   updateTestimonialVisibility,
-//   getTopTestimonial,
-// } from "../controllers/alumniController.js";
-// import { protect, superAdminOnly } from "../middleware/authMiddleware.js";
-// import upload from "../middleware/uploadMiddleware.js";
-
-// const alumniRouter = express.Router();
-
-// alumniRouter.post("/alumnisignup", upload.single("profileImage"), Signup);
-// alumniRouter.post("/verifyotp/:id", verifyOtp);
-// alumniRouter.post("/login", Login);
-
-// // admin approval
-// alumniRouter.put("/alumniapproval/:id", protect, approveAlumni);
-// alumniRouter.put(
-//   "/updatealumni/:id",
-//   protect,
-//   upload.single("profileImage"),
-//   updateAlumni
-// );
-// alumniRouter.delete("/delete/:id", protect, deleteAlumni);
-
-// // alumni achievement and testimonial adding
-// alumniRouter.post("/:id/addalumniachievement", protect, addTestimonial);
-// alumniRouter.post("/:id/addachievement", protect, addAchievement);
-
-// // Admin approves/rejects testimonial
-// alumniRouter.put(
-//   "/:id/:testimonialId",
-//   protect,
-//   superAdminOnly,
-//   updateTestimonialVisibility
-// );
-
-// // Public - get top 3 approved testimonials
-// alumniRouter.get("/top/all", getTopTestimonial);
-
-// export default alumniRouter;
 
 import express from "express";
+import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
 import {
   // Signup,
   // verifyOtp,
@@ -87,20 +40,11 @@ const alumniRouter = express.Router();
         AUTHENTICATION
    =========================== */
 alumniRouter.post("/signup", upload.single("profileImage"), signupAlumni);
-// alumniRouter.post("/verify-otp/:id", verifyOtp);
-alumniRouter.post("/login", loginAlumni);
+alumniRouter.post("/login", validate(loginSchema), loginAlumni);
 
 /* ===========================
         ADMIN ACTIONS
    =========================== */
-// alumniRouter.put("/approve/:id", protect, superAdminOnly, approveAlumni);
-// alumniRouter.delete("/delete/:id", protect, superAdminOnly, deleteAlumni);
-// alumniRouter.put(
-//   "/update/:id",
-//   protect,
-//   upload.single("profileImage"),
-//   updateAlumni
-// );
 
 /* ===========================
         TESTIMONIALS
@@ -122,7 +66,6 @@ alumniRouter.get("/testimonials/top", getTopTestimonials);
 /* ===========================
         ACHIEVEMENTS
    =========================== */
-// alumniRouter.post("/:id/achievement", protect, addAchievement);
 
 // admin action
 alumniRouter.get("/", protect, adminOnly, getAllAlumnis);

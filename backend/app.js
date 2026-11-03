@@ -9,7 +9,8 @@ import passport from "passport";
 
 import "./configs/passport.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
-import { aiLimiter, apiLimiter, authLimiter } from "./middleware/rateLimiters.js";
+import { sanitizeInput } from "./middleware/sanitize.js";
+import { aiLimiter, apiLimiter, authIpLimiter, authLimiter } from "./middleware/rateLimiters.js";
 import { stripeWebhook } from "./controllers/donationController.js";
 
 // Routes
@@ -48,6 +49,8 @@ app.use(
 app.post("/api/donations/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
 app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false, limit: "1mb" }));
+app.use(sanitizeInput);
 app.use(passport.initialize());
 
 // ---------- Rate limits ----------
@@ -69,7 +72,9 @@ app.use(
     "/api/coordinator/logincoordinator",
     "/api/coordinator/verifyotp",
     "/api/otp",
+    "/api/auth/login",
   ],
+  authIpLimiter,
   authLimiter
 );
 app.use("/api/ai", aiLimiter);

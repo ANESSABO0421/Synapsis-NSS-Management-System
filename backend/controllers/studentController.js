@@ -671,52 +671,6 @@ export const rejectInDashboardStudent = async (req, res) => {
   }
 };
 
-// dashboard
-// export const getStudentDashboard = async (req, res) => {
-//   try {
-//     const studentId = req.user.id; // 🟢 Extract from token
-
-//     const student = await Student.findById(studentId)
-//       .populate("assignedEvents", "title status hours date location")
-//       .select("-password -otp -otpExpiry");
-
-//     if (!student) {
-//       return res.status(404).json({ success: false, message: "Student not found" });
-//     }
-
-//     // Calculate event stats
-//     const totalEvents = student.assignedEvents.length;
-//     const completedEvents = student.assignedEvents.filter(
-//       (e) => e.status === "Completed"
-//     ).length;
-//     const totalHours = student.assignedEvents.reduce(
-//       (sum, e) => sum + (e.hours || 0),
-//       0
-//     );
-
-//     // Update student totalHours if different
-//     if (student.totalHours !== totalHours) {
-//       student.totalHours = totalHours;
-//       await student.save();
-//     }
-
-//     res.json({
-//       success: true,
-//       dashboard: {
-//         student,
-//         totalEvents,
-//         completedEvents,
-//         totalHours,
-//         graceMarks: student.graceMarks,
-//         awards: student.awards,
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Dashboard Error:", error);
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
 export const getStudentDashboard = async (req, res) => {
   try {
     const studentId = req.user.id; // ✅ Extract from token (protect middleware)
@@ -754,20 +708,9 @@ export const getStudentDashboard = async (req, res) => {
       0
     );
 
-    // ✅ Grace marks rule (if applicable)
-    let graceMarks = student.graceMarks || 0;
-    if (totalHours >= 100 && totalHours < 200) graceMarks = 5;
-    else if (totalHours >= 200) graceMarks = 10;
-
-    // ✅ Auto-update totalHours and graceMarks if needed
-    if (
-      student.totalHours !== totalHours ||
-      student.graceMarks !== graceMarks
-    ) {
-      student.totalHours = totalHours;
-      student.graceMarks = graceMarks;
-      await student.save();
-    }
+    // Grace marks come from the graceHistory ledger (see Student pre-save hook);
+    // the dashboard must not overwrite them.
+    const graceMarks = student.graceMarks || 0;
 
     // ✅ Awards (if totalHours crosses milestones)
     let autoAwards = [];
