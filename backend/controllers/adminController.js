@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
 import { sendEmail } from "../utils/sendEmail.js";
 import Admin from "../models/Admin.js";
 import { generatePassword } from "../utils/passwordGenerator.js";

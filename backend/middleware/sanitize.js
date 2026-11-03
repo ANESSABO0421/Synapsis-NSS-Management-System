@@ -1,3 +1,4 @@
+// @ts-check
 // Strips MongoDB operator keys ($gt, $ne, $where, ...) and dotted keys from
 // user input so values can't turn into query operators (NoSQL injection).
 // Express 5 makes req.query a getter, so it is redefined rather than assigned.

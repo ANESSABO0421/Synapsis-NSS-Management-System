@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 import Alumni from "../models/Alumni.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import cloudinary from "../utils/cloudinary.js";
-import Mentorship from "../models/Mentorship.js";
 import Event from "../models/Event.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

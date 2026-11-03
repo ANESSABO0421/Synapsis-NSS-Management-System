@@ -1,3 +1,4 @@
+// @ts-check
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Admin from "../models/Admin.js";
@@ -9,6 +10,7 @@ import Teacher from "../models/Teacher.js";
 // Same order the login page used to try endpoints in.
 // `uiRole` is what the frontend stores/routes on; the JWT carries the real role
 // (superadmin / volunteer) so authorization stays precise.
+/** @type {Array<{ model: import("mongoose").Model<any>, uiRole: string, tokenRole: (u: any) => string }>} */
 const ACCOUNT_TYPES = [
   { model: Admin, uiRole: "admin", tokenRole: (u) => u.role },
   { model: Coordinator, uiRole: "coordinator", tokenRole: () => "coordinator" },

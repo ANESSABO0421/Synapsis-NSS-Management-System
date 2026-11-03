@@ -1,3 +1,4 @@
+// @ts-check
 import mongoose from "mongoose";
 import Certificate from "../models/Certificate.js";
 import Coordinator from "../models/Coordinator.js";

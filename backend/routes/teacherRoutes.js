@@ -1,5 +1,5 @@
 import express from "express";
-import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
+import { loginSchema, otpSchema, validate } from "../middleware/validate.js";
 import {
   assignTeacherToEvent,
   teacherLogin,
@@ -31,11 +31,9 @@ import { requireEventAccess } from "../utils/eventAccess.js";
 import { markAttendance } from "../controllers/attendanceController.js";
 import {
   adminOnly,
-  coordinatorOnly,
   protect,
   teacherOnly,
 } from "../middleware/authMiddleware.js";
-import { approvePendingStudent } from "../controllers/studentController.js";
 
 const teacherRoute = express.Router();
 

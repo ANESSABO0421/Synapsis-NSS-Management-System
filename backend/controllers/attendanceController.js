@@ -1,3 +1,4 @@
+// @ts-check
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import Event from "../models/Event.js";
@@ -96,7 +97,7 @@ export const qrCheckIn = async (req, res, next) => {
         .status(409)
         .json({ success: false, code: "done", message: "You have already checked out of this event" });
     } else {
-      const minutes = (now - record.checkInAt) / 60_000;
+      const minutes = (now.getTime() - new Date(record.checkInAt).getTime()) / 60_000;
       if (minutes < MIN_CHECKOUT_MINUTES) {
         return res.status(409).json({
           success: false,

@@ -1,4 +1,6 @@
+// @ts-check
 import Groq from "groq-sdk";
+import { HttpError } from "./httpError.js";
 
 // Lazily-created Groq client: a missing GROQ_API_KEY disables AI features
 // (503 on use) instead of crashing the whole server at import time.
@@ -6,9 +8,7 @@ let client = null;
 
 const getClient = () => {
   if (!process.env.GROQ_API_KEY) {
-    const err = new Error("AI features are not configured (GROQ_API_KEY missing)");
-    err.status = 503;
-    throw err;
+    throw new HttpError(503, "AI features are not configured (GROQ_API_KEY missing)");
   }
   client ??= new Groq({ apiKey: process.env.GROQ_API_KEY });
   return client;

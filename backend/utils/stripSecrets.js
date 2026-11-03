@@ -1,3 +1,4 @@
+// @ts-check
 // Mongoose plugin: never serialize credentials / OTPs in API responses (res.json -> toJSON).
 // toObject() is left untouched so internal code can still read these fields.
 const SECRET_FIELDS = ["password", "otp", "otpExpiry", "googleId"];

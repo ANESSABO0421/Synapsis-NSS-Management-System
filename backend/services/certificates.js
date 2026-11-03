@@ -1,3 +1,4 @@
+// @ts-check
 import crypto from "node:crypto";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
@@ -12,7 +13,10 @@ export const newCode = () =>
 
 export const verifyUrl = (code) => `${config.frontendUrl}/verify/${code}`;
 
-/** Find or create the certificate record (idempotent). */
+/**
+ * Find or create the certificate record (idempotent).
+ * @param {{ type: "event" | "nss_completion", student: any, event?: any, hours: number }} params
+ */
 export const issueCertificate = async ({ type, student, event, hours }) => {
   const filter = { type, student: student._id, ...(type === "event" ? { event: event._id } : {}) };
   const existing = await Certificate.findOne(filter);

@@ -1,7 +1,9 @@
+// @ts-check
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../utils/cloudinary.js";
 import { sanitizeInput } from "./sanitize.js";
+import { HttpError } from "../utils/httpError.js";
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const DOCUMENT_TYPES = ["application/pdf"];
@@ -35,9 +37,7 @@ const fileFilter = (_req, file, cb) => {
     ? [...IMAGE_TYPES, ...DOCUMENT_TYPES]
     : IMAGE_TYPES;
   if (allowed.includes(file.mimetype)) return cb(null, true);
-  const err = new Error(`Unsupported file type for ${file.fieldname}`);
-  err.status = 400;
-  cb(err);
+  cb(new HttpError(400, `Unsupported file type for ${file.fieldname}`));
 };
 
 const multerUpload = multer({
@@ -52,9 +52,12 @@ const thenSanitize = (mw) => (req, res, next) =>
   mw(req, res, (err) => (err ? next(err) : sanitizeInput(req, res, next)));
 
 const upload = {
-  single: (...args) => thenSanitize(multerUpload.single(...args)),
-  array: (...args) => thenSanitize(multerUpload.array(...args)),
-  fields: (...args) => thenSanitize(multerUpload.fields(...args)),
+  /** @param {string} field */
+  single: (field) => thenSanitize(multerUpload.single(field)),
+  /** @param {string} field @param {number} [max] */
+  array: (field, max) => thenSanitize(multerUpload.array(field, max)),
+  /** @param {import("multer").Field[]} fields */
+  fields: (fields) => thenSanitize(multerUpload.fields(fields)),
   none: () => thenSanitize(multerUpload.none()),
 };
 

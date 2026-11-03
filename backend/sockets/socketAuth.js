@@ -1,3 +1,4 @@
+// @ts-check
 import jwt from "jsonwebtoken";
 import Student from "../models/Student.js";
 import Teacher from "../models/Teacher.js";
@@ -20,7 +21,7 @@ export const socketAuth = async (socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("No token provided"));
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = /** @type {{ id: string, role: string }} */ (jwt.verify(token, process.env.JWT_SECRET));
     const Model = MODELS[decoded.role];
     if (!Model) return next(new Error("Unsupported role"));
 

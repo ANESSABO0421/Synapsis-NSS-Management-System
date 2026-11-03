@@ -1,6 +1,6 @@
 
 import express from "express";
-import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
+import { loginSchema, validate } from "../middleware/validate.js";
 import {
   // Signup,
   // verifyOtp,

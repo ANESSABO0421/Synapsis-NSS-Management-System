@@ -324,3 +324,31 @@ describe("admin dashboard stats", () => {
     assert.ok(s.total >= s.active, `total ${s.total} < active ${s.active}`);
   });
 });
+
+describe("profile updates persist (found by type-checking)", () => {
+  it("coordinator phone is saved; institution cannot be changed", async () => {
+    const { default: Coordinator } = await import("../models/Coordinator.js");
+    const { default: Institution } = await import("../models/Institution.js");
+    const other = await Institution.create({ name: "Other College" });
+    const res = await request(app)
+      .put("/api/coordinator/updateProfile")
+      .set(bearer(f.coordinator, "coordinator"))
+      .send({ phone: "8888888888", institution: String(other._id) });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.data.phone, "8888888888");
+    const c = await Coordinator.findById(f.coordinator._id);
+    assert.equal(c.phoneNumber, "8888888888");
+    assert.equal(String(c.institution), String(f.institution._id));
+  });
+
+  it("admin phone and department are saved", async () => {
+    const res = await request(app)
+      .put("/api/admin/profile")
+      .set(bearer(f.admin, "admin"))
+      .send({ phoneNumber: "7777777777", department: "Physics" });
+    assert.equal(res.status, 200);
+    const a = await Admin.findById(f.admin._id);
+    assert.equal(a.phoneNumber, "7777777777");
+    assert.equal(a.department, "Physics");
+  });
+});

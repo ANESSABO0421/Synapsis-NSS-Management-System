@@ -1,9 +1,12 @@
+// @ts-check
 import mongoose from "mongoose";
 import Event from "../models/Event.js";
 import Mentorship from "../models/Mentorship.js";
 import MentorshipMessage from "../models/MentorshipMessage.js";
 import { socketAuth } from "./socketAuth.js";
 import { eventRoom, isEventMember } from "../utils/eventAccess.js";
+import { logger } from "../utils/logger.js";
+import { captureException } from "../configs/sentry.js";
 
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -12,7 +15,8 @@ const safe = (socket, handler) => async (...args) => {
   try {
     await handler(...args);
   } catch (err) {
-    console.error(`Socket handler error (${socket.id}):`, err);
+    logger.error({ err, socketId: socket.id, user: socket.user?.id }, "Socket handler error");
+    captureException(err);
     socket.emit("error_message", "Something went wrong");
   }
 };
@@ -49,7 +53,7 @@ const registerEventChat = (io) => {
       joined.delete(String(eventId));
     });
 
-    socket.on("typing", ({ eventId } = {}) => {
+    socket.on("typing", (/** @type {{ eventId?: string }} */ { eventId } = {}) => {
       if (!joined.has(String(eventId))) return;
       socket.to(eventRoom(eventId)).emit("user_typing", {
         eventId,
@@ -77,7 +81,7 @@ const registerMentorshipChat = (io) => {
 
     socket.on(
       "joinMentorship",
-      safe(socket, async ({ mentorshipId } = {}) => {
+      safe(socket, async (/** @type {{ mentorshipId?: string }} */ { mentorshipId } = {}) => {
         const mentorship = await findAccessible(socket, mentorshipId);
         if (!mentorship) {
           socket.emit("error_message", "You do not have access to this mentorship");
@@ -90,7 +94,7 @@ const registerMentorshipChat = (io) => {
 
     socket.on(
       "sendMentorMessage",
-      safe(socket, async ({ mentorshipId, message } = {}) => {
+      safe(socket, async (/** @type {{ mentorshipId?: string, message?: string }} */ { mentorshipId, message } = {}) => {
         if (!joined.has(String(mentorshipId))) return;
         const text = typeof message === "string" ? message.trim() : "";
         if (!text || text.length > MAX_MESSAGE_LENGTH) return;
@@ -106,7 +110,7 @@ const registerMentorshipChat = (io) => {
     );
 
     for (const evt of ["typing", "stopTyping"]) {
-      socket.on(evt, ({ mentorshipId } = {}) => {
+      socket.on(evt, (/** @type {{ mentorshipId?: string }} */ { mentorshipId } = {}) => {
         if (joined.has(String(mentorshipId))) {
           socket.to(String(mentorshipId)).emit(evt);
         }

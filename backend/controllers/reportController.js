@@ -1,3 +1,4 @@
+// @ts-check
 import mongoose from "mongoose";
 import Coordinator from "../models/Coordinator.js";
 import { academicYearOf } from "../configs/nss.js";

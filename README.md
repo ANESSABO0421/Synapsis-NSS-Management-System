@@ -25,6 +25,17 @@ A web platform for running a college **National Service Scheme (NSS)** unit: eve
 
 ## Quick start
 
+### Try it in one minute (no database needed)
+
+```bash
+cd backend && npm install && npm run demo      # API on :3000 with an in-memory DB + demo data
+cd client  && npm install && npm run dev       # in another terminal, http://localhost:5173
+```
+
+Log in with any demo account below. Data is thrown away when the demo stops.
+
+### Full setup
+
 Requirements: Node 20+ and a MongoDB database (local or Atlas).
 
 ```bash
@@ -61,14 +72,15 @@ The seed only creates or replaces records with `@demo.synapsis.test` emails, and
 
 Only `MONGODB_URL` and `JWT_SECRET` are required. Set `FRONTEND_URL` in production so QR codes and certificate links point to your live site. The server exits at startup if either is missing. Optional integrations turn off the matching feature when their keys are absent, and the server still starts. The full list is in [backend/.env.example](backend/.env.example) and [client/.env.example](client/.env.example).
 
-## Testing
+## Testing & quality
 
 ```bash
-cd backend
-npm test
+cd backend && npm run check     # ESLint + type-check + ~100 integration tests
+cd e2e && npm install && npx playwright install chromium && npx playwright test
 ```
 
-These are integration tests (Node's built-in `node:test`, Supertest and an in-memory MongoDB). No database or API keys are needed. They cover:
+**Backend:** 
+integration tests (Node's built-in `node:test`, Supertest and an in-memory MongoDB). No database or API keys are needed. They cover:
 
 - authentication and role checks on every sensitive route
 - event ownership: coordinators and teachers can only manage their own events
@@ -78,7 +90,17 @@ These are integration tests (Node's built-in `node:test`, Supertest and an in-me
 - chat and mentorship socket permissions
 - NoSQL-injection and input validation
 
-GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs the tests and a production frontend build on every push and pull request.
+**End-to-end:** Playwright starts the demo backend and a production build of the frontend. It checks that every page of every role (64) renders without crashes or console errors, and runs the main journeys: the login form, redirect when logged out, QR check-in on a phone-sized screen, and downloading and publicly verifying a certificate.
+
+**Type-checking:** core modules opt in with `// @ts-check` (see [backend/tsconfig.json](backend/tsconfig.json)), the incremental path to TypeScript. To bring an older module under checking, add the header and fix what `npm run typecheck` reports.
+
+GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs all of this (lint, types, unit tests, frontend build, E2E) on every push and pull request.
+
+## Observability
+
+- **Logs:** JSON in production (`pino`), readable in development. Each request gets an `X-Request-Id` that also appears in its log line, and credentials are redacted.
+- **Errors:** set `SENTRY_DSN` to report server errors (5xx) and socket failures to Sentry.
+- **Health:** `GET /health` returns `200` when the database is connected and `503` when it isn't.
 
 ## Project structure
 
@@ -87,7 +109,7 @@ backend/
   app.js               Express app: middleware, routes, error handling
   server.js            Startup: database connection, Socket.IO, graceful shutdown
   configs/             env validation, DB, Google OAuth
-  controllers/         Route handlers
+  controllers/         Route handlers; large areas split into coordinator/, teacher/, student/
   middleware/          auth (protect/authorize), validation, sanitization, rate limits, uploads
   models/              Mongoose schemas
   routes/              Express routers, one per role or area
@@ -95,6 +117,8 @@ backend/
   utils/               eventAccess (ownership rules), Stripe, Cloudinary, AI client
   scripts/seed.js      Demo data
   tests/               Integration tests
+  scripts/demo.js      Zero-setup demo / E2E backend
+e2e/                   Playwright end-to-end tests
 client/src/
   app/                 Next.js routes (one folder per role dashboard)
   features/            Page-level components grouped by role

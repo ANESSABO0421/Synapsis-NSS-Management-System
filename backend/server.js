@@ -1,3 +1,4 @@
+// @ts-check
 // Must be first: loads .env and exits early if required variables are missing.
 import { config } from "./configs/env.js";
 
@@ -8,11 +9,12 @@ import { Server } from "socket.io";
 import app from "./app.js";
 import { ConnectDb } from "./configs/db.js";
 import { registerSockets } from "./sockets/index.js";
+import { logger } from "./utils/logger.js";
 
 // ---------- Boot ----------
 const start = async () => {
   await ConnectDb();
-  console.log("✅ MongoDB connected successfully");
+  logger.info("MongoDB connected");
 
   const server = http.createServer(app);
   const io = new Server(server, {
@@ -22,11 +24,11 @@ const start = async () => {
   registerSockets(io);
 
   server.listen(config.port, () => {
-    console.log(`🚀 Server running on port ${config.port}`);
+    logger.info({ port: config.port }, "Server listening");
   });
 
   const shutdown = (signal) => {
-    console.log(`${signal} received, shutting down...`);
+    logger.info({ signal }, "Shutting down");
     io.close();
     server.close(() => mongoose.connection.close().then(() => process.exit(0)));
     setTimeout(() => process.exit(1), 10_000).unref();
@@ -36,7 +38,7 @@ const start = async () => {
 };
 
 start().catch((error) => {
-  console.error("❌ Failed to start server:", error.message);
+  logger.fatal({ err: error }, "Failed to start server");
   process.exit(1);
 });
 

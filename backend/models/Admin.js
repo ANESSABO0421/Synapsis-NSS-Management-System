@@ -5,6 +5,9 @@ const adminSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    // Collected at signup/profile edit but previously missing from the schema (silently dropped).
+    phoneNumber: { type: String, trim: true },
+    department: { type: String, trim: true },
     googleId: { type: String },
     password: { type: String },
     role: {

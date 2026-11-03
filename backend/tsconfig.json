@@ -1,0 +1,34 @@
+{
+  // Type-check JavaScript without converting it (incremental path to TypeScript).
+  // Scope grows as modules are cleaned up; new modules should be added here.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": false, // opt-in per file with // @ts-check
+    "noEmit": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
+  },
+  "include": [
+    "types/**/*.d.ts",
+    "app.js",
+    "server.js",
+    "configs/**/*.js",
+    "middleware/**/*.js",
+    "services/**/*.js",
+    "utils/**/*.js",
+    "sockets/**/*.js",
+    "controllers/attendanceController.js",
+    "controllers/certificateController.js",
+    "controllers/reportController.js",
+    "controllers/authController.js",
+    "controllers/donationController.js",
+    "controllers/messageController.js"
+  ]
+}

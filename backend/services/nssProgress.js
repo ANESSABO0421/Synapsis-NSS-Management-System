@@ -1,3 +1,4 @@
+// @ts-check
 import Event from "../models/Event.js";
 import { NSS_RULES, academicYearElapsed, academicYearOf } from "../configs/nss.js";
 
@@ -23,8 +24,8 @@ export const hoursForAttendance = (event, att) => {
   const duration = eventDurationHours(event);
   if (!att.checkInAt) return duration;
 
-  const start = Math.max(new Date(att.checkInAt), event.startTime ? new Date(event.startTime) : 0);
-  const endCandidates = [att.checkOutAt, event.endTime].filter(Boolean).map((d) => new Date(d));
+  const start = Math.max(new Date(att.checkInAt).getTime(), event.startTime ? new Date(event.startTime).getTime() : 0);
+  const endCandidates = [att.checkOutAt, event.endTime].filter(Boolean).map((d) => new Date(d).getTime());
   const end = endCandidates.length ? Math.min(...endCandidates) : Date.now();
   return round2(Math.min(duration, Math.max(0, (end - start) / HOUR)));
 };
@@ -92,7 +93,7 @@ export const summarize = (entries = [], now = new Date()) => {
     status,
     remainingHours: round2(Math.max(0, NSS_RULES.totalHours - totalHours)),
     percent: Math.min(100, Math.round((totalHours / NSS_RULES.totalHours) * 100)),
-    events: [...entries].sort((a, b) => new Date(b.date) - new Date(a.date)),
+    events: [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
   };
 };
 
@@ -113,6 +114,8 @@ export const progressForInstitution = async (institutionId, students) => {
   const ids = new Set(students.map((s) => String(s._id)));
   const byStudent = collectEntries(events, ids);
   return students.map((s) => {
+    // List view stays light: drop the per-event ledger and the shared rules.
+    // eslint-disable-next-line no-unused-vars
     const { events: _events, rules: _rules, ...summary } = summarize(byStudent.get(String(s._id)));
     return { student: { _id: s._id, name: s.name, email: s.email, department: s.department }, ...summary };
   });

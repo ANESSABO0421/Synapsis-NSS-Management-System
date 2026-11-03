@@ -1,5 +1,7 @@
+// @ts-check
 // Must be first: loads .env and exits early if required variables are missing.
 import { config } from "./configs/env.js";
+import "./configs/sentry.js";
 
 import express from "express";
 import cors from "cors";
@@ -10,6 +12,7 @@ import passport from "passport";
 import "./configs/passport.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 import { sanitizeInput } from "./middleware/sanitize.js";
+import { httpLogger } from "./utils/logger.js";
 import { aiLimiter, apiLimiter, authIpLimiter, authLimiter } from "./middleware/rateLimiters.js";
 import { stripeWebhook } from "./controllers/donationController.js";
 
@@ -35,7 +38,8 @@ import reportRouter from "./routes/reportRoutes.js";
 const app = express();
 app.set("trust proxy", 1); // behind Render/Vercel proxy: needed for correct client IPs in rate limiting
 
-// ---------- Security & parsing ----------
+// ---------- Logging, security & parsing ----------
+app.use(httpLogger);
 app.use(helmet());
 app.use(
   cors({

@@ -1,8 +1,9 @@
+// @ts-check
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 const json = (message) => ({ success: false, message });
 const skip = () => process.env.NODE_ENV === "test";
-const common = { standardHeaders: "draft-8", legacyHeaders: false, skip };
+const common = { standardHeaders: /** @type {const} */ ("draft-8"), legacyHeaders: false, skip };
 
 // Global safety net.
 export const apiLimiter = rateLimit({

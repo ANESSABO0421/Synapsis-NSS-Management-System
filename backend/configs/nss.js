@@ -1,3 +1,4 @@
+// @ts-check
 // National Service Scheme certificate rules. Universities vary slightly;
 // adjust here rather than in the code that uses them.
 export const NSS_RULES = {
@@ -32,5 +33,5 @@ export const academicYearElapsed = (label, now = new Date()) => {
   const range = academicYearRange(label);
   if (!range) return 0;
   const [from, to] = range;
-  return Math.min(1, Math.max(0, (now - from) / (to - from)));
+  return Math.min(1, Math.max(0, (now.getTime() - from.getTime()) / (to.getTime() - from.getTime())));
 };

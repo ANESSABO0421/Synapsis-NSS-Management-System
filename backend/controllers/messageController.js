@@ -1,3 +1,4 @@
+// @ts-check
 import mongoose from "mongoose";
 import Message from "../models/Message.js";
 import Event from "../models/Event.js";

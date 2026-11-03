@@ -1,3 +1,4 @@
+// @ts-check
 import mongoose from "mongoose";
 import { stripe } from "../utils/stripe.js";
 import Event from "../models/Event.js";

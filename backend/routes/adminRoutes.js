@@ -1,11 +1,9 @@
 import express from "express";
-import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
-import passport from "passport";
+import { loginSchema, otpSchema, validate } from "../middleware/validate.js";
 import {
   signUp,
   verifyOTP,
   login,
-  googleCallback,
   createAdminBySuperadmin,
   updateAdmin,
   deleteAdmin,

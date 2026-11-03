@@ -1,3 +1,4 @@
+// @ts-check
 import PDFDocument from "pdfkit";
 import Donation from "../models/Donation.js";
 import Event from "../models/Event.js";
@@ -6,15 +7,14 @@ import Student from "../models/Student.js";
 import { NSS_RULES, academicYearOf, academicYearRange } from "../configs/nss.js";
 import { collectEntries, creditedHours } from "./nssProgress.js";
 import { groq } from "../utils/ai.js";
+import { HttpError } from "../utils/httpError.js";
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
 export const buildAnnualReport = async (institutionId, year = academicYearOf(new Date())) => {
   const range = academicYearRange(year);
   if (!range) {
-    const err = new Error('Invalid academic year, expected e.g. "2025-26"');
-    err.status = 400;
-    throw err;
+    throw new HttpError(400, 'Invalid academic year, expected e.g. "2025-26"');
   }
   const [from, to] = range;
 
@@ -84,7 +84,7 @@ export const buildAnnualReport = async (institutionId, year = academicYearOf(new
   return {
     institution: { id: String(institutionId), name: institution?.name || "", address: institution?.address || "" },
     academicYear: year,
-    period: { from, to: new Date(to - 1) },
+    period: { from, to: new Date(to.getTime() - 1) },
     generatedAt: new Date(),
     rules: NSS_RULES,
     totals,
@@ -211,7 +211,7 @@ export const streamReportPdf = (res, r, summary) => {
   const header = () => {
     const y = doc.y;
     doc.font("Helvetica-Bold").fontSize(9).fillColor("#333");
-    for (const [label, x, w] of cols) doc.text(label, x, y, { width: w });
+    for (const [label, x, w] of cols) doc.text(String(label), Number(x), y, { width: Number(w) });
     doc.moveTo(50, doc.y + 2).lineTo(550, doc.y + 2).strokeColor("#ccc").stroke();
     doc.moveDown(0.4);
   };
@@ -230,7 +230,7 @@ export const streamReportPdf = (res, r, summary) => {
     ];
     let bottom = y;
     cols.forEach(([, x, w], i) => {
-      doc.text(String(values[i]), x, y, { width: w });
+      doc.text(String(values[i]), Number(x), y, { width: Number(w) });
       bottom = Math.max(bottom, doc.y);
     });
     doc.y = bottom + 3;

@@ -1,5 +1,5 @@
 import express from "express";
-import { genericOtpSchema, loginSchema, otpSchema, validate } from "../middleware/validate.js";
+import { loginSchema, otpSchema, validate } from "../middleware/validate.js";
 import upload from "../middleware/uploadMiddleware.js";
 import {
   adminCreateStudent,
